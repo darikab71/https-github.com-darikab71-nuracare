@@ -603,6 +603,24 @@ export default function App() {
       <div className="mobile-topbar">
         <button className="hamburger" onClick={() => setSidebarOpen(true)}><Icons.Menu /></button>
         <div className="mobile-logo" style={{display: 'flex', alignItems: 'center'}}><Icons.Leaf size={16} style={{marginRight: 4}}/> NuraCare</div>
+        <button 
+          onClick={() => setDownloadModalOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            background: 'var(--green-light, #dcfce7)',
+            color: 'var(--green, #16a34a)',
+            border: '1px solid var(--green, #16a34a)',
+            borderRadius: 12,
+            padding: '4px 10px',
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+        >
+          <Icons.Download size={13} /> Get App
+        </button>
         <div className="mobile-avatar">{profile.name ? profile.name[0].toUpperCase() : <Icons.User size={18} />}</div>
       </div>
 

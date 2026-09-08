@@ -1,28 +1,34 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
-import { ChevronLeft, Activity, Link as LinkIcon, Unlink, PlayCircle, PauseCircle, Loader2, Footprints, HeartPulse, Moon, Flame, Circle } from 'lucide-react-native';
+import { ChevronLeft, Activity, Link as LinkIcon, Unlink, PlayCircle, PauseCircle, Loader2, Footprints, HeartPulse, Moon, Flame, Circle, Watch, Heart } from 'lucide-react-native';
 
 export default function DevicesScreen() {
   const [isFitbitConnected, setIsFitbitConnected] = useState(false);
   const [isOuraConnected, setIsOuraConnected] = useState(false);
+  const [isAppleConnected, setIsAppleConnected] = useState(false);
+  const [isGarminConnected, setIsGarminConnected] = useState(false);
   
   const [isFitbitSyncActive, setIsFitbitSyncActive] = useState(false);
   const [isOuraSyncActive, setIsOuraSyncActive] = useState(false);
+  const [isAppleSyncActive, setIsAppleSyncActive] = useState(false);
+  const [isGarminSyncActive, setIsGarminSyncActive] = useState(false);
   
   const [readings, setReadings] = useState<any>({});
 
   const handleFitbitConnect = () => {
     setIsFitbitConnected(true);
-    setReadings({ ...readings, steps: 8432, heart_rate: 68 });
+    setReadings((prev: any) => ({ ...prev, steps: 8432, heart_rate: 68 }));
     Alert.alert('Success', 'Fitbit connected successfully.');
   };
 
   const handleFitbitDisconnect = () => {
     setIsFitbitConnected(false);
     setIsFitbitSyncActive(false);
-    const { steps, heart_rate, ...rest } = readings;
-    setReadings(rest);
+    setReadings((prev: any) => {
+      const { steps, heart_rate, ...rest } = prev;
+      return rest;
+    });
     Alert.alert('Disconnected', 'Fitbit disconnected successfully.');
   };
 
@@ -32,20 +38,54 @@ export default function DevicesScreen() {
 
   const handleOuraConnect = () => {
     setIsOuraConnected(true);
-    setReadings({ ...readings, sleep_min: 435, calories: 2450 });
+    setReadings((prev: any) => ({ ...prev, sleep_min: 435, calories: 2450 }));
     Alert.alert('Success', 'Oura Ring connected successfully.');
   };
 
   const handleOuraDisconnect = () => {
     setIsOuraConnected(false);
     setIsOuraSyncActive(false);
-    const { sleep_min, calories, ...rest } = readings;
-    setReadings(rest);
+    setReadings((prev: any) => {
+      const { sleep_min, calories, ...rest } = prev;
+      return rest;
+    });
     Alert.alert('Disconnected', 'Oura Ring disconnected successfully.');
   };
 
   const handleOuraToggleSync = () => {
     setIsOuraSyncActive(!isOuraSyncActive);
+  };
+
+  const handleAppleConnect = () => {
+    setIsAppleConnected(true);
+    setReadings((prev: any) => ({ ...prev, steps: 9820, heart_rate: 64, calories: 2680 }));
+    Alert.alert('Success', 'Apple Health connected successfully.');
+  };
+
+  const handleAppleDisconnect = () => {
+    setIsAppleConnected(false);
+    setIsAppleSyncActive(false);
+    Alert.alert('Disconnected', 'Apple Health disconnected.');
+  };
+
+  const handleAppleToggleSync = () => {
+    setIsAppleSyncActive(!isAppleSyncActive);
+  };
+
+  const handleGarminConnect = () => {
+    setIsGarminConnected(true);
+    setReadings((prev: any) => ({ ...prev, steps: 11240, heart_rate: 61, sleep_min: 460 }));
+    Alert.alert('Success', 'Garmin device connected successfully.');
+  };
+
+  const handleGarminDisconnect = () => {
+    setIsGarminConnected(false);
+    setIsGarminSyncActive(false);
+    Alert.alert('Disconnected', 'Garmin device disconnected.');
+  };
+
+  const handleGarminToggleSync = () => {
+    setIsGarminSyncActive(!isGarminSyncActive);
   };
 
   const hasData = Object.keys(readings).length > 0;
@@ -131,6 +171,78 @@ export default function DevicesScreen() {
                 <TouchableOpacity style={isOuraSyncActive ? styles.btnSecondary : [styles.btnPrimary, { backgroundColor: '#10b981' }]} onPress={handleOuraToggleSync}>
                   {isOuraSyncActive ? <PauseCircle size={18} color="#475569" /> : <PlayCircle size={18} color="#ffffff" />}
                   <Text style={isOuraSyncActive ? styles.btnSecondaryText : styles.btnPrimaryText}>{isOuraSyncActive ? 'Stop Sync' : 'Start Sync'}</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+
+        {/* Apple Health Card */}
+        <View style={[styles.deviceCard, { backgroundColor: '#fff1f2', borderColor: '#fecdd3' }]}>
+          <View style={styles.deviceHeaderRow}>
+            <View style={[styles.deviceIconBox, { backgroundColor: '#ffe4e6' }]}>
+              <Heart size={28} color="#e11d48" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={styles.titleRow}>
+                <Text style={styles.deviceTitle}>Apple HealthKit</Text>
+                {isAppleConnected && <View style={styles.connectedBadge}><Text style={styles.connectedText}>Connected</Text></View>}
+              </View>
+              <Text style={styles.deviceDesc}>Sync Apple Watch cardio, active calories, and resting heart rate.</Text>
+            </View>
+          </View>
+          
+          <View style={styles.actionsRow}>
+            {!isAppleConnected ? (
+              <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: '#e11d48' }]} onPress={handleAppleConnect}>
+                <LinkIcon size={18} color="#ffffff" />
+                <Text style={styles.btnPrimaryText}>Connect</Text>
+              </TouchableOpacity>
+            ) : (
+              <>
+                <TouchableOpacity style={styles.btnDanger} onPress={handleAppleDisconnect}>
+                  <Unlink size={18} color="#ef4444" />
+                  <Text style={styles.btnDangerText}>Disconnect</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={isAppleSyncActive ? styles.btnSecondary : [styles.btnPrimary, { backgroundColor: '#e11d48' }]} onPress={handleAppleToggleSync}>
+                  {isAppleSyncActive ? <PauseCircle size={18} color="#475569" /> : <PlayCircle size={18} color="#ffffff" />}
+                  <Text style={isAppleSyncActive ? styles.btnSecondaryText : styles.btnPrimaryText}>{isAppleSyncActive ? 'Stop Sync' : 'Start Sync'}</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+
+        {/* Garmin Card */}
+        <View style={[styles.deviceCard, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }]}>
+          <View style={styles.deviceHeaderRow}>
+            <View style={[styles.deviceIconBox, { backgroundColor: '#dcfce7' }]}>
+              <Watch size={28} color="#16a34a" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={styles.titleRow}>
+                <Text style={styles.deviceTitle}>Garmin Connect</Text>
+                {isGarminConnected && <View style={styles.connectedBadge}><Text style={styles.connectedText}>Connected</Text></View>}
+              </View>
+              <Text style={styles.deviceDesc}>Sync Garmin Body Battery, training stress, and endurance metrics.</Text>
+            </View>
+          </View>
+          
+          <View style={styles.actionsRow}>
+            {!isGarminConnected ? (
+              <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: '#16a34a' }]} onPress={handleGarminConnect}>
+                <LinkIcon size={18} color="#ffffff" />
+                <Text style={styles.btnPrimaryText}>Connect</Text>
+              </TouchableOpacity>
+            ) : (
+              <>
+                <TouchableOpacity style={styles.btnDanger} onPress={handleGarminDisconnect}>
+                  <Unlink size={18} color="#ef4444" />
+                  <Text style={styles.btnDangerText}>Disconnect</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={isGarminSyncActive ? styles.btnSecondary : [styles.btnPrimary, { backgroundColor: '#16a34a' }]} onPress={handleGarminToggleSync}>
+                  {isGarminSyncActive ? <PauseCircle size={18} color="#475569" /> : <PlayCircle size={18} color="#ffffff" />}
+                  <Text style={isGarminSyncActive ? styles.btnSecondaryText : styles.btnPrimaryText}>{isGarminSyncActive ? 'Stop Sync' : 'Start Sync'}</Text>
                 </TouchableOpacity>
               </>
             )}

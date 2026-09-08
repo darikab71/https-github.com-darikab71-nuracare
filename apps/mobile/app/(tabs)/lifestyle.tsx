@@ -29,12 +29,52 @@ import {
   Clock,
   Calendar,
   Smartphone,
+  Leaf,
 } from 'lucide-react-native';
 import { useWellnessStore } from '../../src/store';
 import { getProfile } from '../../src/storage/profileStorage';
 import { computeBurnoutRisk, compute5CoreWellness } from '../../src/lib/wellnessEngine';
 import DigitalWellnessHub from '../../src/components/lifestyle/DigitalWellnessHub';
 import BurnoutRecoveryHub from '../../src/components/lifestyle/BurnoutRecoveryHub';
+
+const REMEDY_ITEMS = [
+  {
+    name: 'Damakesse',
+    category: 'Respiratory & Relief',
+    tag: 'Traditional',
+    desc: 'Ancient Ethiopian household remedy for colds and head tension. Often crushed and inhaled with warm steam.',
+  },
+  {
+    name: 'Tena Adam (Rue)',
+    category: 'Digestive & Calming',
+    tag: 'Digestive Aid',
+    desc: 'Fragrant herb steeped with traditional Ethiopian tea and coffee to ease digestion and stomach cramps.',
+  },
+  {
+    name: 'Moringa (Shiferaw)',
+    category: 'Immune & Energy',
+    tag: 'Superfood',
+    desc: 'Mineral-dense superfood leaves providing iron, calcium, and essential amino acids for daily vitality.',
+  },
+  {
+    name: 'Koso (Hagenia)',
+    category: 'Botanical Cleanser',
+    tag: 'Traditional',
+    desc: 'Historical Ethiopian mountain botanical traditionally valued for gut cleansing and digestive balance.',
+  },
+  {
+    name: 'Zingibil (Ginger Root)',
+    category: 'Anti-Inflammatory',
+    tag: 'Circulation',
+    desc: 'Natural digestive stimulant that soothes nausea and relieves joint stiffness after prolonged sitting.',
+  },
+  {
+    name: 'Nech Shinkurt (Garlic)',
+    category: 'Cardiovascular',
+    tag: 'Immune Ally',
+    desc: 'Potent natural antimicrobial bulb supporting healthy arterial elasticity and baseline blood pressure.',
+  },
+];
 
 const NUTRITION_ITEMS = [
   {
@@ -103,7 +143,7 @@ export default function LifestyleScreen() {
   const profile = getProfile() || {};
   const { checkIns } = useWellnessStore();
 
-  const [activeSubTab, setActiveSubTab] = useState<'nutrition' | 'movement' | 'recovery' | 'hydration' | 'mindfulness' | 'digital'>('nutrition');
+  const [activeSubTab, setActiveSubTab] = useState<'nutrition' | 'movement' | 'recovery' | 'hydration' | 'mindfulness' | 'digital' | 'remedies'>('nutrition');
 
   // Hydration local tracker
   const [waterCups, setWaterCups] = useState(5);
@@ -213,6 +253,14 @@ export default function LifestyleScreen() {
         >
           <Wind size={15} color={activeSubTab === 'mindfulness' ? '#16a34a' : '#64748b'} />
           <Text style={[styles.subTabText, activeSubTab === 'mindfulness' && styles.subTabTextActive]}>Mindfulness</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.subTabBtn, activeSubTab === 'remedies' && styles.subTabBtnActive]}
+          onPress={() => setActiveSubTab('remedies')}
+        >
+          <Leaf size={15} color={activeSubTab === 'remedies' ? '#16a34a' : '#64748b'} />
+          <Text style={[styles.subTabText, activeSubTab === 'remedies' && styles.subTabTextActive]}>Herbs & Remedies</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -366,6 +414,34 @@ export default function LifestyleScreen() {
             </View>
           </View>
         )}
+
+        {/* SUB-HUB 6: HERBS & TRADITIONAL REMEDIES */}
+        {activeSubTab === 'remedies' && (
+          <View>
+            <View style={styles.fastingHero}>
+              <View style={styles.fastingHeader}>
+                <Leaf size={16} color="#166534" />
+                <Text style={styles.fastingTitle}>Ethiopian Natural Botanicals & Remedies</Text>
+              </View>
+              <Text style={styles.fastingDesc}>
+                Evidence-informed holistic botanical traditions verified with modern botanical medicine standards.
+              </Text>
+            </View>
+
+            {REMEDY_ITEMS.map((remedy, i) => (
+              <View key={i} style={styles.nutritionCard}>
+                <View style={styles.nutritionTopRow}>
+                  <Text style={styles.nutritionName}>{remedy.name}</Text>
+                  <View style={styles.tagPill}>
+                    <Text style={styles.tagPillText}>{remedy.tag}</Text>
+                  </View>
+                </View>
+                <Text style={styles.nutritionCategory}>{remedy.category}</Text>
+                <Text style={styles.nutritionDesc}>{remedy.desc}</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -435,156 +511,157 @@ const styles = StyleSheet.create({
   fastingDesc: { fontSize: 13, color: '#14532d', lineHeight: 19 },
   nutritionCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 6,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
   nutritionTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  nutritionName: { fontSize: 15, fontWeight: '700', color: '#0f172a' },
-  tagPill: { backgroundColor: '#f1f5f9', paddingVertical: 3, paddingHorizontal: 8, borderRadius: 6 },
-  tagPillText: { fontSize: 11, fontWeight: '700', color: '#475569' },
-  nutritionCategory: { fontSize: 12, color: '#16a34a', fontWeight: '600', marginTop: 2 },
-  nutritionDesc: { fontSize: 12, color: '#64748b', marginTop: 4, lineHeight: 17 },
+  nutritionName: { fontSize: 13.5, fontWeight: '700', color: '#0f172a' },
+  tagPill: { backgroundColor: '#f1f5f9', paddingVertical: 2, paddingHorizontal: 7, borderRadius: 5 },
+  tagPillText: { fontSize: 10.5, fontWeight: '700', color: '#475569' },
+  nutritionCategory: { fontSize: 11.5, color: '#16a34a', fontWeight: '600', marginTop: 1 },
+  nutritionDesc: { fontSize: 11.5, color: '#64748b', marginTop: 3, lineHeight: 15 },
   spotlightCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fffbeb',
-    padding: 14,
-    borderRadius: 12,
+    padding: 10,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#fef3c7',
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  spotlightTitle: { fontSize: 14, fontWeight: '800', color: '#92400e' },
-  spotlightDesc: { fontSize: 12, color: '#b45309', marginTop: 2, lineHeight: 17 },
+  spotlightTitle: { fontSize: 13, fontWeight: '800', color: '#92400e' },
+  spotlightDesc: { fontSize: 11, color: '#b45309', marginTop: 2, lineHeight: 15 },
   workoutCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 8,
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 6,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
   workoutIconCol: { justifyContent: 'center', alignItems: 'center' },
-  workoutTitle: { fontSize: 15, fontWeight: '700', color: '#0f172a' },
-  workoutMeta: { fontSize: 12, color: '#16a34a', fontWeight: '600', marginTop: 2 },
-  workoutDesc: { fontSize: 12, color: '#64748b', marginTop: 3 },
-  scoreRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
+  workoutTitle: { fontSize: 13.5, fontWeight: '700', color: '#0f172a' },
+  workoutMeta: { fontSize: 11.5, color: '#16a34a', fontWeight: '600', marginTop: 1 },
+  workoutDesc: { fontSize: 11, color: '#64748b', marginTop: 2 },
+  scoreRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   scoreCard: {
     flex: 1,
     backgroundColor: '#ffffff',
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 12,
+    padding: 10,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     alignItems: 'center',
   },
-  scoreCardLabel: { fontSize: 11, fontWeight: '700', color: '#64748b', letterSpacing: 0.5 },
-  scoreCardVal: { fontSize: 32, fontWeight: '900', marginVertical: 4 },
-  scoreCardStatus: { fontSize: 12, fontWeight: '700' },
+  scoreCardLabel: { fontSize: 10.5, fontWeight: '700', color: '#64748b', letterSpacing: 0.5 },
+  scoreCardVal: { fontSize: 24, fontWeight: '900', marginVertical: 2 },
+  scoreCardStatus: { fontSize: 11, fontWeight: '700' },
   breakdownBox: {
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 10,
+    padding: 10,
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    marginBottom: 14,
+    marginBottom: 8,
   },
   breakdownRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
   },
-  breakdownLabel: { fontSize: 13, color: '#334155' },
-  breakdownVal: { fontSize: 13, fontWeight: '700', color: '#16a34a' },
+  breakdownLabel: { fontSize: 12, color: '#334155' },
+  breakdownVal: { fontSize: 12, fontWeight: '700', color: '#16a34a' },
   sleepCard: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 6,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
-  sleepTitle: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
-  sleepDesc: { fontSize: 12, color: '#64748b', marginTop: 4, lineHeight: 18 },
+  sleepTitle: { fontSize: 13, fontWeight: '700', color: '#0f172a' },
+  sleepDesc: { fontSize: 11.5, color: '#64748b', marginTop: 2, lineHeight: 16 },
   hydrationHero: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 14,
+    padding: 14,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    marginBottom: 12,
+    marginBottom: 10,
   },
-  hydrationHeroAmount: { fontSize: 36, fontWeight: '900', color: '#0284c7', marginTop: 6 },
-  hydrationHeroSub: { fontSize: 13, color: '#64748b', marginTop: 2 },
-  cupRow: { flexDirection: 'row', gap: 6, marginVertical: 18 },
-  cupPill: { width: 24, height: 36, borderRadius: 6 },
+  hydrationHeroAmount: { fontSize: 26, fontWeight: '900', color: '#0284c7', marginTop: 4 },
+  hydrationHeroSub: { fontSize: 12, color: '#64748b', marginTop: 2 },
+  cupRow: { flexDirection: 'row', gap: 5, marginVertical: 10 },
+  cupPill: { width: 20, height: 28, borderRadius: 5 },
   cupPillFilled: { backgroundColor: '#0284c7' },
   cupPillEmpty: { backgroundColor: '#e0f2fe' },
-  hydrationBtnRow: { flexDirection: 'row', gap: 12 },
+  hydrationBtnRow: { flexDirection: 'row', gap: 10 },
   waterAddBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#0284c7',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 18,
     gap: 6,
   },
-  waterAddBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
+  waterAddBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 12 },
   waterResetBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: '#cbd5e1',
   },
-  waterResetBtnText: { color: '#64748b', fontWeight: '600', fontSize: 13 },
+  waterResetBtnText: { color: '#64748b', fontWeight: '600', fontSize: 12 },
   hydrationTipBox: {
     flexDirection: 'row',
     backgroundColor: '#f0f9ff',
-    padding: 14,
-    borderRadius: 12,
+    padding: 10,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#bae6fd',
-    gap: 8,
+    gap: 6,
   },
-  hydrationTipText: { flex: 1, fontSize: 12, color: '#0369a1', lineHeight: 17 },
+  hydrationTipText: { flex: 1, fontSize: 11.5, color: '#0369a1', lineHeight: 16 },
   breathCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 14,
+    padding: 14,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
-  breathTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a', marginTop: 10 },
-  breathSubtitle: { fontSize: 12, color: '#64748b', textAlign: 'center', marginTop: 4, marginBottom: 20 },
+  breathTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginTop: 6 },
+  breathSubtitle: { fontSize: 11.5, color: '#64748b', textAlign: 'center', marginTop: 2, marginBottom: 12 },
   breathCircle: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     backgroundColor: '#f0fdf4',
-    borderWidth: 3,
+    borderWidth: 2.5,
     borderColor: '#16a34a',
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 10,
+    marginVertical: 6,
   },
-  breathPhaseText: { fontSize: 16, fontWeight: '800', color: '#16a34a' },
+  breathPhaseText: { fontSize: 14, fontWeight: '800', color: '#16a34a' },
   breathActionBtn: {
     backgroundColor: '#16a34a',
-    paddingVertical: 12,
-    paddingHorizontal: 28,
-    borderRadius: 24,
-    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    borderRadius: 20,
+    marginTop: 14,
   },
-  breathActionBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 14 },
+  breathActionBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
 });
