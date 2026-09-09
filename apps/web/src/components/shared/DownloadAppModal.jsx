@@ -7,8 +7,8 @@ export default function DownloadAppModal({ isOpen = true, onClose }) {
 
   if (!isOpen) return null;
 
-  // Direct standalone APK binary link
-  const directCdnApkUrl = 'https://expo.dev/artifacts/eas/C-UgZsC__wqw56esa8iN1OXISQYLfOgSFNiqU0O70lY.apk';
+  // Direct standalone APK binary link (Build with app icon & adaptive icon)
+  const directCdnApkUrl = 'https://expo.dev/artifacts/eas/bjDouv6vxAgG4IFo4FDciT_UU48kQK4x0kL7XT_oYxE.apk';
   const activeDownloadUrl = directCdnApkUrl;
 
   // QR code encodes the direct .apk link so scanning it immediately triggers Android's native APK download
