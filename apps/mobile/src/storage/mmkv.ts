@@ -16,8 +16,23 @@ if (isWeb) {
     getNumber: (k: string) => { try { return Number(localStorage.getItem(k)) || 0; } catch(e) { return 0; } }
   };
 } else {
-  const { MMKV } = require('react-native-mmkv');
-  storageInstance = new MMKV({ id: 'nuracare-mobile-storage' });
+  try {
+    const { MMKV } = require('react-native-mmkv');
+    storageInstance = new MMKV({ id: 'nuracare-mobile-storage' });
+  } catch (err) {
+    console.warn('MMKV initialization failed, using in-memory fallback', err);
+    const memoryStore = new Map<string, string>();
+    storageInstance = {
+      set: (k: string, v: string) => memoryStore.set(k, v),
+      getString: (k: string) => memoryStore.get(k) ?? null,
+      delete: (k: string) => memoryStore.delete(k),
+      clearAll: () => memoryStore.clear(),
+      contains: (k: string) => memoryStore.has(k),
+      getAllKeys: () => Array.from(memoryStore.keys()),
+      getBoolean: (k: string) => memoryStore.get(k) === 'true',
+      getNumber: (k: string) => Number(memoryStore.get(k)) || 0,
+    };
+  }
 }
 
 export const storage = storageInstance;
