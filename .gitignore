@@ -31,3 +31,4 @@ Thumbs.db
 *.apk
 public/*.apk
 apps/web/public/*.apk
+package-lock.json
