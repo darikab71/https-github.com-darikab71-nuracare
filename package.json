@@ -5,6 +5,9 @@
     "apps/*",
     "packages/*"
   ],
+  "scripts": {
+    "build": "npm run build --workspace=apps/web"
+  },
   "dependencies": {
     "abort-controller": "^3.0.0",
     "babel-plugin-syntax-hermes-parser": "^0.37.0",

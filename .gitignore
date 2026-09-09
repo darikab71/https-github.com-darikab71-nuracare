@@ -28,3 +28,6 @@ Thumbs.db
 
 .vercel
 .env*.local
+*.apk
+public/*.apk
+apps/web/public/*.apk
