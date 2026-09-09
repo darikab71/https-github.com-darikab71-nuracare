@@ -4,18 +4,12 @@ import { showToast } from '@/lib/utils';
 
 export default function DownloadAppModal({ isOpen = true, onClose }) {
   const [copied, setCopied] = useState(false);
-  const [useCdnSource, setUseCdnSource] = useState(true);
 
   if (!isOpen) return null;
 
-  // Direct standalone APK binary links (No Expo Go or Expo app needed)
+  // Direct standalone APK binary link
   const directCdnApkUrl = 'https://expo.dev/artifacts/eas/C-UgZsC__wqw56esa8iN1OXISQYLfOgSFNiqU0O70lY.apk';
-  
-  const localApkUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/nuracare.apk`
-    : '/nuracare.apk';
-
-  const activeDownloadUrl = useCdnSource ? directCdnApkUrl : localApkUrl;
+  const activeDownloadUrl = directCdnApkUrl;
 
   // QR code encodes the direct .apk link so scanning it immediately triggers Android's native APK download
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(activeDownloadUrl)}&color=166534&bgcolor=f0fdf4`;
@@ -201,32 +195,7 @@ export default function DownloadAppModal({ isOpen = true, onClose }) {
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
                 >
                   <Icons.Download size={18} />
-                  <span>Download .APK (Fast CDN)</span>
-                </a>
-
-                <a 
-                  href={localApkUrl} 
-                  download="nuracare.apk"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#15803d',
-                    padding: '10px 16px',
-                    borderRadius: '12px',
-                    border: '1.5px solid #86efac',
-                    fontWeight: 600,
-                    fontSize: '13px',
-                    textDecoration: 'none',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0fdf4'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
-                >
-                  <Icons.HardDriveDownload size={16} />
-                  <span>Download from Server (.APK)</span>
+                  <span>Download Android App (.APK)</span>
                 </a>
 
                 <button 
