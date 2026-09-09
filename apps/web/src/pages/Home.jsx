@@ -181,8 +181,10 @@ function Home({ profile, setActivePage, t = (k)=>k, onOpenDownloadModal = () => 
       <div className="section-title">Quick Actions</div>
       <div className="quick-actions">
         <button className="quick-btn" onClick={() => setActivePage('chat')}><Icons.MessageCircle size={18} color="var(--green)"/> Check Symptoms</button>
-        <button className="quick-btn" onClick={() => setActivePage('discovery')}><Icons.Compass size={18} color="var(--green)"/> Explore Tips</button>
+        <button className="quick-btn" onClick={() => setActivePage('medication')}><Icons.Pill size={18} color="var(--green)"/> Medication Tracker</button>
+        <button className="quick-btn" onClick={() => setActivePage('community')}><Icons.Users size={18} color="var(--green)"/> Community Forum</button>
         <button className="quick-btn" onClick={() => setActivePage('wellness')}><Icons.Activity size={18} color="var(--green)"/> Wellness Score</button>
+        <button className="quick-btn" onClick={() => setActivePage('discovery')}><Icons.Compass size={18} color="var(--green)"/> Explore Tips</button>
         <button className="quick-btn" onClick={onOpenDownloadModal}><Icons.Smartphone size={18} color="var(--green)"/> Get Mobile App</button>
       </div>
     </div>
