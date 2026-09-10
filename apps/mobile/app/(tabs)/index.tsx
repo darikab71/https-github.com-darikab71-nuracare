@@ -6,10 +6,11 @@ import { useWellnessStore } from '../../src/store';
 import { useRemoteConfigStore } from '../../src/store/remoteConfigStore';
 import DynamicSectionRenderer from '../../src/components/dynamic/DynamicSectionRenderer';
 import FloatingNatureBackground from '../../src/components/ambient/FloatingNatureBackground';
-import { User, MessageCircle, Sparkles, ChevronRight, RefreshCw, Smartphone, ShieldCheck, HeartHandshake } from 'lucide-react-native';
+import { User, MessageCircle, Sparkles, ChevronRight, RefreshCw, Smartphone, ShieldCheck, HeartHandshake, Download } from 'lucide-react-native';
 import { getDigitalUsage } from '../../src/storage/digitalWellnessStorage';
 import { evaluateBurnoutAndRecovery } from '../../src/lib/burnoutRecoveryEngine';
 import { computeDigitalBalanceScore } from '../../src/lib/digitalWellnessEngine';
+import { checkForAppUpdates } from '../../src/services/versionCheck';
 
 export default function AdaptiveHomeScreen() {
   const router = useRouter();
@@ -219,6 +220,16 @@ export default function AdaptiveHomeScreen() {
         sections={activeSections} 
         biometrics={biometrics}
       />
+
+      {/* Check for App Updates Button */}
+      <TouchableOpacity 
+        style={styles.updateCheckBtn}
+        onPress={() => checkForAppUpdates(true)}
+        activeOpacity={0.8}
+      >
+        <Download size={16} color="#15803d" />
+        <Text style={styles.updateCheckBtnText}>Check for Updates</Text>
+      </TouchableOpacity>
       </ScrollView>
     </FloatingNatureBackground>
   );
@@ -430,5 +441,23 @@ const styles = StyleSheet.create({
     width: 1,
     height: 24,
     backgroundColor: '#e2e8f0'
+  },
+  updateCheckBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#f0fdf4',
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+    borderRadius: 14,
+    paddingVertical: 12,
+    marginTop: 20,
+    marginBottom: 10
+  },
+  updateCheckBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#15803d'
   }
 });

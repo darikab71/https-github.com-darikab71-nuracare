@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { ProfileProvider, useProfile } from '../src/context/ProfileContext';
 
 import * as SplashScreen from 'expo-splash-screen';
+import { checkForAppUpdates } from '../src/services/versionCheck';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -29,6 +30,10 @@ function InnerLayout() {
       } finally {
         setIsReady(true);
         await SplashScreen.hideAsync().catch(() => {});
+        // Check for updates in the background without blocking UI
+        setTimeout(() => {
+          checkForAppUpdates(false);
+        }, 3000);
       }
     }
     prepare();

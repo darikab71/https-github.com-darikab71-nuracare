@@ -1,0 +1,9 @@
+{
+    "releaseDate":  "2026-09-10",
+    "minSupportedVersion":  "1.0.0",
+    "websiteUrl":  "https://nuracare.pro.et",
+    "downloadUrl":  "https://expo.dev/artifacts/eas/bjDouv6vxAgG4IFo4FDciT_UU48kQK4x0kL7XT_oYxE.apk",
+    "versionCode":  2,
+    "appVersion":  "1.0.1",
+    "releaseNotes":  "Updated official green leaf app icon, eliminated splash screen freezing, and improved native offline performance."
+}
