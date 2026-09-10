@@ -6,6 +6,10 @@ import { startBackgroundSyncLoop } from '../src/services/supabase/syncEngine';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { ProfileProvider, useProfile } from '../src/context/ProfileContext';
 
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
 function InnerLayout() {
   const { user, loading: authLoading } = useAuth();
   const { user: storeUser } = useAuthStore();
@@ -16,9 +20,18 @@ function InnerLayout() {
   const segments = useSegments();
 
   useEffect(() => {
-    loadWellnessData();
-    startBackgroundSyncLoop();
-    setIsReady(true);
+    async function prepare() {
+      try {
+        await loadWellnessData();
+        startBackgroundSyncLoop();
+      } catch (e) {
+        console.warn('Initialization error:', e);
+      } finally {
+        setIsReady(true);
+        await SplashScreen.hideAsync().catch(() => {});
+      }
+    }
+    prepare();
   }, []);
 
   useEffect(() => {

@@ -7,7 +7,12 @@ import {
   Platform,
 } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
-import { Audio } from 'expo-av';
+let Audio: any = null;
+try {
+  Audio = require('expo-av')?.Audio;
+} catch (e) {
+  // Safe fallback if expo-av is not linked in native build
+}
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -73,12 +78,16 @@ export default function FloatingNatureBackground({
 
   // Initialize and loop leaf & air breeze animations
   useEffect(() => {
+    let isMounted = true;
+    const timers: any[] = [];
+
     // 1. Vector Leaves Floating Animation
     leavesAnim.forEach((leaf, idx) => {
       const duration = 9000 + (idx * 2000);
       const delay = idx * 900;
 
       const animateLeaf = () => {
+        if (!isMounted) return;
         leaf.translateY.setValue(SCREEN_HEIGHT + 30);
         leaf.translateX.setValue((idx * (SCREEN_WIDTH / LEAF_COUNT)) + (Math.random() * 30 - 15));
 
@@ -100,15 +109,18 @@ export default function FloatingNatureBackground({
               useNativeDriver: Platform.OS !== 'web',
             }),
           ]),
-        ]).start(() => animateLeaf());
+        ]).start(({ finished }) => {
+          if (finished && isMounted) animateLeaf();
+        });
       };
 
       const timer = setTimeout(() => animateLeaf(), delay);
-      return () => clearTimeout(timer);
+      timers.push(timer);
     });
 
     // 2. Air / Wind Breeze Flow Animation
     const animateWind = () => {
+      if (!isMounted) return;
       windAnim1.setValue(-SCREEN_WIDTH);
       windAnim2.setValue(-SCREEN_WIDTH * 1.5);
 
@@ -127,10 +139,17 @@ export default function FloatingNatureBackground({
           Animated.timing(windOpacity, { toValue: 0.5, duration: 4500, useNativeDriver: Platform.OS !== 'web' }),
           Animated.timing(windOpacity, { toValue: 0.15, duration: 4500, useNativeDriver: Platform.OS !== 'web' }),
         ]),
-      ]).start(() => animateWind());
+      ]).start(({ finished }) => {
+        if (finished && isMounted) animateWind();
+      });
     };
 
     animateWind();
+
+    return () => {
+      isMounted = false;
+      timers.forEach(t => clearTimeout(t));
+    };
   }, []);
 
   // Ambient sound always on in background
@@ -139,6 +158,7 @@ export default function FloatingNatureBackground({
 
     async function initSound() {
       try {
+        if (!Audio?.Sound) return;
         await Audio.setAudioModeAsync({
           playsInSilentModeIOS: true,
           staysActiveInBackground: true,
