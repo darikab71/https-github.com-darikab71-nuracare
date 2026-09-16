@@ -35,55 +35,51 @@ interface FloatingNatureBackgroundProps {
 }
 
 /**
- * 1. Leaf SVG (Matching Web exactly)
+ * 1. Realistic botanical leaf SVG with gentle organic curve, stem, and natural branching veins
  */
 export const LeafSVG = ({ id }: { id: string | number }) => (
-  <Svg width="100%" height="100%" viewBox="0 0 24 24">
+  <Svg width="100%" height="100%" viewBox="0 0 28 32">
     <Defs>
-      <SvgLinearGradient id={`lg-${id}`} x1="4" y1="2" x2="20" y2="22">
-        <Stop offset="0" stopColor="#86EFAC" />
-        <Stop offset="1" stopColor="#22C55E" />
+      <SvgLinearGradient id={`lg-${id}`} x1="3" y1="2" x2="25" y2="30">
+        <Stop offset="0" stopColor="#4ade80" />
+        <Stop offset="0.45" stopColor="#22c55e" />
+        <Stop offset="1" stopColor="#15803d" />
+      </SvgLinearGradient>
+      <SvgLinearGradient id={`stem-${id}`} x1="14" y1="2" x2="14" y2="31">
+        <Stop offset="0" stopColor="#bbf7d0" stopOpacity="0.8" />
+        <Stop offset="1" stopColor="#166534" stopOpacity="0.9" />
       </SvgLinearGradient>
     </Defs>
+    {/* Natural asymmetrical leaf body */}
     <Path
-      d="M12 2C7.5 2 4 5.5 4 10C4 16 12 22 12 22C12 22 20 16 20 10C20 5.5 16.5 2 12 2Z"
+      d="M14 2C19.5 5.5 25 12 24.5 19C24 25.5 18 29.5 14 30C10 29.5 4 25.5 3.5 19C3 12 8.5 5.5 14 2Z"
       fill={`url(#lg-${id})`}
     />
+    {/* Highlight shine along left leaf blade */}
     <Path
-      d="M12 22C12 10 12 2 12 2"
-      stroke="rgba(255,255,255,0.5)"
-      strokeWidth={1.2}
+      d="M14 3C10.5 7 5.5 13.5 5 18.5C4.6 22 7.5 25.5 10.5 27.5C8 24.5 7 19.5 9 14.5C10.5 10.5 12.8 5.5 14 3Z"
+      fill="rgba(255, 255, 255, 0.18)"
+    />
+    {/* Central vein / spine */}
+    <Path
+      d="M14 30C14 22 14.2 11 14 2"
+      stroke={`url(#stem-${id})`}
+      strokeWidth={1.3}
       strokeLinecap="round"
     />
-    <Path
-      d="M12 12C9 8 7 6 8 4"
-      stroke="rgba(255,255,255,0.3)"
-      strokeWidth={0.8}
-      strokeLinecap="round"
-    />
+    {/* Right lateral veins */}
+    <Path d="M14 10C17 12 21 13 22.5 14.5" stroke="rgba(255,255,255,0.4)" strokeWidth={0.8} strokeLinecap="round"/>
+    <Path d="M14 16C17.5 18 21.5 19.5 22.8 21" stroke="rgba(255,255,255,0.35)" strokeWidth={0.8} strokeLinecap="round"/>
+    <Path d="M14 22C16.5 23.5 19 25 20 26.2" stroke="rgba(255,255,255,0.3)" strokeWidth={0.75} strokeLinecap="round"/>
+    {/* Left lateral veins */}
+    <Path d="M14 12C11 14 7 15 5.5 16.5" stroke="rgba(255,255,255,0.4)" strokeWidth={0.8} strokeLinecap="round"/>
+    <Path d="M14 18C10.5 20 6.5 21.5 5.2 23" stroke="rgba(255,255,255,0.35)" strokeWidth={0.8} strokeLinecap="round"/>
+    <Path d="M14 24C11.5 25.5 9 27 8 28.2" stroke="rgba(255,255,255,0.3)" strokeWidth={0.75} strokeLinecap="round"/>
   </Svg>
 );
 
 /**
- * 2. Pill SVG (Matching Web exactly)
- */
-export const PillSVG = ({ id }: { id: string | number }) => (
-  <Svg width="100%" height="100%" viewBox="0 0 32 16">
-    <Defs>
-      <SvgLinearGradient id={`lg-${id}`} x1="0" y1="0" x2="32" y2="16">
-        <Stop offset="0" stopColor="#67E8F9" />
-        <Stop offset="0.5" stopColor="#38BDF8" />
-        <Stop offset="1" stopColor="#0EA5E9" />
-      </SvgLinearGradient>
-    </Defs>
-    <Rect x="0.5" y="0.5" width="31" height="15" rx="7.5" fill={`url(#lg-${id})`} />
-    <Line x1="16" y1="0.5" x2="16" y2="15.5" stroke="rgba(255,255,255,0.6)" strokeWidth={1.5} />
-    <Rect x="0.5" y="0.5" width="31" height="15" rx="7.5" stroke="rgba(255,255,255,0.3)" strokeWidth={1} />
-  </Svg>
-);
-
-/**
- * 3. Flower SVG (Matching Web exactly with rotating petals)
+ * 2. Flower SVG (Matching Web with rotating petals)
  */
 export const FlowerSVG = ({ id }: { id: string | number }) => (
   <Svg width="100%" height="100%" viewBox="0 0 24 24">
@@ -114,7 +110,7 @@ export const FlowerSVG = ({ id }: { id: string | number }) => (
 );
 
 /**
- * 4. Droplet SVG (Matching Web exactly)
+ * 3. Droplet SVG (Pure morning dew droplet)
  */
 export const DropletSVG = ({ id }: { id: string | number }) => (
   <Svg width="100%" height="100%" viewBox="0 0 24 24">
@@ -134,18 +130,15 @@ export const DropletSVG = ({ id }: { id: string | number }) => (
   </Svg>
 );
 
-const svgTypes = ['leaf', 'flower', 'droplet', 'pill'];
+const svgTypes = ['leaf', 'leaf', 'flower', 'droplet'];
 
 function renderSVG(type: string, id: string | number) {
   switch (type) {
-    case 'leaf':
-      return <LeafSVG id={id} />;
-    case 'pill':
-      return <PillSVG id={id} />;
     case 'flower':
       return <FlowerSVG id={id} />;
     case 'droplet':
       return <DropletSVG id={id} />;
+    case 'leaf':
     default:
       return <LeafSVG id={id} />;
   }
@@ -160,7 +153,6 @@ export default function FloatingNatureBackground({
   const elementsConfig = useMemo(() => {
     return Array.from({ length: ELEMENT_COUNT }).map((_, i) => {
       const type = svgTypes[i % svgTypes.length];
-      const isWide = type === 'pill';
       const size = 18 + Math.floor(Math.random() * 14);
       const startX = (i / ELEMENT_COUNT) * SCREEN_WIDTH + (Math.random() * 20 - 10);
       const driftX = (Math.random() * 60 + 30) * (Math.random() > 0.5 ? 1 : -1);
@@ -170,8 +162,8 @@ export default function FloatingNatureBackground({
       return {
         id: `el-${i}`,
         type,
-        width: isWide ? size * 2 : size,
-        height: size,
+        width: size,
+        height: type === 'leaf' ? size * 1.15 : size,
         startX,
         driftX,
         duration,

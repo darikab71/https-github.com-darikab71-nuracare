@@ -199,10 +199,6 @@ export default function LifestyleScreen() {
           <Text style={styles.title}>Lifestyle & Habits</Text>
           <Text style={styles.subtitle}>Nutrition, movement, recovery & mindfulness</Text>
         </View>
-        <TouchableOpacity style={styles.aiHeaderBtn} onPress={() => router.push('/chat')}>
-          <Bot size={18} color="#16a34a" />
-          <Text style={styles.aiHeaderBtnText}>Ask Nura</Text>
-        </TouchableOpacity>
       </View>
 
       {/* 5-Sub-Hub Segmented Tabs */}
