@@ -204,22 +204,6 @@ export default function AdaptiveHomeScreen() {
             </Text>
             <Text style={styles.subtitleText}>Your holistic health & vitality</Text>
           </View>
-
-          <TouchableOpacity 
-            style={styles.profileBtn} 
-            onPress={() => router.push('/profile')}
-            activeOpacity={0.8}
-            accessibilityLabel="Open Profile"
-          >
-            <View style={styles.avatarCircle}>
-              {profile?.name ? (
-                <Text style={styles.avatarText}>{profile.name[0].toUpperCase()}</Text>
-              ) : (
-                <User size={20} color="#ffffff" />
-              )}
-            </View>
-            <Text style={styles.profileBtnLabel}>Profile</Text>
-          </TouchableOpacity>
         </View>
 
         {/* 1. TOP: Today's Insight */}
@@ -314,7 +298,7 @@ export default function AdaptiveHomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.horizontalScrollContent}
             decelerationRate="fast"
-            snapToInterval={148}
+            snapToInterval={187}
           >
             {quickActions.map((act, index) => (
               <TouchableOpacity
@@ -352,53 +336,22 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 16,
-    paddingTop: 52,
+    paddingTop: 16,
     paddingBottom: 40
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16
+    marginBottom: 14
   },
   greetingText: {
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: 18,
+    fontWeight: '700',
     color: '#0f172a',
-    letterSpacing: -0.5
+    letterSpacing: -0.3
   },
   subtitleText: {
-    fontSize: 13,
+    fontSize: 12.5,
     color: '#64748b',
     marginTop: 2
-  },
-  profileBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 12
-  },
-  avatarCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#16a34a',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#16a34a',
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 2
-  },
-  avatarText: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: 'bold'
-  },
-  profileBtnLabel: {
-    fontSize: 10,
-    color: '#64748b',
-    fontWeight: '600',
-    marginTop: 3
   },
 
   // 1. Today's Insight
@@ -544,65 +497,65 @@ const styles = StyleSheet.create({
     marginBottom: 18
   },
   chatNuraBtn: {
-    flex: 1.7,
+    flex: 1.6,
     backgroundColor: '#16a34a',
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     shadowColor: '#16a34a',
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 2
   },
   actionIconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
     justifyContent: 'center'
   },
   chatNuraTitle: {
     color: '#ffffff',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800'
   },
   chatNuraSub: {
     color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 11
+    fontSize: 10.5
   },
   callNuraBtn: {
     flex: 1,
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderWidth: 1.5,
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderWidth: 1.2,
     borderColor: '#bbf7d0',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 6,
     shadowColor: '#000',
     shadowOpacity: 0.02,
     shadowRadius: 4,
     elevation: 1
   },
   callIconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#f0fdf4',
     alignItems: 'center',
     justifyContent: 'center'
   },
   callNuraText: {
     color: '#16a34a',
-    fontSize: 13,
-    fontWeight: '800'
+    fontSize: 12.5,
+    fontWeight: '700'
   },
 
   // 4. Quick Actions Horizontal Display
@@ -627,37 +580,37 @@ const styles = StyleSheet.create({
   },
   horizontalScrollContent: {
     paddingRight: 16,
-    gap: 10
+    gap: 12
   },
   actionCardShift: {
-    width: 136,
+    width: 175,
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: 18,
+    padding: 16,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     shadowColor: '#000',
-    shadowOpacity: 0.02,
-    shadowRadius: 4,
-    elevation: 1
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1.5
   },
   actionCardIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     backgroundColor: '#f8fafc',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10
+    marginBottom: 12
   },
   actionCardTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: '#0f172a',
-    marginBottom: 2
+    marginBottom: 3
   },
   actionCardDesc: {
-    fontSize: 11,
+    fontSize: 11.5,
     color: '#64748b'
   },
 

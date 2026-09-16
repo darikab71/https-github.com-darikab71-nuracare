@@ -338,7 +338,10 @@ export default function FloatingNatureBackground({
         </Svg>
       </Animated.View>
 
-      {/* 3D Falling Nature Elements (Leaves, Flowers, Droplets, Pills) */}
+      {/* Screen Content */}
+      <View style={styles.contentWrap}>{children}</View>
+
+      {/* 3D Falling Nature Elements floating above content */}
       {elementsConfig.map((el, idx) => {
         const anim = animatedValues[idx].progress;
 
@@ -388,9 +391,6 @@ export default function FloatingNatureBackground({
           </Animated.View>
         );
       })}
-
-      {/* Screen Content */}
-      <View style={styles.contentWrap}>{children}</View>
     </View>
   );
 }
@@ -415,14 +415,14 @@ const styles = StyleSheet.create({
   },
   element: {
     position: 'absolute',
-    zIndex: 2,
+    zIndex: 20, // Above content
   },
   leaf: {
     position: 'absolute',
-    zIndex: 2,
+    zIndex: 20,
   },
   contentWrap: {
     flex: 1,
-    zIndex: 10,
+    zIndex: 2,
   },
 });
