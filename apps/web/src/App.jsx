@@ -549,10 +549,10 @@ export default function App() {
         <nav className="sidebar-nav">
           <NavItem icon={Icons.Home} label={t("home")} active={activePage === 'home'} onClick={() => {setActivePage('home'); setSidebarOpen(false);}} />
           <NavItem icon={Icons.CalendarCheck} label={t("daily_checkin")} active={activePage === 'checkin'} onClick={() => { setActivePage('checkin'); setSidebarOpen(false); }} />
+          <NavItem icon={Icons.MessageCircle} label={t("chat")} active={activePage === 'chat'} onClick={() => {setActivePage('chat'); setSidebarOpen(false);}} />
           <NavItem icon={Icons.Pill} label="Medication" active={activePage === 'medication'} onClick={() => { setActivePage('medication'); setSidebarOpen(false); }} />
           <NavItem icon={Icons.Zap} label={t("lifestyle")} active={activePage === 'lifestyle'} onClick={() => { setActivePage('lifestyle'); setSidebarOpen(false); }} />
           <NavItem icon={Icons.Users} label="Community" active={activePage === 'community'} onClick={() => { setActivePage('community'); setSidebarOpen(false); }} />
-          <NavItem icon={Icons.MessageCircle} label={t("chat")} active={activePage === 'chat'} onClick={() => {setActivePage('chat'); setSidebarOpen(false);}} />
           <NavItem icon={Icons.Stethoscope} label={t("checkups")} active={activePage === 'checkups'} onClick={() => { setActivePage('checkups'); setSidebarOpen(false); }} />
           <NavItem icon={Icons.Sparkles} label={t("discover")} active={activePage === 'discovery'} onClick={() => { setActivePage('discovery'); setSidebarOpen(false); }} />
         </nav>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -6,12 +6,24 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
-import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, {
+  Path,
+  Defs,
+  LinearGradient as SvgLinearGradient,
+  RadialGradient as SvgRadialGradient,
+  Stop,
+  Rect,
+  Line,
+  Ellipse,
+  Circle,
+  G,
+} from 'react-native-svg';
+
 let Audio: any = null;
 try {
   Audio = require('expo-av')?.Audio;
 } catch (e) {
-  // Safe fallback if expo-av is not linked in native build
+  // Safe fallback if expo-av is not linked
 }
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -23,102 +35,194 @@ interface FloatingNatureBackgroundProps {
 }
 
 /**
- * Website's Exact Emerald Gradient Vector Leaf
+ * 1. Leaf SVG (Matching Web exactly)
  */
-const WebLeafSVG = ({ size = 26, id = 0 }: { size?: number; id?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
+export const LeafSVG = ({ id }: { id: string | number }) => (
+  <Svg width="100%" height="100%" viewBox="0 0 24 24">
     <Defs>
-      <LinearGradient id={`leaf-grad-${id}`} x1="4" y1="2" x2="20" y2="22">
+      <SvgLinearGradient id={`lg-${id}`} x1="4" y1="2" x2="20" y2="22">
         <Stop offset="0" stopColor="#86EFAC" />
         <Stop offset="1" stopColor="#22C55E" />
-      </LinearGradient>
+      </SvgLinearGradient>
     </Defs>
     <Path
       d="M12 2C7.5 2 4 5.5 4 10C4 16 12 22 12 22C12 22 20 16 20 10C20 5.5 16.5 2 12 2Z"
-      fill={`url(#leaf-grad-${id})`}
+      fill={`url(#lg-${id})`}
     />
     <Path
       d="M12 22C12 10 12 2 12 2"
-      stroke="rgba(255,255,255,0.6)"
+      stroke="rgba(255,255,255,0.5)"
       strokeWidth={1.2}
       strokeLinecap="round"
     />
     <Path
       d="M12 12C9 8 7 6 8 4"
-      stroke="rgba(255,255,255,0.4)"
+      stroke="rgba(255,255,255,0.3)"
       strokeWidth={0.8}
       strokeLinecap="round"
     />
   </Svg>
 );
 
-const LEAF_COUNT = 8;
+/**
+ * 2. Pill SVG (Matching Web exactly)
+ */
+export const PillSVG = ({ id }: { id: string | number }) => (
+  <Svg width="100%" height="100%" viewBox="0 0 32 16">
+    <Defs>
+      <SvgLinearGradient id={`lg-${id}`} x1="0" y1="0" x2="32" y2="16">
+        <Stop offset="0" stopColor="#67E8F9" />
+        <Stop offset="0.5" stopColor="#38BDF8" />
+        <Stop offset="1" stopColor="#0EA5E9" />
+      </SvgLinearGradient>
+    </Defs>
+    <Rect x="0.5" y="0.5" width="31" height="15" rx="7.5" fill={`url(#lg-${id})`} />
+    <Line x1="16" y1="0.5" x2="16" y2="15.5" stroke="rgba(255,255,255,0.6)" strokeWidth={1.5} />
+    <Rect x="0.5" y="0.5" width="31" height="15" rx="7.5" stroke="rgba(255,255,255,0.3)" strokeWidth={1} />
+  </Svg>
+);
+
+/**
+ * 3. Flower SVG (Matching Web exactly with rotating petals)
+ */
+export const FlowerSVG = ({ id }: { id: string | number }) => (
+  <Svg width="100%" height="100%" viewBox="0 0 24 24">
+    <Defs>
+      <SvgRadialGradient id={`lg-${id}`} cx="50%" cy="50%" rx="50%" ry="50%">
+        <Stop offset="0" stopColor="#FDE68A" />
+        <Stop offset="1" stopColor="#F59E0B" />
+      </SvgRadialGradient>
+    </Defs>
+    <Ellipse cx="12" cy="6" rx="3" ry="4.5" fill="#86EFAC" opacity={0.9} />
+    <G transform="rotate(60, 18, 9)">
+      <Ellipse cx="18" cy="9" rx="3" ry="4.5" fill="#86EFAC" opacity={0.9} />
+    </G>
+    <G transform="rotate(120, 18, 15)">
+      <Ellipse cx="18" cy="15" rx="3" ry="4.5" fill="#86EFAC" opacity={0.9} />
+    </G>
+    <G transform="rotate(180, 12, 18)">
+      <Ellipse cx="12" cy="18" rx="3" ry="4.5" fill="#86EFAC" opacity={0.9} />
+    </G>
+    <G transform="rotate(240, 6, 15)">
+      <Ellipse cx="6" cy="15" rx="3" ry="4.5" fill="#86EFAC" opacity={0.9} />
+    </G>
+    <G transform="rotate(300, 6, 9)">
+      <Ellipse cx="6" cy="9" rx="3" ry="4.5" fill="#86EFAC" opacity={0.9} />
+    </G>
+    <Circle cx="12" cy="12" r="4" fill={`url(#lg-${id})`} />
+  </Svg>
+);
+
+/**
+ * 4. Droplet SVG (Matching Web exactly)
+ */
+export const DropletSVG = ({ id }: { id: string | number }) => (
+  <Svg width="100%" height="100%" viewBox="0 0 24 24">
+    <Defs>
+      <SvgLinearGradient id={`lg-${id}`} x1="12" y1="2" x2="12" y2="22">
+        <Stop offset="0" stopColor="#A7F3D0" />
+        <Stop offset="1" stopColor="#059669" />
+      </SvgLinearGradient>
+    </Defs>
+    <Path
+      d="M12 22C16.4183 22 20 18.4183 20 14C20 9 12 2 12 2C12 2 4 9 4 14C4 18.4183 7.58172 22 12 22Z"
+      fill={`url(#lg-${id})`}
+    />
+    <G transform="rotate(-20, 9, 13)">
+      <Ellipse cx="9" cy="13" rx="2" ry="3" fill="rgba(255,255,255,0.3)" />
+    </G>
+  </Svg>
+);
+
+const svgTypes = ['leaf', 'flower', 'droplet', 'pill'];
+
+function renderSVG(type: string, id: string | number) {
+  switch (type) {
+    case 'leaf':
+      return <LeafSVG id={id} />;
+    case 'pill':
+      return <PillSVG id={id} />;
+    case 'flower':
+      return <FlowerSVG id={id} />;
+    case 'droplet':
+      return <DropletSVG id={id} />;
+    default:
+      return <LeafSVG id={id} />;
+  }
+}
+
+const ELEMENT_COUNT = 10;
 
 export default function FloatingNatureBackground({
   children,
 }: FloatingNatureBackgroundProps) {
-  // Leaf animations - 8 floating leaves with unique coordinates and drift
-  const leavesAnim = useRef(
-    Array.from({ length: LEAF_COUNT }).map(() => ({
-      translateY: new Animated.Value(SCREEN_HEIGHT + 20),
-      translateX: new Animated.Value(Math.random() * SCREEN_WIDTH),
-      rotate: new Animated.Value(0),
-      opacity: new Animated.Value(0.3 + Math.random() * 0.5),
-      size: 20 + Math.floor(Math.random() * 14),
+  // Elements configuration matching web FloatingLeaves
+  const elementsConfig = useMemo(() => {
+    return Array.from({ length: ELEMENT_COUNT }).map((_, i) => {
+      const type = svgTypes[i % svgTypes.length];
+      const isWide = type === 'pill';
+      const size = 18 + Math.floor(Math.random() * 14);
+      const startX = (i / ELEMENT_COUNT) * SCREEN_WIDTH + (Math.random() * 20 - 10);
+      const driftX = (Math.random() * 60 + 30) * (Math.random() > 0.5 ? 1 : -1);
+      const duration = 15000 + Math.random() * 8000;
+      const delay = i * 1200;
+
+      return {
+        id: `el-${i}`,
+        type,
+        width: isWide ? size * 2 : size,
+        height: size,
+        startX,
+        driftX,
+        duration,
+        delay,
+        opacity: 0.45 + Math.random() * 0.3,
+      };
+    });
+  }, []);
+
+  const animatedValues = useRef(
+    elementsConfig.map(() => ({
+      progress: new Animated.Value(0),
     }))
   ).current;
 
-  // Air breeze stream animations
+  // Breeze streams
   const windAnim1 = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const windAnim2 = useRef(new Animated.Value(-SCREEN_WIDTH * 1.5)).current;
-  const windOpacity = useRef(new Animated.Value(0.25)).current;
+  const windOpacity = useRef(new Animated.Value(0.2)).current;
 
-  // Ambient sound ref
+  // Sound ref
   const soundRef = useRef<Audio.Sound | null>(null);
 
-  // Initialize and loop leaf & air breeze animations
   useEffect(() => {
     let isMounted = true;
     const timers: any[] = [];
 
-    // 1. Vector Leaves Floating Animation
-    leavesAnim.forEach((leaf, idx) => {
-      const duration = 9000 + (idx * 2000);
-      const delay = idx * 900;
+    // Falling 3D downward motion loop (0: top -10vh -> 1: bottom 110vh)
+    elementsConfig.forEach((cfg, idx) => {
+      const anim = animatedValues[idx].progress;
 
-      const animateLeaf = () => {
+      const runFall = () => {
         if (!isMounted) return;
-        leaf.translateY.setValue(SCREEN_HEIGHT + 30);
-        leaf.translateX.setValue((idx * (SCREEN_WIDTH / LEAF_COUNT)) + (Math.random() * 30 - 15));
+        anim.setValue(0);
 
-        Animated.parallel([
-          Animated.timing(leaf.translateY, {
-            toValue: -50,
-            duration,
-            useNativeDriver: Platform.OS !== 'web',
-          }),
-          Animated.sequence([
-            Animated.timing(leaf.rotate, {
-              toValue: 1,
-              duration: duration / 2,
-              useNativeDriver: Platform.OS !== 'web',
-            }),
-            Animated.timing(leaf.rotate, {
-              toValue: 2,
-              duration: duration / 2,
-              useNativeDriver: Platform.OS !== 'web',
-            }),
-          ]),
-        ]).start(({ finished }) => {
-          if (finished && isMounted) animateLeaf();
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: cfg.duration,
+          useNativeDriver: Platform.OS !== 'web',
+        }).start(({ finished }) => {
+          if (finished && isMounted) {
+            runFall();
+          }
         });
       };
 
-      const timer = setTimeout(() => animateLeaf(), delay);
-      timers.push(timer);
+      const t = setTimeout(() => runFall(), cfg.delay);
+      timers.push(t);
     });
 
-    // 2. Air / Wind Breeze Flow Animation
+    // Wind animation
     const animateWind = () => {
       if (!isMounted) return;
       windAnim1.setValue(-SCREEN_WIDTH);
@@ -136,8 +240,8 @@ export default function FloatingNatureBackground({
           useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.sequence([
-          Animated.timing(windOpacity, { toValue: 0.5, duration: 4500, useNativeDriver: Platform.OS !== 'web' }),
-          Animated.timing(windOpacity, { toValue: 0.15, duration: 4500, useNativeDriver: Platform.OS !== 'web' }),
+          Animated.timing(windOpacity, { toValue: 0.4, duration: 4500, useNativeDriver: Platform.OS !== 'web' }),
+          Animated.timing(windOpacity, { toValue: 0.1, duration: 4500, useNativeDriver: Platform.OS !== 'web' }),
         ]),
       ]).start(({ finished }) => {
         if (finished && isMounted) animateWind();
@@ -148,11 +252,11 @@ export default function FloatingNatureBackground({
 
     return () => {
       isMounted = false;
-      timers.forEach(t => clearTimeout(t));
+      timers.forEach((t) => clearTimeout(t));
     };
   }, []);
 
-  // Ambient sound always on in background
+  // Ambient sound in background (calm nature)
   useEffect(() => {
     let isMounted = true;
 
@@ -167,7 +271,7 @@ export default function FloatingNatureBackground({
 
         const { sound } = await Audio.Sound.createAsync(
           { uri: 'https://cdn.freesound.org/previews/530/530697_11234978-lq.mp3' },
-          { isLooping: true, volume: 0.3, shouldPlay: true }
+          { isLooping: true, volume: 0.25, shouldPlay: true }
         );
 
         if (isMounted) {
@@ -196,12 +300,13 @@ export default function FloatingNatureBackground({
       {/* Background Calm Base */}
       <View style={styles.calmBase} />
 
-      {/* Flowing Air / Wind Stream 1 */}
+      {/* Gentle Air / Breeze Stream 1 */}
       <Animated.View
+        pointerEvents="none"
         style={[
           styles.windLineWrap,
           {
-            top: 130,
+            top: 110,
             opacity: windOpacity,
             transform: [{ translateX: windAnim1 }],
           },
@@ -211,19 +316,20 @@ export default function FloatingNatureBackground({
           <Path
             d="M 0 30 Q 120 5 250 30 T 500 30"
             fill="none"
-            stroke="rgba(34, 197, 94, 0.22)"
+            stroke="rgba(34, 197, 94, 0.2)"
             strokeWidth={2.5}
             strokeLinecap="round"
           />
         </Svg>
       </Animated.View>
 
-      {/* Flowing Air / Wind Stream 2 */}
+      {/* Gentle Air / Breeze Stream 2 */}
       <Animated.View
+        pointerEvents="none"
         style={[
           styles.windLineWrap,
           {
-            top: 350,
+            top: 360,
             opacity: windOpacity,
             transform: [{ translateX: windAnim2 }],
           },
@@ -233,42 +339,65 @@ export default function FloatingNatureBackground({
           <Path
             d="M 0 40 Q 150 70 300 40 T 600 40"
             fill="none"
-            stroke="rgba(16, 185, 129, 0.18)"
+            stroke="rgba(16, 185, 129, 0.16)"
             strokeWidth={2}
             strokeLinecap="round"
           />
         </Svg>
       </Animated.View>
 
-      {/* Website's Exact Floating Vector Leaves */}
-      {leavesAnim.map((leaf, idx) => {
-        const spin = leaf.rotate.interpolate({
-          inputRange: [0, 1, 2],
-          outputRange: ['0deg', '180deg', '360deg'],
+      {/* 3D Falling Nature Elements (Leaves, Flowers, Droplets, Pills) */}
+      {elementsConfig.map((el, idx) => {
+        const anim = animatedValues[idx].progress;
+
+        // Downward fall from -60 to SCREEN_HEIGHT + 60 (fall3D simulation)
+        const translateY = anim.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [-60, SCREEN_HEIGHT * 0.5, SCREEN_HEIGHT + 60],
+        });
+
+        // Lateral breeze sway (drift)
+        const translateX = anim.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [el.startX, el.startX + el.driftX, el.startX + el.driftX * 1.6],
+        });
+
+        // 3D rotation mimicking rotateX + rotateY + rotateZ
+        const rotateZ = anim.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: ['0deg', '90deg', '180deg'],
+        });
+
+        const scale = anim.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [0.85, 1.1, 0.9],
         });
 
         return (
           <Animated.View
-            key={idx}
+            key={el.id}
             pointerEvents="none"
             style={[
-              styles.leaf,
+              styles.element,
               {
-                opacity: leaf.opacity,
+                width: el.width,
+                height: el.height,
+                opacity: el.opacity,
                 transform: [
-                  { translateX: leaf.translateX },
-                  { translateY: leaf.translateY },
-                  { rotate: spin },
+                  { translateX },
+                  { translateY },
+                  { rotate: rotateZ },
+                  { scale },
                 ],
               },
             ]}
           >
-            <WebLeafSVG size={leaf.size} id={idx} />
+            {renderSVG(el.type, el.id)}
           </Animated.View>
         );
       })}
 
-      {/* Child Content */}
+      {/* Screen Content */}
       <View style={styles.contentWrap}>{children}</View>
     </View>
   );
@@ -291,6 +420,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     zIndex: 1,
+  },
+  element: {
+    position: 'absolute',
+    zIndex: 2,
   },
   leaf: {
     position: 'absolute',
