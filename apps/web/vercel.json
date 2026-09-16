@@ -14,6 +14,13 @@
       "schedule": "0 0 * * *"
     }
   ],
+  "redirects": [
+    {
+      "source": "/nuracare.apk",
+      "destination": "https://expo.dev/artifacts/eas/YVvW-8AAkIdnyBfVbkcXZy3qUAh88lbOncvs1NgCRXY.apk",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     { "source": "/api/fitbit-auth", "destination": "/api/fitbit?action=auth" },
     { "source": "/api/fitbit-callback", "destination": "/api/fitbit?action=callback" },

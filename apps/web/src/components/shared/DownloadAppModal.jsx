@@ -7,8 +7,9 @@ export default function DownloadAppModal({ isOpen = true, onClose }) {
 
   if (!isOpen) return null;
 
-  // Direct standalone APK binary link (Build with app icon & adaptive icon)
-  const directCdnApkUrl = 'https://expo.dev/artifacts/eas/bjDouv6vxAgG4IFo4FDciT_UU48kQK4x0kL7XT_oYxE.apk';
+  // Direct standalone APK binary link (Build with emerald green leaf app icon & adaptive icon)
+  const directCdnApkUrl = 'https://expo.dev/artifacts/eas/YVvW-8AAkIdnyBfVbkcXZy3qUAh88lbOncvs1NgCRXY.apk';
+  const serverApkUrl = '/nuracare.apk';
   const activeDownloadUrl = directCdnApkUrl;
 
   // QR code encodes the direct .apk link so scanning it immediately triggers Android's native APK download
@@ -196,6 +197,31 @@ export default function DownloadAppModal({ isOpen = true, onClose }) {
                 >
                   <Icons.Download size={18} />
                   <span>Download Android App (.APK)</span>
+                </a>
+
+                <a 
+                  href={serverApkUrl} 
+                  download="nuracare.apk"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    backgroundColor: '#f0fdf4',
+                    color: '#15803d',
+                    padding: '10px 16px',
+                    borderRadius: '12px',
+                    border: '1px solid #bbf7d0',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    textDecoration: 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dcfce7'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0fdf4'}
+                >
+                  <Icons.HardDriveDownload size={16} />
+                  <span>Download Direct from Server</span>
                 </a>
 
                 <button 
