@@ -12,8 +12,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useProfile } from '../../../src/context/ProfileContext';
-import { ArrowLeft, MapPin, ArrowRight } from 'lucide-react-native';
-import FloatingNatureBackground from '../../../src/components/ambient/FloatingNatureBackground';
+import { ArrowLeft, ArrowRight, User } from 'lucide-react-native';
 
 const COUNTRIES = ['Ethiopia', 'Kenya', 'Nigeria', 'South Africa', 'United States', 'United Kingdom', 'Other'];
 const LANGUAGES = ['English', 'Amharic', 'Oromiffa'];
@@ -48,7 +47,7 @@ export default function OnboardingStep1() {
   };
 
   return (
-    <FloatingNatureBackground showSoundToggle={true}>
+    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -134,7 +133,7 @@ export default function OnboardingStep1() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </FloatingNatureBackground>
+    </View>
   );
 }
 

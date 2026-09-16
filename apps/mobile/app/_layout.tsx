@@ -98,11 +98,15 @@ function InnerLayout() {
   );
 }
 
+import FloatingNatureBackground from '../src/components/ambient/FloatingNatureBackground';
+
 export default function RootLayout() {
   return (
     <AuthProvider>
       <ProfileProvider>
-        <InnerLayout />
+        <FloatingNatureBackground showSoundToggle={false}>
+          <InnerLayout />
+        </FloatingNatureBackground>
       </ProfileProvider>
     </AuthProvider>
   );

@@ -13,7 +13,6 @@ import {
 import { router } from 'expo-router';
 import { useProfile } from '../../../src/context/ProfileContext';
 import { ArrowLeft, ArrowRight, Activity, Heart, Wind, Bone, Brain, Sparkles, Clock } from 'lucide-react-native';
-import FloatingNatureBackground from '../../../src/components/ambient/FloatingNatureBackground';
 
 const CONDITIONS = [
   { id: 'diabetes', label: 'Diabetes', icon: Activity },
@@ -72,7 +71,7 @@ export default function OnboardingStep2() {
   };
 
   return (
-    <FloatingNatureBackground showSoundToggle={true}>
+    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -147,7 +146,7 @@ export default function OnboardingStep2() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </FloatingNatureBackground>
+    </View>
   );
 }
 

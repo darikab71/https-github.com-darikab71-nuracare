@@ -11,7 +11,6 @@ import { router } from 'expo-router';
 import { Sparkles, CheckCircle2, Heart, ShieldCheck, Users, Pill, ArrowRight } from 'lucide-react-native';
 import { saveProfile, getProfile } from '../../../src/storage/profileStorage';
 import { useAuthStore } from '../../../src/store';
-import FloatingNatureBackground from '../../../src/components/ambient/FloatingNatureBackground';
 
 export default function OnboardingStep4() {
   const existingProfile = getProfile() || {};
@@ -46,7 +45,7 @@ export default function OnboardingStep4() {
   ];
 
   return (
-    <FloatingNatureBackground showSoundToggle={true}>
+    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <View style={styles.stepPill}>
@@ -90,7 +89,7 @@ export default function OnboardingStep4() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </FloatingNatureBackground>
+    </View>
   );
 }
 

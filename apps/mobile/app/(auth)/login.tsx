@@ -14,7 +14,6 @@ import { Leaf, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react-native';
 import { useAuth } from '../../src/context/AuthContext';
 import { useAuthStore } from '../../src/store';
 import { router } from 'expo-router';
-import FloatingNatureBackground from '../../src/components/ambient/FloatingNatureBackground';
 
 export default function LoginScreen() {
   const { signInWithEmail, signUpWithEmail, signInWithGoogle, setGuestUser } = useAuth();
@@ -74,7 +73,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <FloatingNatureBackground showSoundToggle={true}>
+    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -226,7 +225,7 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </FloatingNatureBackground>
+    </View>
   );
 }
 

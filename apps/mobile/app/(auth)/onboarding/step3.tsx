@@ -14,7 +14,6 @@ import { router } from 'expo-router';
 import { useProfile } from '../../../src/context/ProfileContext';
 import { ArrowLeft, ArrowRight, Upload, FileText, Pill } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import FloatingNatureBackground from '../../../src/components/ambient/FloatingNatureBackground';
 
 export default function OnboardingStep3() {
   const { profile, setProfile } = useProfile();
@@ -49,7 +48,7 @@ export default function OnboardingStep3() {
   };
 
   return (
-    <FloatingNatureBackground showSoundToggle={true}>
+    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -125,7 +124,7 @@ export default function OnboardingStep3() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </FloatingNatureBackground>
+    </View>
   );
 }
 

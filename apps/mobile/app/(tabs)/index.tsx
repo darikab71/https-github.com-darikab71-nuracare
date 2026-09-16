@@ -1,12 +1,20 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Linking, Alert } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  RefreshControl, 
+  Alert,
+  Modal 
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useProfile } from '../../src/context/ProfileContext';
 import { useWellnessStore } from '../../src/store';
 import { useRemoteConfigStore } from '../../src/store/remoteConfigStore';
-import FloatingNatureBackground from '../../src/components/ambient/FloatingNatureBackground';
+import { DISCOVERY_ITEMS, DiscoveryItem } from '../../src/data/discoveryData';
 import { 
-  User, 
   MessageCircle, 
   PhoneCall, 
   Sparkles, 
@@ -22,7 +30,14 @@ import {
   Flame,
   Activity,
   Moon,
-  Compass
+  Compass,
+  Flower2,
+  Droplets,
+  Coffee,
+  Eye,
+  X,
+  BookOpen,
+  Leaf
 } from 'lucide-react-native';
 import { getDigitalUsage } from '../../src/storage/digitalWellnessStorage';
 import { evaluateBurnoutAndRecovery } from '../../src/lib/burnoutRecoveryEngine';
@@ -67,6 +82,28 @@ export default function AdaptiveHomeScreen() {
   } = useRemoteConfigStore();
 
   const [refreshing, setRefreshing] = useState(false);
+  const [discoveryTab, setDiscoveryTab] = useState<'all' | 'herbs' | 'foods' | 'tips'>('all');
+  const [selectedDiscovery, setSelectedDiscovery] = useState<DiscoveryItem | null>(null);
+
+  const filteredDiscovery = useMemo(() => {
+    if (discoveryTab === 'all') return DISCOVERY_ITEMS;
+    return DISCOVERY_ITEMS.filter(item => item.category === discoveryTab);
+  }, [discoveryTab]);
+
+  const renderDiscoveryIcon = (iconName: string, color: string) => {
+    switch (iconName) {
+      case 'Leaf': return <Leaf size={22} color={color} />;
+      case 'Flower2': return <Flower2 size={22} color={color} />;
+      case 'Flame': return <Flame size={22} color={color} />;
+      case 'Droplets': return <Droplets size={22} color={color} />;
+      case 'Coffee': return <Coffee size={22} color={color} />;
+      case 'Heart': return <Heart size={22} color={color} />;
+      case 'Activity': return <Activity size={22} color={color} />;
+      case 'Users': return <Users size={22} color={color} />;
+      case 'Eye': return <Eye size={22} color={color} />;
+      default: return <Sparkles size={22} color={color} />;
+    }
+  };
 
   useEffect(() => {
     initialize();
@@ -182,7 +219,7 @@ export default function AdaptiveHomeScreen() {
   };
 
   return (
-    <FloatingNatureBackground showSoundToggle={true}>
+    <View style={styles.screenWrapper}>
       <ScrollView 
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
@@ -298,7 +335,7 @@ export default function AdaptiveHomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.horizontalScrollContent}
             decelerationRate="fast"
-            snapToInterval={187}
+            snapToInterval={212}
           >
             {quickActions.map((act, index) => (
               <TouchableOpacity
@@ -315,6 +352,88 @@ export default function AdaptiveHomeScreen() {
           </ScrollView>
         </View>
 
+        {/* 5. NATURAL DISCOVERY (Ported from Web with Quick Action Aesthetic) */}
+        <View style={styles.discoverySection}>
+          <View style={styles.discoveryHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Sparkles size={16} color="#16a34a" />
+              <Text style={styles.discoverySectionTitle}>Natural Discovery</Text>
+            </View>
+            <Text style={styles.discoverySectionHint}>Tap remedy to explore</Text>
+          </View>
+
+          {/* Category Filter Tabs */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterPillsRow}
+          >
+            {[
+              { id: 'all', label: 'All Remedies' },
+              { id: 'herbs', label: 'Ethiopian Herbs' },
+              { id: 'foods', label: 'Superfoods' },
+              { id: 'tips', label: 'Daily Habits' },
+            ].map((tab) => (
+              <TouchableOpacity
+                key={tab.id}
+                style={[
+                  styles.filterPill,
+                  discoveryTab === tab.id && styles.filterPillActive,
+                ]}
+                onPress={() => setDiscoveryTab(tab.id as any)}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.filterPillText,
+                    discoveryTab === tab.id && styles.filterPillTextActive,
+                  ]}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Discovery Cards styled with Quick Actions visual language */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalScrollContent}
+            decelerationRate="fast"
+            snapToInterval={227}
+          >
+            {filteredDiscovery.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.discoveryCard}
+                onPress={() => setSelectedDiscovery(item)}
+                activeOpacity={0.8}
+              >
+                <View style={styles.discoveryCardTop}>
+                  <View style={[styles.discoveryCardIconWrap, { backgroundColor: `${item.badgeColor}15` }]}>
+                    {renderDiscoveryIcon(item.iconName, item.badgeColor)}
+                  </View>
+                  <View style={[styles.discoveryBadge, { backgroundColor: `${item.badgeColor}12` }]}>
+                    <Text style={[styles.discoveryBadgeText, { color: item.badgeColor }]}>
+                      {item.categoryLabel}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={styles.discoveryCardTitle}>{item.name}</Text>
+                <Text style={styles.discoveryCardDesc} numberOfLines={3}>
+                  {item.benefit}
+                </Text>
+
+                <View style={styles.discoveryCardBottom}>
+                  <Text style={styles.discoveryActionText}>Learn more →</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
         {/* Check for App Updates */}
         <TouchableOpacity 
           style={styles.updateCheckBtn}
@@ -325,7 +444,63 @@ export default function AdaptiveHomeScreen() {
           <Text style={styles.updateCheckBtnText}>Check for Updates</Text>
         </TouchableOpacity>
       </ScrollView>
-    </FloatingNatureBackground>
+
+      {/* Discovery Detail Modal */}
+      {selectedDiscovery && (
+        <Modal
+          visible={true}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSelectedDiscovery(null)}
+        >
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setSelectedDiscovery(null)}
+          >
+            <View style={styles.modalCard} onStartShouldSetResponder={() => true}>
+              <View style={styles.modalHeader}>
+                <View style={[styles.modalIconWrap, { backgroundColor: `${selectedDiscovery.badgeColor}15` }]}>
+                  {renderDiscoveryIcon(selectedDiscovery.iconName, selectedDiscovery.badgeColor)}
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={styles.modalTitle}>{selectedDiscovery.name}</Text>
+                  <Text style={[styles.modalCategory, { color: selectedDiscovery.badgeColor }]}>
+                    {selectedDiscovery.categoryLabel}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => setSelectedDiscovery(null)} style={styles.modalCloseBtn}>
+                  <X size={18} color="#64748b" />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.modalBenefitText}>{selectedDiscovery.benefit}</Text>
+
+              <View style={styles.modalTagsRow}>
+                {selectedDiscovery.tags.map((tag) => (
+                  <View key={tag} style={styles.modalTagChip}>
+                    <Text style={styles.modalTagText}>#{tag}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <TouchableOpacity
+                style={styles.modalChatBtn}
+                onPress={() => {
+                  const remedyName = selectedDiscovery.name;
+                  setSelectedDiscovery(null);
+                  router.push('/chat');
+                }}
+                activeOpacity={0.85}
+              >
+                <Sparkles size={16} color="#ffffff" />
+                <Text style={styles.modalChatBtnText}>Ask Nura About {selectedDiscovery.name}</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      )}
+    </View>
   );
 }
 
@@ -578,40 +753,245 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     fontWeight: '600'
   },
+  screenWrapper: {
+    flex: 1,
+    backgroundColor: 'transparent'
+  },
   horizontalScrollContent: {
     paddingRight: 16,
     gap: 12
   },
   actionCardShift: {
-    width: 175,
+    width: 200,
+    minHeight: 148,
     backgroundColor: '#ffffff',
-    borderRadius: 18,
-    padding: 16,
+    borderRadius: 20,
+    padding: 18,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     shadowColor: '#000',
     shadowOpacity: 0.03,
     shadowRadius: 6,
-    elevation: 1.5
+    elevation: 1.5,
+    justifyContent: 'space-between'
   },
   actionCardIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     backgroundColor: '#f8fafc',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12
   },
   actionCardTitle: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     color: '#0f172a',
     marginBottom: 3
   },
   actionCardDesc: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748b'
+  },
+
+  // 5. Natural Discovery
+  discoverySection: {
+    marginBottom: 20
+  },
+  discoveryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12
+  },
+  discoverySectionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0f172a'
+  },
+  discoverySectionHint: {
+    fontSize: 11,
+    color: '#94a3b8',
+    fontWeight: '600'
+  },
+  filterPillsRow: {
+    gap: 8,
+    paddingRight: 16,
+    marginBottom: 14
+  },
+  filterPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0'
+  },
+  filterPillActive: {
+    backgroundColor: '#16a34a',
+    borderColor: '#16a34a'
+  },
+  filterPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748b'
+  },
+  filterPillTextActive: {
+    color: '#ffffff'
+  },
+  discoveryCard: {
+    width: 215,
+    minHeight: 160,
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1.5,
+    justifyContent: 'space-between'
+  },
+  discoveryCardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10
+  },
+  discoveryCardIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  discoveryBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 8
+  },
+  discoveryBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '800'
+  },
+  discoveryCardTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 4
+  },
+  discoveryCardDesc: {
+    fontSize: 11.5,
+    color: '#64748b',
+    lineHeight: 16.5,
+    flex: 1
+  },
+  discoveryCardBottom: {
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end'
+  },
+  discoveryActionText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#16a34a'
+  },
+
+  // Discovery Modal
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 22,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14
+  },
+  modalIconWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#0f172a'
+  },
+  modalCategory: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 1
+  },
+  modalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f1f5f9',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  modalBenefitText: {
+    fontSize: 13.5,
+    color: '#334155',
+    lineHeight: 20,
+    marginBottom: 16
+  },
+  modalTagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 20
+  },
+  modalTagChip: {
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10
+  },
+  modalTagText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#475569'
+  },
+  modalChatBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#16a34a',
+    borderRadius: 14,
+    paddingVertical: 12,
+    shadowColor: '#16a34a',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 2
+  },
+  modalChatBtnText: {
+    color: '#ffffff',
+    fontSize: 13.5,
+    fontWeight: '800'
   },
 
   // Updates Button
