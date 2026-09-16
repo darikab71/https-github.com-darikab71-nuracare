@@ -27,45 +27,58 @@ import {
   Plus,
   Trash2,
   Award,
+  Sun,
+  Compass,
+  CloudRain,
+  Cloud,
+  Zap,
+  BatteryCharging,
+  Battery,
+  ShieldCheck,
+  Shield,
+  Leaf,
+  Clock,
+  Heart,
+  AlertTriangle,
 } from 'lucide-react-native';
 import { useWellnessStore } from '../../src/store';
 import { saveCheckin, getCheckins } from '../../src/storage/checkinStorage';
 import { getCheckups, saveCheckup, deleteCheckup } from '../../src/storage/checkupsStorage';
 
-const FUN_MOODS = [
-  { label: 'Radiant', sub: 'High vibes', emoji: '🤩', val: 5, color: '#16a34a' },
-  { label: 'Joyful', sub: 'Smiling & light', emoji: '😄', val: 4, color: '#22c55e' },
-  { label: 'Balanced', sub: 'Peaceful calm', emoji: '😌', val: 3, color: '#0ea5e9' },
-  { label: 'Low Energy', sub: 'Need warmth', emoji: '🥱', val: 2, color: '#f59e0b' },
-  { label: 'Stressed', sub: 'Gentle space', emoji: '🌧️', val: 1, color: '#ef4444' },
+const MODERN_MOODS = [
+  { id: 'radiant', label: 'Radiant', sub: 'High vitality', icon: Sun, val: 5, color: '#16a34a' },
+  { id: 'joyful', label: 'Joyful', sub: 'Positive & light', icon: Smile, val: 4, color: '#22c55e' },
+  { id: 'balanced', label: 'Balanced', sub: 'Calm & centered', icon: Compass, val: 3, color: '#0ea5e9' },
+  { id: 'low', label: 'Low Energy', sub: 'Need warmth', icon: Moon, val: 2, color: '#f59e0b' },
+  { id: 'strained', label: 'Strained', sub: 'Gentle pause', icon: CloudRain, val: 1, color: '#ef4444' },
 ];
 
 const ENERGY_LEVELS = [
-  { label: 'Recharging', pct: '25%', icon: '🪫', val: 1 },
-  { label: 'Steady', pct: '50%', icon: '🔋', val: 2 },
-  { label: 'Active', pct: '75%', icon: '⚡', val: 3 },
-  { label: 'Peak Power', pct: '100%', icon: '🚀', val: 4 },
+  { label: 'Recharge', pct: '25%', icon: Battery, val: 1 },
+  { label: 'Steady', pct: '50%', icon: BatteryCharging, val: 2 },
+  { label: 'Active', pct: '75%', icon: Zap, val: 3 },
+  { label: 'Peak', pct: '100%', icon: Flame, val: 4 },
 ];
 
 const SLEEP_CARDS = [
-  { label: '< 5 hrs', icon: '☁️', desc: 'Short nap', hours: 4 },
-  { label: '5-6 hrs', icon: '🌙', desc: 'Light sleep', hours: 6 },
-  { label: '7-8 hrs', icon: '✨', desc: 'Optimal recovery', hours: 7.5 },
-  { label: '8+ hrs', icon: '💤', desc: 'Deep slumber', hours: 9 },
+  { label: '< 5 hrs', icon: Cloud, desc: 'Short nap', hours: 4 },
+  { label: '5-6 hrs', icon: Moon, desc: 'Light rest', hours: 6 },
+  { label: '7-8 hrs', icon: Sparkles, desc: 'Optimal window', hours: 7.5 },
+  { label: '8+ hrs', icon: Clock, desc: 'Deep recovery', hours: 9 },
 ];
 
 const STRESS_ZONES = [
-  { label: 'Zen Mind', desc: 'Peaceful', emoji: '🧘', val: 2, color: '#16a34a' },
-  { label: 'Gentle Flow', desc: 'Manageable', emoji: '🍃', val: 4, color: '#0ea5e9' },
-  { label: 'Active Load', desc: 'Full plate', emoji: '⚡', val: 7, color: '#f59e0b' },
-  { label: 'Overwhelmed', desc: 'Needs breath', emoji: '🌋', val: 9, color: '#ef4444' },
+  { label: 'Zen State', desc: 'Restful nervous flow', icon: ShieldCheck, val: 2, color: '#16a34a' },
+  { label: 'Gentle Flow', desc: 'Mild baseline', icon: Leaf, val: 4, color: '#0ea5e9' },
+  { label: 'Active Load', desc: 'High mental demand', icon: Activity, val: 7, color: '#f59e0b' },
+  { label: 'Elevated Strain', desc: 'Requires wind-down', icon: AlertCircle, val: 9, color: '#ef4444' },
 ];
 
 const BODY_COMFORTS = [
-  { label: '🌸 Pure Comfort', val: 'None' },
-  { label: '💆 Mild Tension', val: 'Mild' },
-  { label: '🧘 Muscle Stiffness', val: 'Moderate' },
-  { label: '🩹 Acute Pain', val: 'Severe' },
+  { label: 'Comfortable', sub: 'Feeling balanced', icon: Heart, val: 'None', color: '#16a34a' },
+  { label: 'Mild Tension', sub: 'Neck or shoulders', icon: Activity, val: 'Mild', color: '#0284c7' },
+  { label: 'Stiffness', sub: 'Joints or posture', icon: Shield, val: 'Moderate', color: '#f59e0b' },
+  { label: 'Acute Discomfort', sub: 'Needs attention', icon: AlertTriangle, val: 'Severe', color: '#ef4444' },
 ];
 
 export default function CheckupsScreen() {
@@ -75,7 +88,7 @@ export default function CheckupsScreen() {
   // Top Section: 'daily' vs 'clinical'
   const [section, setSection] = useState<'daily' | 'clinical'>('daily');
 
-  // Fun Daily Form State
+  // Form State
   const [mood, setMood] = useState(4);
   const [energy, setEnergy] = useState(3);
   const [sleepHours, setSleepHours] = useState(7.5);
@@ -133,9 +146,9 @@ export default function CheckupsScreen() {
     setSavedToday(true);
 
     const affirmations = [
-      "🌟 Fantastic! You earned +25 Vitality XP and preserved your 5-day rhythm!",
-      "🌿 Wonderful check-in! Your body and mind thank you for taking this moment.",
-      "✨ Ritual complete! Nura has recalibrated your biological recovery score.",
+      "Daily check-in logged. +25 Vitality XP credited to your rhythm streak.",
+      "Biological recovery baseline updated with your latest wellness signals.",
+      "Self-care signals recorded. Restorative balance profile calibrated.",
     ];
     setCelebrationMessage(affirmations[Math.floor(Math.random() * affirmations.length)]);
   };
@@ -197,7 +210,7 @@ export default function CheckupsScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Daily Checkup</Text>
-          <Text style={styles.subtitle}>Playful self-care & health rhythm</Text>
+          <Text style={styles.subtitle}>Self-care signals & biological rhythm</Text>
         </View>
         <TouchableOpacity
           style={styles.aiHeaderBtn}
@@ -241,11 +254,11 @@ export default function CheckupsScreen() {
       >
         {section === 'daily' ? (
           <View>
-            {/* Gamified Hero Card: Streak & XP */}
+            {/* Gamified Hero Card: Streak & XP (Pure Modern Icons) */}
             <View style={styles.streakHeroCard}>
               <View style={styles.streakTopRow}>
                 <View style={styles.streakBadge}>
-                  <Flame size={16} color="#ef4444" />
+                  <Flame size={15} color="#ef4444" />
                   <Text style={styles.streakBadgeText}>5-DAY STREAK</Text>
                 </View>
                 <View style={styles.xpBadge}>
@@ -253,28 +266,30 @@ export default function CheckupsScreen() {
                   <Text style={styles.xpBadgeText}>Level 3 Vitality</Text>
                 </View>
               </View>
-              <Text style={styles.streakHeroTitle}>You're in Natural Rhythm ✨</Text>
+              <Text style={styles.streakHeroTitle}>Natural Biological Rhythm</Text>
               <Text style={styles.streakHeroSub}>
-                Take 60 seconds to tune into your body and collect +25 XP today.
+                Tune into your physiological cues today to earn +25 Vitality XP.
               </Text>
             </View>
 
             {/* Celebration Notice if logged */}
             {celebrationMessage && (
               <View style={styles.celebrationBanner}>
-                <Sparkles size={18} color="#16a34a" />
+                <Sparkles size={17} color="#16a34a" />
                 <Text style={styles.celebrationBannerText}>{celebrationMessage}</Text>
               </View>
             )}
 
-            {/* 1. Playful Mood Avatars */}
+            {/* 1. Modern Mood Avatars (No Emojis) */}
             <View style={styles.funCard}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
-                  <Text style={styles.sectionEmoji}>🌈</Text>
-                  <Text style={styles.cardTitle}>How does your spirit feel?</Text>
+                  <View style={styles.sectionIconBubble}>
+                    <Smile size={18} color="#16a34a" />
+                  </View>
+                  <Text style={styles.cardTitle}>Emotional & Mental State</Text>
                 </View>
-                <Text style={styles.hintBadge}>Tap to pick</Text>
+                <Text style={styles.hintBadge}>Select active state</Text>
               </View>
 
               <ScrollView 
@@ -282,23 +297,25 @@ export default function CheckupsScreen() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.moodScrollRow}
               >
-                {FUN_MOODS.map((item) => {
+                {MODERN_MOODS.map((item) => {
                   const isSelected = mood === item.val;
+                  const IconComp = item.icon;
                   return (
                     <TouchableOpacity
-                      key={item.val}
+                      key={item.id}
                       style={[
                         styles.moodAvatarCard,
                         isSelected && {
                           borderColor: item.color,
-                          backgroundColor: `${item.color}15`,
-                          transform: [{ scale: 1.04 }],
+                          backgroundColor: `${item.color}14`,
                         },
                       ]}
                       onPress={() => setMood(item.val)}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.moodAvatarEmoji}>{item.emoji}</Text>
+                      <View style={[styles.moodIconWrap, { backgroundColor: `${item.color}18` }]}>
+                        <IconComp size={24} color={item.color} />
+                      </View>
                       <Text style={[styles.moodAvatarTitle, isSelected && { color: item.color, fontWeight: '800' }]}>
                         {item.label}
                       </Text>
@@ -314,21 +331,24 @@ export default function CheckupsScreen() {
               </ScrollView>
             </View>
 
-            {/* 2. Visual Energy Battery */}
+            {/* 2. Visual Energy Battery (No Emojis) */}
             <View style={styles.funCard}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
-                  <Text style={styles.sectionEmoji}>⚡</Text>
-                  <Text style={styles.cardTitle}>Physical Energy Battery</Text>
+                  <View style={styles.sectionIconBubble}>
+                    <Zap size={18} color="#16a34a" />
+                  </View>
+                  <Text style={styles.cardTitle}>Physical Energy Capacity</Text>
                 </View>
                 <Text style={styles.selectedLevelText}>
-                  {ENERGY_LEVELS.find(e => e.val === energy)?.pct} Charged
+                  {ENERGY_LEVELS.find(e => e.val === energy)?.pct} Capacity
                 </Text>
               </View>
 
               <View style={styles.energyBatteryGrid}>
                 {ENERGY_LEVELS.map((lvl) => {
                   const isSelected = energy === lvl.val;
+                  const IconComp = lvl.icon;
                   return (
                     <TouchableOpacity
                       key={lvl.val}
@@ -339,7 +359,7 @@ export default function CheckupsScreen() {
                       onPress={() => setEnergy(lvl.val)}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.energyIconText}>{lvl.icon}</Text>
+                      <IconComp size={20} color={isSelected ? '#16a34a' : '#64748b'} style={{ marginBottom: 4 }} />
                       <Text style={[styles.energyPctText, isSelected && styles.energyPctTextActive]}>
                         {lvl.pct}
                       </Text>
@@ -352,18 +372,21 @@ export default function CheckupsScreen() {
               </View>
             </View>
 
-            {/* 3. Sleep Journey */}
+            {/* 3. Sleep Journey (No Emojis) */}
             <View style={styles.funCard}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
-                  <Text style={styles.sectionEmoji}>🌙</Text>
-                  <Text style={styles.cardTitle}>Last Night's Sleep</Text>
+                  <View style={styles.sectionIconBubble}>
+                    <Moon size={18} color="#16a34a" />
+                  </View>
+                  <Text style={styles.cardTitle}>Sleep Duration & Rest</Text>
                 </View>
               </View>
 
               <View style={styles.sleepCardsGrid}>
                 {SLEEP_CARDS.map((opt) => {
                   const isSelected = sleepHours === opt.hours;
+                  const IconComp = opt.icon;
                   return (
                     <TouchableOpacity
                       key={opt.hours}
@@ -374,7 +397,7 @@ export default function CheckupsScreen() {
                       onPress={() => setSleepHours(opt.hours)}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.sleepIconText}>{opt.icon}</Text>
+                      <IconComp size={19} color={isSelected ? '#16a34a' : '#64748b'} style={{ marginBottom: 4 }} />
                       <Text style={[styles.sleepHoursText, isSelected && styles.sleepHoursTextActive]}>
                         {opt.label}
                       </Text>
@@ -385,12 +408,14 @@ export default function CheckupsScreen() {
               </View>
             </View>
 
-            {/* 4. Interactive Stress Barometer */}
+            {/* 4. Interactive Stress Barometer (No Emojis) */}
             <View style={styles.funCard}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
-                  <Text style={styles.sectionEmoji}>🧠</Text>
-                  <Text style={styles.cardTitle}>Nervous System Pace</Text>
+                  <View style={styles.sectionIconBubble}>
+                    <Activity size={18} color="#16a34a" />
+                  </View>
+                  <Text style={styles.cardTitle}>Nervous System Load</Text>
                 </View>
               </View>
 
@@ -400,6 +425,7 @@ export default function CheckupsScreen() {
                                      (stress > 3 && stress <= 5 && zone.val === 4) ||
                                      (stress > 5 && stress <= 7 && zone.val === 7) ||
                                      (stress > 7 && zone.val === 9);
+                  const IconComp = zone.icon;
                   return (
                     <TouchableOpacity
                       key={zone.label}
@@ -407,13 +433,13 @@ export default function CheckupsScreen() {
                         styles.stressZoneCard,
                         isSelected && {
                           borderColor: zone.color,
-                          backgroundColor: `${zone.color}15`,
+                          backgroundColor: `${zone.color}14`,
                         },
                       ]}
                       onPress={() => setStress(zone.val)}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.stressZoneEmoji}>{zone.emoji}</Text>
+                      <IconComp size={22} color={zone.color} style={{ marginBottom: 5 }} />
                       <Text style={[styles.stressZoneTitle, isSelected && { color: zone.color, fontWeight: '800' }]}>
                         {zone.label}
                       </Text>
@@ -424,67 +450,81 @@ export default function CheckupsScreen() {
               </View>
             </View>
 
-            {/* 5. Hydration Water Tracker */}
+            {/* 5. Hydration Water Tracker (No Emojis) */}
             <View style={styles.funCard}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
-                  <Text style={styles.sectionEmoji}>💧</Text>
-                  <Text style={styles.cardTitle}>Daily Hydration</Text>
+                  <View style={styles.sectionIconBubble}>
+                    <Droplets size={18} color="#0284c7" />
+                  </View>
+                  <Text style={styles.cardTitle}>Hydration Pace</Text>
                 </View>
                 <Text style={styles.waterCountBadge}>{waterCups} / 8 Glasses</Text>
               </View>
 
               <View style={styles.waterDropsRow}>
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((cup) => (
-                  <TouchableOpacity
-                    key={cup}
-                    style={[
-                      styles.waterDropBtn,
-                      cup <= waterCups && styles.waterDropBtnFilled,
-                    ]}
-                    onPress={() => setWaterCups(cup === waterCups ? cup - 1 : cup)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.waterDropEmoji}>
-                      {cup <= waterCups ? '💧' : '⚪'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((cup) => {
+                  const filled = cup <= waterCups;
+                  return (
+                    <TouchableOpacity
+                      key={cup}
+                      style={[
+                        styles.waterDropBtn,
+                        filled && styles.waterDropBtnFilled,
+                      ]}
+                      onPress={() => setWaterCups(cup === waterCups ? cup - 1 : cup)}
+                      activeOpacity={0.7}
+                    >
+                      <Droplets size={17} color={filled ? '#0284c7' : '#94a3b8'} />
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
               <Text style={styles.waterTipText}>
-                {waterCups >= 7 ? '🎉 Optimal hydration! Your brain and energy are glowing.' : 'Tip: A warm herbal glass in the afternoon sustains cognitive focus.'}
+                {waterCups >= 7 ? 'Optimal hydration level. Cognitive focus supported.' : 'Aim for 8 glasses throughout the day for kidney & energy balance.'}
               </Text>
             </View>
 
-            {/* 6. Body Comfort */}
+            {/* 6. Body Comfort (No Emojis) */}
             <View style={styles.funCard}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
-                  <Text style={styles.sectionEmoji}>🌿</Text>
-                  <Text style={styles.cardTitle}>Physical Body Sensation</Text>
+                  <View style={styles.sectionIconBubble}>
+                    <Heart size={18} color="#16a34a" />
+                  </View>
+                  <Text style={styles.cardTitle}>Musculoskeletal Comfort</Text>
                 </View>
               </View>
 
-              <View style={styles.bodyComfortsRow}>
-                {BODY_COMFORTS.map((item) => (
-                  <TouchableOpacity
-                    key={item.val}
-                    style={[
-                      styles.comfortChip,
-                      pain === item.val && styles.comfortChipActive,
-                    ]}
-                    onPress={() => setPain(item.val)}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={[styles.comfortChipText, pain === item.val && styles.comfortChipTextActive]}>
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              <View style={styles.bodyComfortsGrid}>
+                {BODY_COMFORTS.map((item) => {
+                  const isSelected = pain === item.val;
+                  const IconComp = item.icon;
+                  return (
+                    <TouchableOpacity
+                      key={item.val}
+                      style={[
+                        styles.comfortCard,
+                        isSelected && {
+                          borderColor: item.color,
+                          backgroundColor: `${item.color}14`,
+                        },
+                      ]}
+                      onPress={() => setPain(item.val)}
+                      activeOpacity={0.8}
+                    >
+                      <IconComp size={18} color={item.color} style={{ marginBottom: 4 }} />
+                      <Text style={[styles.comfortCardTitle, isSelected && { color: item.color, fontWeight: '800' }]}>
+                        {item.label}
+                      </Text>
+                      <Text style={styles.comfortCardSub}>{item.sub}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
 
-            {/* Celebratory Submission Button */}
+            {/* Submit Button (Pure Modern Icons) */}
             <TouchableOpacity
               style={styles.submitRitualBtn}
               onPress={handleSaveDailyCheckup}
@@ -492,7 +532,7 @@ export default function CheckupsScreen() {
             >
               <Sparkles size={18} color="#ffffff" />
               <Text style={styles.submitRitualBtnText}>
-                {savedToday ? '✨ Update Today’s Ritual (+25 XP)' : '✨ Log Daily Ritual (+25 XP)'}
+                {savedToday ? 'Update Today’s Ritual (+25 XP)' : 'Log Daily Ritual (+25 XP)'}
               </Text>
             </TouchableOpacity>
 
@@ -542,10 +582,10 @@ export default function CheckupsScreen() {
               </View>
               <Text style={styles.aiSynthesisText}>
                 {stress > 6
-                  ? 'Your nervous system is processing high demands today. We recommend 10 minutes of gentle diaphragmatic breathing and soothing chamomile tea.'
+                  ? 'Elevated stress patterns detected. A short 10-minute restorative pause and chamomile infusion will help reset autonomic balance.'
                   : sleepHours < 6
-                  ? 'Short sleep noted. Consider taking a light 15-minute sunshine stroll and avoiding caffeine late in the day.'
-                  : 'Your physiological markers reflect radiant balance today! Perfect window for joyful movement and deep cognitive focus.'}
+                  ? 'Sub-optimal sleep logged. Prioritize early wind-down tonight and stay hydrated during afternoon hours.'
+                  : 'Physiological markers indicate resilient harmony. Optimal window for cognitive focus and aerobic training.'}
               </Text>
             </View>
           </View>
@@ -844,8 +884,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  sectionEmoji: {
-    fontSize: 20,
+  sectionIconBubble: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(187, 247, 208, 0.8)',
   },
   cardTitle: {
     fontSize: 15,
@@ -869,7 +916,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   moodAvatarCard: {
-    width: 102,
+    width: 104,
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.88)',
     borderRadius: 16,
@@ -879,15 +926,20 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(187, 247, 208, 0.65)',
     position: 'relative',
   },
-  moodAvatarEmoji: {
-    fontSize: 32,
-    marginBottom: 6,
+  moodIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   moodAvatarTitle: {
     fontSize: 12.5,
     fontWeight: '700',
     color: '#1e293b',
     marginBottom: 2,
+    textAlign: 'center',
   },
   moodAvatarSub: {
     fontSize: 10,
@@ -923,10 +975,6 @@ const styles = StyleSheet.create({
   energyBtnActive: {
     backgroundColor: '#dcfce7',
     borderColor: '#16a34a',
-  },
-  energyIconText: {
-    fontSize: 22,
-    marginBottom: 4,
   },
   energyPctText: {
     fontSize: 13,
@@ -966,10 +1014,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#dcfce7',
     borderColor: '#16a34a',
   },
-  sleepIconText: {
-    fontSize: 20,
-    marginBottom: 4,
-  },
   sleepHoursText: {
     fontSize: 12,
     fontWeight: '700',
@@ -1000,10 +1044,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     borderWidth: 1.2,
     borderColor: 'rgba(187, 247, 208, 0.6)',
-  },
-  stressZoneEmoji: {
-    fontSize: 22,
-    marginBottom: 4,
   },
   stressZoneTitle: {
     fontSize: 11.5,
@@ -1043,9 +1083,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0f2fe',
     borderColor: '#7dd3fc',
   },
-  waterDropEmoji: {
-    fontSize: 16,
-  },
   waterTipText: {
     fontSize: 11.5,
     color: '#0284c7',
@@ -1053,32 +1090,30 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  // Body Comfort
-  bodyComfortsRow: {
+  // Body Comfort (Grid format with clean cards)
+  bodyComfortsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
   },
-  comfortChip: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 20,
+  comfortCard: {
+    width: '48%',
     backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderWidth: 1.2,
     borderColor: 'rgba(187, 247, 208, 0.7)',
   },
-  comfortChipActive: {
-    backgroundColor: '#dcfce7',
-    borderColor: '#16a34a',
-  },
-  comfortChipText: {
+  comfortCardTitle: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#334155',
+    marginBottom: 2,
   },
-  comfortChipTextActive: {
-    color: '#16a34a',
-    fontWeight: '800',
+  comfortCardSub: {
+    fontSize: 10,
+    color: '#64748b',
   },
 
   // Submit Button

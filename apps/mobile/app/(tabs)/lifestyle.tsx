@@ -6,658 +6,818 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
-  Alert,
+  Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import {
-  Utensils,
-  Dumbbell,
   Moon,
-  Droplets,
+  Sun,
+  Activity,
   Heart,
   Wind,
-  Flame,
-  Activity,
-  PlayCircle,
-  Plus,
+  Utensils,
   ShieldCheck,
-  Bot,
+  Droplets,
+  Zap,
   Sparkles,
-  ChevronRight,
-  Info,
   Clock,
-  Calendar,
-  Smartphone,
+  Compass,
+  PlayCircle,
+  CheckCircle2,
   Leaf,
+  ChevronRight,
+  Bot,
+  RotateCcw,
+  Check,
 } from 'lucide-react-native';
 import { useWellnessStore } from '../../src/store';
-import { getProfile } from '../../src/storage/profileStorage';
-import { computeBurnoutRisk, compute5CoreWellness } from '../../src/lib/wellnessEngine';
-import DigitalWellnessHub from '../../src/components/lifestyle/DigitalWellnessHub';
-import BurnoutRecoveryHub from '../../src/components/lifestyle/BurnoutRecoveryHub';
+import { useProfile } from '../../src/context/ProfileContext';
+import { TSOM_TYPES } from '../../src/lib/ethiopianCalendar';
 
-const REMEDY_ITEMS = [
-  {
-    name: 'Damakesse',
-    category: 'Respiratory & Relief',
-    tag: 'Traditional',
-    desc: 'Ancient Ethiopian household remedy for colds and head tension. Often crushed and inhaled with warm steam.',
-  },
-  {
-    name: 'Tena Adam (Rue)',
-    category: 'Digestive & Calming',
-    tag: 'Digestive Aid',
-    desc: 'Fragrant herb steeped with traditional Ethiopian tea and coffee to ease digestion and stomach cramps.',
-  },
-  {
-    name: 'Moringa (Shiferaw)',
-    category: 'Immune & Energy',
-    tag: 'Superfood',
-    desc: 'Mineral-dense superfood leaves providing iron, calcium, and essential amino acids for daily vitality.',
-  },
-  {
-    name: 'Koso (Hagenia)',
-    category: 'Botanical Cleanser',
-    tag: 'Traditional',
-    desc: 'Historical Ethiopian mountain botanical traditionally valued for gut cleansing and digestive balance.',
-  },
-  {
-    name: 'Zingibil (Ginger Root)',
-    category: 'Anti-Inflammatory',
-    tag: 'Circulation',
-    desc: 'Natural digestive stimulant that soothes nausea and relieves joint stiffness after prolonged sitting.',
-  },
-  {
-    name: 'Nech Shinkurt (Garlic)',
-    category: 'Cardiovascular',
-    tag: 'Immune Ally',
-    desc: 'Potent natural antimicrobial bulb supporting healthy arterial elasticity and baseline blood pressure.',
-  },
-];
-
-const NUTRITION_ITEMS = [
-  {
-    name: 'Teff Injera',
-    category: 'Whole Grain / Staple',
-    cals: 165,
-    tag: 'Iron & Prebiotic',
-    desc: 'Ancient iron-rich staple grain, fermented and gluten-free. Provides sustained complex carbs.',
-  },
-  {
-    name: 'Shiro Wot',
-    category: 'Plant Protein',
-    cals: 210,
-    tag: 'High Fiber',
-    desc: 'Spiced chickpea and broad bean stew. Cook with moderate olive or seed oil for optimal macros.',
-  },
-  {
-    name: 'Gomen (Collard Greens)',
-    category: 'Micronutrient',
-    cals: 85,
-    tag: 'Vitamins A, C, K',
-    desc: 'Steamed greens sauteed with ginger and garlic. Essential for bone density and digestion.',
-  },
-  {
-    name: 'Telba Drink (Flaxseed)',
-    category: 'Superfood',
-    cals: 140,
-    tag: 'Omega-3 ALA',
-    desc: 'Toasted ground flaxseed infusion. Natural anti-inflammatory drink for heart and gut wellness.',
-  },
-];
-
-const WORKOUTS = [
-  {
-    title: 'Eskesta Cardio Dance',
-    duration: '15 min',
-    intensity: 'Cardio & Mobility',
-    desc: 'Traditional Ethiopian rhythmic shoulder and neck dance for upper body mobility and aerobic endurance.',
-    url: 'https://youtube.com/results?search_query=Eskesta+workout+cardio',
-  },
-  {
-    title: 'Morning Core & Posture',
-    duration: '12 min',
-    intensity: 'Low-Impact',
-    desc: 'Planks, bird-dogs, and pelvic tilts to reinforce spinal stability after waking up.',
-    url: 'https://youtube.com/results?search_query=morning+core+and+posture+routine',
-  },
-  {
-    title: 'Lower Body Strength',
-    duration: '20 min',
-    intensity: 'Moderate',
-    desc: 'Bodyweight squats, lunges, and calf raises to support joint mobility and endurance.',
-    url: 'https://youtube.com/results?search_query=20+min+bodyweight+leg+workout',
-  },
-  {
-    title: 'Restorative Hip & Back Release',
-    duration: '10 min',
-    intensity: 'Recovery',
-    desc: 'Gentle yoga stretches to decompress lower back after desk work.',
-    url: 'https://youtube.com/results?search_query=hip+and+back+stretch+routine',
-  },
+// 4 Professional Lifestyle Pillars
+const LIFESTYLE_PILLARS = [
+  { id: 'recovery', label: 'Rest & Recovery', icon: Moon },
+  { id: 'movement', label: 'Movement & Mobility', icon: Activity },
+  { id: 'nourishment', label: 'Nourishment & Fasting', icon: Utensils },
+  { id: 'mindfulness', label: 'Breathwork & Reset', icon: Wind },
 ];
 
 export default function LifestyleScreen() {
   const router = useRouter();
-  const profile = getProfile() || {};
-  const { checkIns } = useWellnessStore();
+  const { profile } = useProfile();
+  const { wellnessScore } = useWellnessStore();
 
-  const [activeSubTab, setActiveSubTab] = useState<'nutrition' | 'movement' | 'recovery' | 'hydration' | 'mindfulness' | 'digital' | 'remedies'>('nutrition');
+  const [activePillar, setActivePillar] = useState<'recovery' | 'movement' | 'nourishment' | 'mindfulness'>('recovery');
 
-  // Hydration local tracker
-  const [waterCups, setWaterCups] = useState(5);
-  const targetCups = 8;
+  // Interactive Breathwork State (4-7-8 Breathing Technique)
+  const [breathingActive, setBreathingActive] = useState(false);
+  const [breathPhase, setBreathPhase] = useState<'Inhale (4s)' | 'Hold (7s)' | 'Exhale (8s)' | 'Ready'>('Ready');
+  const [breathSecondsLeft, setBreathSecondsLeft] = useState(0);
 
-  // Breathwork state
-  const [breathPhase, setBreathPhase] = useState<'Ready' | 'Inhale (4s)' | 'Hold (7s)' | 'Exhale (8s)'>('Ready');
-  const [isBreathing, setIsBreathing] = useState(false);
+  // Daily Habits Completed State
+  const [completedHabits, setCompletedHabits] = useState<string[]>([
+    'morning_sunlight',
+    'hydration_start',
+  ]);
 
-  const latestCheckin = checkIns.length > 0 ? checkIns[0] : null;
-  const burnout = computeBurnoutRisk(latestCheckin);
-  const wellness = compute5CoreWellness(latestCheckin, profile);
-
-  const handleOpenVideo = async (url: string) => {
-    try {
-      await WebBrowser.openBrowserAsync(url);
-    } catch {
-      Alert.alert('Browser', 'Unable to open workout video.');
+  const toggleHabit = (id: string) => {
+    if (completedHabits.includes(id)) {
+      setCompletedHabits(completedHabits.filter((h) => h !== id));
+    } else {
+      setCompletedHabits([...completedHabits, id]);
     }
   };
 
-  const handleAddWater = () => {
-    setWaterCups(prev => Math.min(prev + 1, 16));
+  // Breathwork Timer Cycle
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (breathingActive) {
+      if (breathPhase === 'Ready' || breathPhase === 'Exhale (8s)') {
+        setBreathPhase('Inhale (4s)');
+        setBreathSecondsLeft(4);
+      }
+
+      timer = setInterval(() => {
+        setBreathSecondsLeft((prev) => {
+          if (prev <= 1) {
+            setBreathPhase((current) => {
+              if (current === 'Inhale (4s)') return 'Hold (7s)';
+              if (current === 'Hold (7s)') return 'Exhale (8s)';
+              return 'Inhale (4s)';
+            });
+            return currentPhaseDuration(breathPhase);
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      setBreathPhase('Ready');
+      setBreathSecondsLeft(0);
+    }
+    return () => clearInterval(timer);
+  }, [breathingActive, breathPhase]);
+
+  const currentPhaseDuration = (phase: string) => {
+    if (phase === 'Inhale (4s)') return 7; // transitioning to hold
+    if (phase === 'Hold (7s)') return 8; // transitioning to exhale
+    return 4; // transitioning to inhale
   };
 
-  const handleResetWater = () => {
-    setWaterCups(0);
-  };
-
-  const startBreathwork = () => {
-    if (isBreathing) return;
-    setIsBreathing(true);
-    setBreathPhase('Inhale (4s)');
-
-    setTimeout(() => {
-      setBreathPhase('Hold (7s)');
-      setTimeout(() => {
-        setBreathPhase('Exhale (8s)');
-        setTimeout(() => {
-          setBreathPhase('Ready');
-          setIsBreathing(false);
-          Alert.alert('Session Complete', 'Wonderful job taking a mindful pause.');
-        }, 8000);
-      }, 7000);
-    }, 4000);
-  };
+  const isFasting = profile?.fastingMode && profile.fastingMode !== TSOM_TYPES.NONE;
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Lifestyle & Habits</Text>
-          <Text style={styles.subtitle}>Nutrition, movement, recovery & mindfulness</Text>
+    <View style={styles.outerContainer}>
+      {/* Top Header */}
+      <View style={styles.topHeader}>
+        <View style={styles.topHeaderContent}>
+          <Text style={styles.topHeaderTitle}>Lifestyle Medicine</Text>
+          <Text style={styles.topHeaderSubtitle}>Evidence-based protocols for daily vitality</Text>
         </View>
       </View>
 
-      {/* 5-Sub-Hub Segmented Tabs */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subTabsScroll} contentContainerStyle={styles.subTabsContent}>
-        <TouchableOpacity
-          style={[styles.subTabBtn, activeSubTab === 'nutrition' && styles.subTabBtnActive]}
-          onPress={() => setActiveSubTab('nutrition')}
-        >
-          <Utensils size={15} color={activeSubTab === 'nutrition' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.subTabText, activeSubTab === 'nutrition' && styles.subTabTextActive]}>Nutrition & Tsom</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.subTabBtn, activeSubTab === 'movement' && styles.subTabBtnActive]}
-          onPress={() => setActiveSubTab('movement')}
-        >
-          <Dumbbell size={15} color={activeSubTab === 'movement' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.subTabText, activeSubTab === 'movement' && styles.subTabTextActive]}>Movement</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.subTabBtn, activeSubTab === 'recovery' && styles.subTabBtnActive]}
-          onPress={() => setActiveSubTab('recovery')}
-        >
-          <Moon size={15} color={activeSubTab === 'recovery' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.subTabText, activeSubTab === 'recovery' && styles.subTabTextActive]}>Recovery & 5-Core</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.subTabBtn, activeSubTab === 'digital' && styles.subTabBtnActive]}
-          onPress={() => setActiveSubTab('digital')}
-        >
-          <Smartphone size={15} color={activeSubTab === 'digital' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.subTabText, activeSubTab === 'digital' && styles.subTabTextActive]}>Digital Wellness</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.subTabBtn, activeSubTab === 'hydration' && styles.subTabBtnActive]}
-          onPress={() => setActiveSubTab('hydration')}
-        >
-          <Droplets size={15} color={activeSubTab === 'hydration' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.subTabText, activeSubTab === 'hydration' && styles.subTabTextActive]}>Hydration</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.subTabBtn, activeSubTab === 'mindfulness' && styles.subTabBtnActive]}
-          onPress={() => setActiveSubTab('mindfulness')}
-        >
-          <Wind size={15} color={activeSubTab === 'mindfulness' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.subTabText, activeSubTab === 'mindfulness' && styles.subTabTextActive]}>Mindfulness</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.subTabBtn, activeSubTab === 'remedies' && styles.subTabBtnActive]}
-          onPress={() => setActiveSubTab('remedies')}
-        >
-          <Leaf size={15} color={activeSubTab === 'remedies' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.subTabText, activeSubTab === 'remedies' && styles.subTabTextActive]}>Herbs & Remedies</Text>
-        </TouchableOpacity>
-      </ScrollView>
-
-      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 60 }}>
-        {/* SUB-HUB 1: NUTRITION & FASTING */}
-        {activeSubTab === 'nutrition' && (
-          <View>
-            {/* Fasting Calendar Card */}
-            <View style={styles.fastingHero}>
-              <View style={styles.fastingHeader}>
-                <Clock size={20} color="#16a34a" />
-                <Text style={styles.fastingTitle}>Ethiopian Fasting (Tsom) Guidance</Text>
-              </View>
-              <Text style={styles.fastingDesc}>
-                {profile.fastingMode === 'Orthodox Christian (Tsom)'
-                  ? 'Orthodox Christian fasting season active. Prioritize plant-based proteins like Misir (lentils), Shimbra (chickpeas), and Telba (flaxseed) to meet your protein target without animal products.'
-                  : profile.fastingMode === 'Islamic (Ramadan)'
-                  ? 'Islamic fasting guide: Prioritize hydration with electrolytes during Suhoor and break your fast with dates and water before entering Iftar.'
-                  : 'Balanced traditional nutrition: Incorporating Wednesday and Friday vegan meals provides natural digestive reset and high dietary fiber.'}
-              </Text>
-            </View>
-
-            <Text style={styles.sectionHeading}>Ethiopian Nutrient-Dense Foods</Text>
-            {NUTRITION_ITEMS.map((item, idx) => (
-              <View key={idx} style={styles.nutritionCard}>
-                <View style={styles.nutritionTopRow}>
-                  <Text style={styles.nutritionName}>{item.name}</Text>
-                  <View style={styles.tagPill}>
-                    <Text style={styles.tagPillText}>{item.tag}</Text>
-                  </View>
-                </View>
-                <Text style={styles.nutritionCategory}>{item.category} • ~{item.cals} kcal</Text>
-                <Text style={styles.nutritionDesc}>{item.desc}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* SUB-HUB 2: MOVEMENT */}
-        {activeSubTab === 'movement' && (
-          <View>
-            {/* Eskesta Spotlight Card */}
-            <View style={styles.spotlightCard}>
-              <Sparkles size={24} color="#f59e0b" />
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.spotlightTitle}>Cultural Movement: Eskesta Cardio</Text>
-                <Text style={styles.spotlightDesc}>
-                  Ethiopian traditional shoulder dancing elevates heart rate, strengthens upper back posture, and burns up to 180 kcal in 15 minutes.
-                </Text>
-              </View>
-            </View>
-
-            <Text style={styles.sectionHeading}>Workout & Mobility Library</Text>
-            {WORKOUTS.map((item, idx) => (
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Pillar Selector Pills */}
+        <View style={styles.pillarPillsRow}>
+          {LIFESTYLE_PILLARS.map((p) => {
+            const Icon = p.icon;
+            const isSelected = activePillar === p.id;
+            return (
               <TouchableOpacity
-                key={idx}
-                style={styles.workoutCard}
-                onPress={() => handleOpenVideo(item.url)}
+                key={p.id}
+                style={[styles.pillarPill, isSelected && styles.pillarPillActive]}
+                onPress={() => setActivePillar(p.id as any)}
+                activeOpacity={0.75}
               >
-                <View style={styles.workoutIconCol}>
-                  <PlayCircle size={28} color="#16a34a" />
-                </View>
-                <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={styles.workoutTitle}>{item.title}</Text>
-                  <Text style={styles.workoutMeta}>{item.duration} • {item.intensity}</Text>
-                  <Text style={styles.workoutDesc}>{item.desc}</Text>
-                </View>
-                <ChevronRight size={18} color="#94a3b8" />
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {/* SUB-HUB 3: RECOVERY & BURNOUT INTELLIGENCE */}
-        {activeSubTab === 'recovery' && (
-          <BurnoutRecoveryHub />
-        )}
-
-        {/* SUB-HUB: DIGITAL WELLNESS */}
-        {activeSubTab === 'digital' && (
-          <DigitalWellnessHub />
-        )}
-
-        {/* SUB-HUB 4: HYDRATION */}
-        {activeSubTab === 'hydration' && (
-          <View>
-            <View style={styles.hydrationHero}>
-              <Droplets size={36} color="#0284c7" />
-              <Text style={styles.hydrationHeroAmount}>{waterCups * 250} ml</Text>
-              <Text style={styles.hydrationHeroSub}>
-                Goal: {targetCups * 250} ml ({waterCups} of {targetCups} glasses logged)
-              </Text>
-
-              {/* Visual Cup Progress */}
-              <View style={styles.cupRow}>
-                {Array.from({ length: targetCups }).map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.cupPill,
-                      i < waterCups ? styles.cupPillFilled : styles.cupPillEmpty,
-                    ]}
-                  />
-                ))}
-              </View>
-
-              <View style={styles.hydrationBtnRow}>
-                <TouchableOpacity style={styles.waterAddBtn} onPress={handleAddWater}>
-                  <Plus size={18} color="#ffffff" />
-                  <Text style={styles.waterAddBtnText}>+250 ml Glass</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.waterResetBtn} onPress={handleResetWater}>
-                  <Text style={styles.waterResetBtnText}>Reset</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.hydrationTipBox}>
-              <Info size={18} color="#0284c7" />
-              <Text style={styles.hydrationTipText}>
-                Drinking water consistently during high-altitude activity in Addis Ababa and central Ethiopia prevents dehydration headaches and preserves cellular recovery.
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* SUB-HUB 5: MINDFULNESS */}
-        {activeSubTab === 'mindfulness' && (
-          <View>
-            <View style={styles.breathCard}>
-              <Wind size={40} color="#16a34a" />
-              <Text style={styles.breathTitle}>4-7-8 Parasympathetic Reset</Text>
-              <Text style={styles.breathSubtitle}>
-                Calms central nervous tension and reduces sympathetic heart rate elevation.
-              </Text>
-
-              <View style={styles.breathCircle}>
-                <Text style={styles.breathPhaseText}>{breathPhase}</Text>
-              </View>
-
-              <TouchableOpacity
-                style={[styles.breathActionBtn, isBreathing && { backgroundColor: '#64748b' }]}
-                onPress={startBreathwork}
-                disabled={isBreathing}
-              >
-                <Text style={styles.breathActionBtnText}>
-                  {isBreathing ? 'Session in Progress...' : 'Start 1-Cycle Reset'}
+                <Icon size={16} color={isSelected ? '#ffffff' : '#15803d'} />
+                <Text style={[styles.pillarPillText, isSelected && styles.pillarPillTextActive]}>
+                  {p.label}
                 </Text>
               </TouchableOpacity>
-            </View>
-          </View>
-        )}
+            );
+          })}
+        </View>
 
-        {/* SUB-HUB 6: HERBS & TRADITIONAL REMEDIES */}
-        {activeSubTab === 'remedies' && (
-          <View>
-            <View style={styles.fastingHero}>
-              <View style={styles.fastingHeader}>
-                <Leaf size={16} color="#166534" />
-                <Text style={styles.fastingTitle}>Ethiopian Natural Botanicals & Remedies</Text>
+        {/* PILLAR 1: REST & RECOVERY */}
+        {activePillar === 'recovery' && (
+          <View style={styles.pillarContent}>
+            {/* Overview Card */}
+            <View style={styles.heroOverviewCard}>
+              <View style={styles.heroBadgeRow}>
+                <View style={styles.greenBadge}>
+                  <Moon size={13} color="#16a34a" />
+                  <Text style={styles.greenBadgeText}>Sleep Architecture</Text>
+                </View>
+                <Text style={styles.heroTargetText}>Target: 7.5 - 8.0 hrs</Text>
               </View>
-              <Text style={styles.fastingDesc}>
-                Evidence-informed holistic botanical traditions verified with modern botanical medicine standards.
+              <Text style={styles.heroCardHeading}>Circadian Synchronization</Text>
+              <Text style={styles.heroCardDescription}>
+                Aligning your sleep schedule with natural dark-light cycles stabilizes heart rate variability (HRV) and optimizes deep stage cellular repair.
               </Text>
             </View>
 
-            {REMEDY_ITEMS.map((remedy, i) => (
-              <View key={i} style={styles.nutritionCard}>
-                <View style={styles.nutritionTopRow}>
-                  <Text style={styles.nutritionName}>{remedy.name}</Text>
-                  <View style={styles.tagPill}>
-                    <Text style={styles.tagPillText}>{remedy.tag}</Text>
-                  </View>
-                </View>
-                <Text style={styles.nutritionCategory}>{remedy.category}</Text>
-                <Text style={styles.nutritionDesc}>{remedy.desc}</Text>
+            {/* Protocols List */}
+            <Text style={styles.subheading}>Daily Wind-Down Ritual</Text>
+            
+            <TouchableOpacity
+              style={styles.habitCard}
+              onPress={() => toggleHabit('digital_sunset')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.habitCheckbox, completedHabits.includes('digital_sunset') && styles.habitCheckboxDone]}>
+                {completedHabits.includes('digital_sunset') && <Check size={14} color="#ffffff" />}
               </View>
-            ))}
+              <View style={styles.habitTextWrap}>
+                <Text style={styles.habitTitle}>Digital Sunset (60 min prior)</Text>
+                <Text style={styles.habitDetail}>Block blue-light photons to prompt natural melatonin synthesis.</Text>
+              </View>
+              <Clock size={16} color="#94a3b8" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.habitCard}
+              onPress={() => toggleHabit('thermal_cool')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.habitCheckbox, completedHabits.includes('thermal_cool') && styles.habitCheckboxDone]}>
+                {completedHabits.includes('thermal_cool') && <Check size={14} color="#ffffff" />}
+              </View>
+              <View style={styles.habitTextWrap}>
+                <Text style={styles.habitTitle}>Cool Bedroom Temperature</Text>
+                <Text style={styles.habitDetail}>Maintain ambient room temperature between 18°C – 20°C for deep slow-wave sleep.</Text>
+              </View>
+              <ShieldCheck size={16} color="#94a3b8" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.habitCard}
+              onPress={() => toggleHabit('magnesium_intake')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.habitCheckbox, completedHabits.includes('magnesium_intake') && styles.habitCheckboxDone]}>
+                {completedHabits.includes('magnesium_intake') && <Check size={14} color="#ffffff" />}
+              </View>
+              <View style={styles.habitTextWrap}>
+                <Text style={styles.habitTitle}>Magnesium & Chamomile Wind-Down</Text>
+                <Text style={styles.habitDetail}>Gentle nervous system relaxation without morning grogginess.</Text>
+              </View>
+              <Leaf size={16} color="#94a3b8" />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* PILLAR 2: MOVEMENT & MOBILITY */}
+        {activePillar === 'movement' && (
+          <View style={styles.pillarContent}>
+            {/* Overview Card */}
+            <View style={styles.heroOverviewCard}>
+              <View style={styles.heroBadgeRow}>
+                <View style={styles.greenBadge}>
+                  <Activity size={13} color="#16a34a" />
+                  <Text style={styles.greenBadgeText}>Metabolic Health</Text>
+                </View>
+                <Text style={styles.heroTargetText}>Daily: 8,500 Steps</Text>
+              </View>
+              <Text style={styles.heroCardHeading}>Functional Daily Mobility</Text>
+              <Text style={styles.heroCardDescription}>
+                Short, regular movement intervals reduce insulin spikes by 34% compared to prolonged sitting followed by intense evening workouts.
+              </Text>
+            </View>
+
+            <Text style={styles.subheading}>Targeted Mobility Protocols</Text>
+
+            <View style={styles.protocolCard}>
+              <View style={styles.protocolIconWrap}>
+                <Zap size={20} color="#16a34a" />
+              </View>
+              <View style={styles.protocolTextWrap}>
+                <Text style={styles.protocolTitle}>Eskista Shoulder & Thoracic Reset</Text>
+                <Text style={styles.protocolDesc}>
+                  Traditional rhythmic scapular release that relieves desk tension, improves posture, and stimulates lymphatic drainage.
+                </Text>
+                <View style={styles.protocolFooter}>
+                  <Text style={styles.protocolMeta}>5 min • Gentle Mobility</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.protocolCard}>
+              <View style={styles.protocolIconWrap}>
+                <Compass size={20} color="#0284c7" />
+              </View>
+              <View style={styles.protocolTextWrap}>
+                <Text style={styles.protocolTitle}>Post-Meal Glucose Walk</Text>
+                <Text style={styles.protocolDesc}>
+                  A moderate 10-15 minute walk within 30 minutes of eating significantly flattens postprandial glucose curves.
+                </Text>
+                <View style={styles.protocolFooter}>
+                  <Text style={styles.protocolMeta}>15 min • Low-Impact</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.protocolCard}>
+              <View style={styles.protocolIconWrap}>
+                <Heart size={20} color="#e11d48" />
+              </View>
+              <View style={styles.protocolTextWrap}>
+                <Text style={styles.protocolTitle}>Zone 2 Aerobic Foundation</Text>
+                <Text style={styles.protocolDesc}>
+                  Steady conversational pace cycling or brisk walking to stimulate mitochondrial density and longevity enzymes.
+                </Text>
+                <View style={styles.protocolFooter}>
+                  <Text style={styles.protocolMeta}>30 min • 3x Weekly</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* PILLAR 3: NOURISHMENT & FASTING */}
+        {activePillar === 'nourishment' && (
+          <View style={styles.pillarContent}>
+            {/* Overview Card */}
+            <View style={styles.heroOverviewCard}>
+              <View style={styles.heroBadgeRow}>
+                <View style={styles.greenBadge}>
+                  <Utensils size={13} color="#16a34a" />
+                  <Text style={styles.greenBadgeText}>Nutrient Density</Text>
+                </View>
+                <Text style={styles.heroTargetText}>
+                  {isFasting ? 'Fasting Active' : 'Standard Window'}
+                </Text>
+              </View>
+              <Text style={styles.heroCardHeading}>Integrative Nutrition</Text>
+              <Text style={styles.heroCardDescription}>
+                Nourishing your microbiome with fermented prebiotic whole grains and polyphenol-dense botanicals supports sustained metabolic energy.
+              </Text>
+            </View>
+
+            <Text style={styles.subheading}>Superfood Focus</Text>
+
+            <View style={styles.nutritionCard}>
+              <View style={styles.nutritionRow}>
+                <View style={styles.nutritionBullet}>
+                  <Leaf size={16} color="#16a34a" />
+                </View>
+                <View style={styles.nutritionInfo}>
+                  <Text style={styles.nutritionTitle}>100% Teff Injera (Prebiotic Grain)</Text>
+                  <Text style={styles.nutritionDetail}>
+                    Fermented for 3 days; rich in iron, resistant starch, and low glycemic carbohydrates that feed beneficial Bifidobacteria.
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.nutritionCard}>
+              <View style={styles.nutritionRow}>
+                <View style={styles.nutritionBullet}>
+                  <Droplets size={16} color="#0284c7" />
+                </View>
+                <View style={styles.nutritionInfo}>
+                  <Text style={styles.nutritionTitle}>Telba (Flaxseed) Omega Infusion</Text>
+                  <Text style={styles.nutritionDetail}>
+                    Toasted ground flaxseed steeped in lukewarm water. Rich in Alpha-Linolenic Acid (ALA) for vascular elasticity and gentle digestion.
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.nutritionCard}>
+              <View style={styles.nutritionRow}>
+                <View style={styles.nutritionBullet}>
+                  <Sparkles size={16} color="#f59e0b" />
+                </View>
+                <View style={styles.nutritionInfo}>
+                  <Text style={styles.nutritionTitle}>Moringa (Shiferaw) Vitality Greens</Text>
+                  <Text style={styles.nutritionDetail}>
+                    Micro-nutrient powerhouse packed with vitamin C, plant calcium, and bioactive quercetin to combat oxidative stress.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* PILLAR 4: MINDFULNESS & BREATHWORK */}
+        {activePillar === 'mindfulness' && (
+          <View style={styles.pillarContent}>
+            {/* Interactive 4-7-8 Breathwork Module */}
+            <View style={styles.breathworkContainer}>
+              <View style={styles.breathBadge}>
+                <Wind size={14} color="#16a34a" />
+                <Text style={styles.breathBadgeText}>Parasympathetic Reset</Text>
+              </View>
+              <Text style={styles.breathHeading}>4-7-8 Autonomic Breathwork</Text>
+              <Text style={styles.breathDescription}>
+                Scientific pranayama technique proven to down-regulate sympathetic fight-or-flight within 2 minutes.
+              </Text>
+
+              {/* Pulsing Visual Circle */}
+              <View style={styles.breathVisualRingWrap}>
+                <View style={[styles.breathRingGlow, breathingActive && styles.breathRingGlowActive]} />
+                <View style={[styles.breathCenterCircle, breathingActive && styles.breathCenterCircleActive]}>
+                  <Text style={styles.breathPhaseText}>{breathPhase}</Text>
+                  {breathingActive && (
+                    <Text style={styles.breathCountdownText}>{breathSecondsLeft}s</Text>
+                  )}
+                </View>
+              </View>
+
+              {/* Controls */}
+              <TouchableOpacity
+                style={[styles.breathActionBtn, breathingActive && styles.breathActionBtnStop]}
+                onPress={() => setBreathingActive(!breathingActive)}
+                activeOpacity={0.85}
+              >
+                {breathingActive ? (
+                  <>
+                    <RotateCcw size={18} color="#ffffff" />
+                    <Text style={styles.breathActionBtnText}>End Session</Text>
+                  </>
+                ) : (
+                  <>
+                    <PlayCircle size={18} color="#ffffff" />
+                    <Text style={styles.breathActionBtnText}>Begin 2-Min Reset</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* Mental Clarity Habits */}
+            <Text style={styles.subheading}>Daily Mental Hygiene</Text>
+
+            <TouchableOpacity
+              style={styles.habitCard}
+              onPress={() => toggleHabit('morning_sunlight')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.habitCheckbox, completedHabits.includes('morning_sunlight') && styles.habitCheckboxDone]}>
+                {completedHabits.includes('morning_sunlight') && <Check size={14} color="#ffffff" />}
+              </View>
+              <View style={styles.habitTextWrap}>
+                <Text style={styles.habitTitle}>Morning Sunlight (10-15 min)</Text>
+                <Text style={styles.habitDetail}>Anchor your suprachiasmatic nucleus within an hour of waking for elevated daytime focus.</Text>
+              </View>
+              <Sun size={16} color="#f59e0b" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.habitCard}
+              onPress={() => toggleHabit('micro_pauses')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.habitCheckbox, completedHabits.includes('micro_pauses') && styles.habitCheckboxDone]}>
+                {completedHabits.includes('micro_pauses') && <Check size={14} color="#ffffff" />}
+              </View>
+              <View style={styles.habitTextWrap}>
+                <Text style={styles.habitTitle}>Hourly Micro-Pauses</Text>
+                <Text style={styles.habitDetail}>Look 20 feet away for 20 seconds to release ocular ciliary muscle strain.</Text>
+              </View>
+              <Compass size={16} color="#0284c7" />
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
+
+      {/* Universal Floating Chat FAB: Permanent on 4 tabs above bottom bar */}
+      <TouchableOpacity
+        style={styles.floatingChatFab}
+        onPress={() => router.push('/(tabs)/chat')}
+        activeOpacity={0.85}
+      >
+        <Bot size={22} color="#ffffff" />
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 56 : 48,
-    paddingBottom: 16,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  title: { fontSize: 24, fontWeight: '800', color: '#0f172a' },
-  subtitle: { fontSize: 13, color: '#64748b', marginTop: 2 },
-  aiHeaderBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0fdf4',
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    gap: 4,
-  },
-  aiHeaderBtnText: { color: '#16a34a', fontWeight: '700', fontSize: 12 },
-  subTabsScroll: {
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-  },
-  subTabsContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 8,
-  },
-  subTabBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    backgroundColor: '#f1f5f9',
-    gap: 6,
-  },
-  subTabBtnActive: { backgroundColor: '#dcfce7', borderWidth: 1, borderColor: '#16a34a' },
-  subTabText: { fontSize: 12, fontWeight: '600', color: '#64748b' },
-  subTabTextActive: { color: '#16a34a', fontWeight: '700' },
-  content: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
-  sectionHeading: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginVertical: 12 },
-  fastingHero: {
-    backgroundColor: '#f0fdf4',
-    padding: 16,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    marginBottom: 12,
-  },
-  fastingHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-  fastingTitle: { fontSize: 15, fontWeight: '800', color: '#166534' },
-  fastingDesc: { fontSize: 13, color: '#14532d', lineHeight: 19 },
-  nutritionCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  nutritionTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  nutritionName: { fontSize: 13.5, fontWeight: '700', color: '#0f172a' },
-  tagPill: { backgroundColor: '#f1f5f9', paddingVertical: 2, paddingHorizontal: 7, borderRadius: 5 },
-  tagPillText: { fontSize: 10.5, fontWeight: '700', color: '#475569' },
-  nutritionCategory: { fontSize: 11.5, color: '#16a34a', fontWeight: '600', marginTop: 1 },
-  nutritionDesc: { fontSize: 11.5, color: '#64748b', marginTop: 3, lineHeight: 15 },
-  spotlightCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fffbeb',
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#fef3c7',
-    marginBottom: 8,
-  },
-  spotlightTitle: { fontSize: 13, fontWeight: '800', color: '#92400e' },
-  spotlightDesc: { fontSize: 11, color: '#b45309', marginTop: 2, lineHeight: 15 },
-  workoutCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  workoutIconCol: { justifyContent: 'center', alignItems: 'center' },
-  workoutTitle: { fontSize: 13.5, fontWeight: '700', color: '#0f172a' },
-  workoutMeta: { fontSize: 11.5, color: '#16a34a', fontWeight: '600', marginTop: 1 },
-  workoutDesc: { fontSize: 11, color: '#64748b', marginTop: 2 },
-  scoreRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-  scoreCard: {
+  outerContainer: {
     flex: 1,
+    backgroundColor: '#f8fafc',
+    position: 'relative',
+  },
+  topHeader: {
+    paddingTop: Platform.OS === 'ios' ? 52 : 40,
+    paddingBottom: 14,
+    paddingHorizontal: 20,
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 10,
-    borderWidth: 1,
+    borderBottomWidth: 1,
     borderColor: '#e2e8f0',
+  },
+  topHeaderContent: {
+    alignItems: 'flex-start',
+  },
+  topHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0f172a',
+    letterSpacing: -0.3,
+  },
+  topHeaderSubtitle: {
+    fontSize: 12.5,
+    color: '#64748b',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 90, // Leave room for bottom navigation tabs
+  },
+
+  // Pillar Selector Pills
+  pillarPillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  pillarPill: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  scoreCardLabel: { fontSize: 10.5, fontWeight: '700', color: '#64748b', letterSpacing: 0.5 },
-  scoreCardVal: { fontSize: 24, fontWeight: '900', marginVertical: 2 },
-  scoreCardStatus: { fontSize: 11, fontWeight: '700' },
-  breakdownBox: {
+    gap: 6,
     backgroundColor: '#ffffff',
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginBottom: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1.2,
+    borderColor: '#bbf7d0',
   },
-  breakdownRow: {
+  pillarPillActive: {
+    backgroundColor: '#16a34a',
+    borderColor: '#16a34a',
+  },
+  pillarPillText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#15803d',
+  },
+  pillarPillTextActive: {
+    color: '#ffffff',
+  },
+
+  pillarContent: {
+    gap: 12,
+  },
+
+  // Hero Overview Card
+  heroOverviewCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 18,
+    padding: 18,
+    borderWidth: 1.2,
+    borderColor: '#bbf7d0',
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  heroBadgeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  breakdownLabel: { fontSize: 12, color: '#334155' },
-  breakdownVal: { fontSize: 12, fontWeight: '700', color: '#16a34a' },
-  sleepCard: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  sleepTitle: { fontSize: 13, fontWeight: '700', color: '#0f172a' },
-  sleepDesc: { fontSize: 11.5, color: '#64748b', marginTop: 2, lineHeight: 16 },
-  hydrationHero: {
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    padding: 14,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
     marginBottom: 10,
   },
-  hydrationHeroAmount: { fontSize: 26, fontWeight: '900', color: '#0284c7', marginTop: 4 },
-  hydrationHeroSub: { fontSize: 12, color: '#64748b', marginTop: 2 },
-  cupRow: { flexDirection: 'row', gap: 5, marginVertical: 10 },
-  cupPill: { width: 20, height: 28, borderRadius: 5 },
-  cupPillFilled: { backgroundColor: '#0284c7' },
-  cupPillEmpty: { backgroundColor: '#e0f2fe' },
-  hydrationBtnRow: { flexDirection: 'row', gap: 10 },
-  waterAddBtn: {
+  greenBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0284c7',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 18,
-    gap: 6,
-  },
-  waterAddBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 12 },
-  waterResetBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 18,
+    gap: 5,
+    backgroundColor: '#f0fdf4',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#cbd5e1',
+    borderColor: '#bbf7d0',
   },
-  waterResetBtnText: { color: '#64748b', fontWeight: '600', fontSize: 12 },
-  hydrationTipBox: {
+  greenBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#16a34a',
+  },
+  heroTargetText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#15803d',
+  },
+  heroCardHeading: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 6,
+    letterSpacing: -0.2,
+  },
+  heroCardDescription: {
+    fontSize: 13,
+    color: '#475569',
+    lineHeight: 19,
+  },
+
+  subheading: {
+    fontSize: 14.5,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginTop: 8,
+    marginBottom: 2,
+    letterSpacing: -0.1,
+  },
+
+  // Habit Checklist Cards
+  habitCard: {
     flexDirection: 'row',
-    backgroundColor: '#f0f9ff',
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#bae6fd',
-    gap: 6,
-  },
-  hydrationTipText: { flex: 1, fontSize: 11.5, color: '#0369a1', lineHeight: 16 },
-  breathCard: {
+    alignItems: 'center',
+    gap: 12,
     backgroundColor: '#ffffff',
-    borderRadius: 14,
     padding: 14,
-    alignItems: 'center',
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
-  breathTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginTop: 6 },
-  breathSubtitle: { fontSize: 11.5, color: '#64748b', textAlign: 'center', marginTop: 2, marginBottom: 12 },
-  breathCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#f0fdf4',
-    borderWidth: 2.5,
-    borderColor: '#16a34a',
-    justifyContent: 'center',
+  habitCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.8,
+    borderColor: '#cbd5e1',
     alignItems: 'center',
-    marginVertical: 6,
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
   },
-  breathPhaseText: { fontSize: 14, fontWeight: '800', color: '#16a34a' },
-  breathActionBtn: {
+  habitCheckboxDone: {
     backgroundColor: '#16a34a',
-    paddingVertical: 10,
-    paddingHorizontal: 22,
-    borderRadius: 20,
-    marginTop: 14,
+    borderColor: '#16a34a',
   },
-  breathActionBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
+  habitTextWrap: {
+    flex: 1,
+  },
+  habitTitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  habitDetail: {
+    fontSize: 11.5,
+    color: '#64748b',
+    marginTop: 2,
+    lineHeight: 16,
+  },
+
+  // Protocol Cards (Movement)
+  protocolCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    backgroundColor: '#ffffff',
+    padding: 15,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  protocolIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#f0fdf4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  protocolTextWrap: {
+    flex: 1,
+  },
+  protocolTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  protocolDesc: {
+    fontSize: 12,
+    color: '#475569',
+    marginTop: 3,
+    lineHeight: 17,
+  },
+  protocolFooter: {
+    marginTop: 8,
+  },
+  protocolMeta: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#15803d',
+  },
+
+  // Nutrition Cards
+  nutritionCard: {
+    backgroundColor: '#ffffff',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  nutritionRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  nutritionBullet: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#f0fdf4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  nutritionInfo: {
+    flex: 1,
+  },
+  nutritionTitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  nutritionDetail: {
+    fontSize: 12,
+    color: '#475569',
+    marginTop: 3,
+    lineHeight: 17,
+  },
+
+  // Interactive Breathwork Module
+  breathworkContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1.2,
+    borderColor: '#bbf7d0',
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  breathBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#f0fdf4',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+    marginBottom: 8,
+  },
+  breathBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#16a34a',
+  },
+  breathHeading: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 4,
+    letterSpacing: -0.2,
+  },
+  breathDescription: {
+    fontSize: 12.5,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 17,
+    paddingHorizontal: 12,
+    marginBottom: 18,
+  },
+  breathVisualRingWrap: {
+    width: 150,
+    height: 150,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    marginVertical: 10,
+  },
+  breathRingGlow: {
+    position: 'absolute',
+    width: 146,
+    height: 146,
+    borderRadius: 73,
+    backgroundColor: 'rgba(34, 197, 94, 0.10)',
+  },
+  breathRingGlowActive: {
+    backgroundColor: 'rgba(34, 197, 94, 0.22)',
+  },
+  breathCenterCircle: {
+    width: 114,
+    height: 114,
+    borderRadius: 57,
+    backgroundColor: '#ffffff',
+    borderWidth: 3,
+    borderColor: '#bbf7d0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  breathCenterCircleActive: {
+    borderColor: '#16a34a',
+  },
+  breathPhaseText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#15803d',
+    textAlign: 'center',
+  },
+  breathCountdownText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#0f172a',
+    marginTop: 2,
+  },
+  breathActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#16a34a',
+    paddingHorizontal: 22,
+    paddingVertical: 11,
+    borderRadius: 14,
+    marginTop: 18,
+  },
+  breathActionBtnStop: {
+    backgroundColor: '#475569',
+  },
+  breathActionBtnText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+
+  // Permanent Floating Chat Button (Universal FAB on 4 tabs)
+  floatingChatFab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#16a34a',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.22,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 99,
+  },
 });

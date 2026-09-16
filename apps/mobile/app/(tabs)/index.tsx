@@ -65,9 +65,9 @@ function CircleInfoTeller({
     <View style={styles.circleTellerWrap}>
       <View style={[styles.circleRing, { borderColor: color, backgroundColor: bgColor }]}>
         <Text style={[styles.circleVal, { color }]}>{value}</Text>
-        <Text style={styles.circleSub}>{subtext}</Text>
       </View>
       <Text style={styles.circleLabel}>{label}</Text>
+      <Text style={styles.circleSub}>{subtext}</Text>
     </View>
   );
 }
@@ -286,53 +286,52 @@ export default function AdaptiveHomeScreen() {
           </View>
         </View>
 
-        {/* 1. TOP: Thin / Slim Today's Insight Banner ("tin") */}
+        {/* 1. TOP: 2-Line Today's Insight Banner */}
         <View style={styles.insightCardSlim}>
           <View style={styles.insightSlimLeft}>
             <View style={styles.insightSlimPill}>
-              <Sparkles size={11} color="#16a34a" />
+              <Sparkles size={12} color="#16a34a" />
               <Text style={styles.insightSlimPillText}>INSIGHT</Text>
             </View>
-            <Text style={styles.insightSlimTitle} numberOfLines={1}>
+            <Text style={styles.insightSlimTitle} numberOfLines={2}>
               {todayInsight.title}: <Text style={styles.insightSlimDesc}>{todayInsight.desc}</Text>
             </Text>
           </View>
           <View style={[styles.stateDotSlim, { backgroundColor: todayInsight.badgeColor }]} />
         </View>
 
-        {/* 2. ENLARGED 3D ANIMATION BALANCE SPACE + CIRCLE INFO TELLERS */}
-        <View style={styles.stage3DContainer}>
-          {/* Expanded 3D Canvas visual with glowing orbital atmosphere */}
-          <View style={styles.canvas3DPlaceholder}>
+        {/* 2. WIDE OPEN 3D ANIMATION BALANCE SPACE (No card, pure wide open canvas) */}
+        <View style={styles.stage3DWideSpace}>
+          <View style={styles.canvas3DOpenArea}>
             <View style={styles.canvasGlowOuter} />
             <View style={styles.canvasGlowInner} />
             <View style={styles.gyroscopeRing}>
-              <Compass size={36} color="#16a34a" />
+              <Compass size={40} color="#16a34a" />
             </View>
-            <Text style={styles.canvasTitle}>Living 3D Balance Sphere</Text>
-            <Text style={styles.canvasNote}>Dynamic biological rhythm & nervous equilibrium</Text>
+            <Text style={styles.canvasTitle}>Living 3D Balance Canvas</Text>
+            <Text style={styles.canvasNote}>Dynamic biological rhythm & neurological balance</Text>
           </View>
 
-          {/* Circle Info Tellers overlaying in compact circular method */}
-          <View style={styles.circlesRow}>
+          {/* Compact Circle Info Tellers below wide 3D space */}
+          <View style={styles.circlesRowCompact}>
             <CircleInfoTeller
-              label="Wellness Score"
+              label="Wellness"
               value={biometrics.recoveryScore}
-              subtext="/ 100"
+              subtext="Optimal"
               color="#16a34a"
               bgColor="#f0fdf4"
             />
             <CircleInfoTeller
-              label="Burnout State"
+              label="Burnout"
               value={burnoutAssessment.state.split(' ')[0]}
               subtext={burnoutAssessment.state.split(' ')[1] || 'State'}
               color={burnoutAssessment.stateColor}
               bgColor={`${burnoutAssessment.stateColor}15`}
             />
             <CircleInfoTeller
-              label="Digital Health"
+              label="Digital"
               value={digitalScore.score}
-              subtext="/ 100"
+              subtext="Balanced"
               color="#4f46e5"
               bgColor="#eef2ff"
             />
@@ -464,39 +463,44 @@ export default function AdaptiveHomeScreen() {
             ))}
           </ScrollView>
 
-          {/* Discovery Cards styled with Quick Actions visual language */}
+          {/* Discovery Half-Cards (Like Quick Actions with Image Background & Hovering Text) */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.horizontalScrollContent}
             decelerationRate="fast"
-            snapToInterval={227}
+            snapToInterval={168}
           >
             {filteredDiscovery.map((item) => (
               <TouchableOpacity
                 key={item.id}
-                style={styles.discoveryCard}
+                style={styles.discoveryHalfCard}
                 onPress={() => setSelectedDiscovery(item)}
-                activeOpacity={0.8}
+                activeOpacity={0.82}
               >
-                <View style={styles.discoveryCardTop}>
-                  <View style={[styles.discoveryCardIconWrap, { backgroundColor: `${item.badgeColor}15` }]}>
-                    {renderDiscoveryIcon(item.iconName, item.badgeColor)}
+                {/* Background Image */}
+                <Image 
+                  source={{ uri: item.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Pfefferminze_natur_peppermint.jpg/400px-Pfefferminze_natur_peppermint.jpg' }} 
+                  style={StyleSheet.absoluteFillObject}
+                  resizeMode="cover"
+                />
+                {/* Semi-transparent Emerald/Dark Glass Overlay */}
+                <View style={styles.actionCardImageOverlay} />
+
+                {/* Text Hovering over Image */}
+                <View style={styles.discoveryHalfContentHover}>
+                  <View style={styles.discoveryHalfBadge}>
+                    <Text style={styles.discoveryHalfBadgeText}>{item.categoryLabel.toUpperCase()}</Text>
                   </View>
-                  <View style={[styles.discoveryBadge, { backgroundColor: `${item.badgeColor}12` }]}>
-                    <Text style={[styles.discoveryBadgeText, { color: item.badgeColor }]}>
-                      {item.categoryLabel}
+
+                  <View style={styles.discoveryHalfTextWrap}>
+                    <Text style={styles.discoveryHalfTitleHover} numberOfLines={1}>
+                      {item.name.split('(')[0].trim()}
+                    </Text>
+                    <Text style={styles.discoveryHalfDescHover} numberOfLines={2}>
+                      {item.benefit}
                     </Text>
                   </View>
-                </View>
-
-                <Text style={styles.discoveryCardTitle}>{item.name}</Text>
-                <Text style={styles.discoveryCardDesc} numberOfLines={3}>
-                  {item.benefit}
-                </Text>
-
-                <View style={styles.discoveryCardBottom}>
-                  <Text style={styles.discoveryActionText}>Learn more →</Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -663,107 +667,99 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
 
-  // 2. Enlarged 3D Space + Circle Info Tellers
-  stage3DContainer: {
-    backgroundColor: 'rgba(240, 253, 244, 0.72)',
-    borderRadius: 24,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1.2,
-    borderColor: 'rgba(187, 247, 208, 0.75)',
-    alignItems: 'center',
-    shadowColor: '#16a34a',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  canvas3DPlaceholder: {
+  // 2. Wide Open 3D Space (No card, pure wide canvas)
+  stage3DWideSpace: {
     width: '100%',
-    height: 160,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.82)',
-    borderWidth: 1,
-    borderColor: 'rgba(187, 247, 208, 0.6)',
+    marginVertical: 12,
+    alignItems: 'center',
+    backgroundColor: 'transparent', // Pure open space without card boxing
+  },
+  canvas3DOpenArea: {
+    width: '100%',
+    height: 180, // Generous wide open space for 3D animation
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   canvasGlowOuter: {
     position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: 'rgba(34, 197, 94, 0.12)',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(34, 197, 94, 0.10)',
   },
   canvasGlowInner: {
     position: 'absolute',
-    width: 130,
-    height: 130,
-    borderRadius: 65,
-    backgroundColor: 'rgba(134, 239, 172, 0.25)',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(134, 239, 172, 0.22)',
   },
   gyroscopeRing: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     borderWidth: 2,
     borderColor: '#16a34a',
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    marginBottom: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    marginBottom: 8,
     shadowColor: '#16a34a',
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 2,
   },
   canvasTitle: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '800',
     color: '#0f172a',
-    marginTop: 4,
+    letterSpacing: -0.2,
   },
   canvasNote: {
     fontSize: 11,
-    color: '#16a34a',
+    color: '#15803d',
     fontWeight: '600',
-    marginTop: 2,
+    marginTop: 3,
   },
-  circlesRow: {
+  circlesRowCompact: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+    gap: 20,
     width: '100%',
-    paddingHorizontal: 8
+    marginTop: 4,
   },
   circleTellerWrap: {
-    alignItems: 'center'
+    alignItems: 'center',
   },
   circleRing: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 3,
+    width: 52, // Moderate compact circle
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 2.2,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6
+    marginBottom: 4,
+    shadowColor: '#16a34a',
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
   },
   circleVal: {
-    fontSize: 14,
-    fontWeight: '900'
+    fontSize: 13,
+    fontWeight: '900',
   },
   circleSub: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: '#64748b',
-    fontWeight: '600'
+    fontWeight: '600',
+    marginTop: 1,
   },
   circleLabel: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
-    color: '#334155'
+    color: '#334155',
   },
 
   // 3. Action Row: Chat with Nura or Call Her
@@ -931,6 +927,65 @@ const styles = StyleSheet.create({
     color: 'rgba(240, 253, 244, 0.95)',
     fontWeight: '500',
     textShadowColor: 'rgba(0, 0, 0, 0.35)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+
+
+  // Discovery Half-Cards (Matching Quick Actions aesthetic at half size)
+  discoveryHalfCard: {
+    width: 156,
+    height: 136,
+    borderRadius: 18,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.85)',
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.10,
+    shadowRadius: 6,
+    elevation: 2.5,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  discoveryHalfContentHover: {
+    flex: 1,
+    justifyContent: 'space-between',
+    padding: 11,
+    zIndex: 2,
+  },
+  discoveryHalfBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.28)',
+    paddingHorizontal: 6,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+    borderWidth: 0.6,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  discoveryHalfBadgeText: {
+    color: '#ffffff',
+    fontSize: 8.5,
+    fontWeight: '800',
+    letterSpacing: 0.4,
+  },
+  discoveryHalfTextWrap: {
+    marginTop: 'auto',
+  },
+  discoveryHalfTitleHover: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#ffffff',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+    marginBottom: 2,
+  },
+  discoveryHalfDescHover: {
+    fontSize: 10.5,
+    color: 'rgba(240, 253, 244, 0.92)',
+    fontWeight: '500',
+    lineHeight: 14,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },

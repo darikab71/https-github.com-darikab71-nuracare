@@ -93,7 +93,7 @@ const INITIAL_POSTS: CommunityPost[] = [
     author: 'Sarah M.',
     avatarColor: '#ec4899',
     timeAgo: '2h ago',
-    content: '🔥 Finished my 7-day hydration challenge!\n\nMaintained 92% hydration consistency this week. Energy levels have visibly normalized during morning routines.',
+    content: 'Finished my 7-day hydration challenge!\n\nMaintained 92% hydration consistency this week. Energy levels have visibly normalized during morning routines.',
     likes: 24,
     comments: 7,
   },
@@ -121,7 +121,7 @@ const INITIAL_POSTS: CommunityPost[] = [
     authorBadge: 'Nutritionist',
     avatarColor: '#8b5cf6',
     timeAgo: '1d ago',
-    title: 'Ethiopian Wellness Tip 🇪🇹',
+    title: 'Ethiopian Wellness Tip (Teff & Gut Health)',
     content: 'How traditional Teff-based meals can fit seamlessly into a balanced nutrition and glycemic control routine. Teff contains resistant starch that supports a diverse microbiome.',
     likes: 92,
     comments: 21,
@@ -161,9 +161,9 @@ const INITIAL_POSTS: CommunityPost[] = [
 const INITIAL_GROUPS: CommunityGroup[] = [
   {
     id: 'grp-1',
-    name: 'Running Ethiopia 🇪🇹',
+    name: 'Running Ethiopia ',
     category: 'Cardio & Athletics',
-    icon: '🏃',
+    icon: '',
     membersCount: '12.4K',
     description: 'For Ethiopian runners sharing routes, morning distance goals, motivation, and regional half-marathons.',
     privacy: 'Public',
@@ -171,9 +171,9 @@ const INITIAL_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'grp-2',
-    name: 'Addis Fitness 👟',
+    name: 'Addis Fitness ',
     category: 'Workouts & Gyms',
-    icon: '👟',
+    icon: '',
     membersCount: '8.2K',
     description: 'Active gym-goers and fitness enthusiasts discussing workout splits, local training centers, and recovery.',
     privacy: 'Public',
@@ -181,9 +181,9 @@ const INITIAL_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'grp-3',
-    name: 'Healthy Ethiopian Cooking 🥗',
+    name: 'Healthy Ethiopian Cooking ',
     category: 'Nutrition & Tsom',
-    icon: '🥗',
+    icon: '',
     membersCount: '15.1K',
     description: 'Sharing healthy recipes: high-protein Shiro, low-oil Misir, Telba smoothies, and nutritious fasting meals.',
     privacy: 'Public',
@@ -191,9 +191,9 @@ const INITIAL_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'grp-4',
-    name: 'Mindfulness & Stress 🧘',
+    name: 'Mindfulness & Stress ',
     category: 'Mental Wellness',
-    icon: '🧘',
+    icon: '',
     membersCount: '6.3K',
     description: 'Daily breathwork reflections, meditation tips, stress resilience techniques, and mindful living.',
     privacy: 'Public',
@@ -201,9 +201,9 @@ const INITIAL_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'grp-5',
-    name: 'Hydration Challenge 💧',
+    name: 'Hydration Challenge ',
     category: 'Habit Building',
-    icon: '💧',
+    icon: '',
     membersCount: '9.8K',
     description: 'Accountability group for maintaining optimal daily hydration and sharing water tracking milestones.',
     privacy: 'Public',
@@ -211,9 +211,9 @@ const INITIAL_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'grp-6',
-    name: 'Muscle Building 💪',
+    name: 'Muscle Building ',
     category: 'Strength Training',
-    icon: '💪',
+    icon: '',
     membersCount: '4.5K',
     description: 'Hypertrophy principles, bodyweight calisthenics, and plant-based protein pairing during fasting.',
     privacy: 'Public',
@@ -221,9 +221,9 @@ const INITIAL_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'grp-7',
-    name: 'Healthy Lifestyle 🌿',
+    name: 'Healthy Lifestyle ',
     category: 'General Wellness',
-    icon: '🌿',
+    icon: '',
     membersCount: '11.0K',
     description: 'Holistic wellness tips, restorative sleep routines, and sustainable lifestyle habit changes.',
     privacy: 'Public',
@@ -231,9 +231,9 @@ const INITIAL_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'grp-8',
-    name: 'Digital Reset & Sanctuary 📵',
+    name: 'Digital Reset & Sanctuary ',
     category: 'Digital Wellness',
-    icon: '📵',
+    icon: '',
     membersCount: '5.2K',
     description: 'Intentional phone use, bedtime digital wind-down, focus sessions, and burnout recovery support.',
     privacy: 'Public',
@@ -547,7 +547,7 @@ export default function CommunityScreen() {
                 <View style={styles.challengeBox}>
                   <View style={styles.challengeMetaRow}>
                     <Text style={styles.participantsText}>
-                      👥 {post.challengeData.participants} participants
+                       {post.challengeData.participants} participants
                     </Text>
                     <Text style={styles.percentText}>
                       {post.challengeData.progressPercent}% Target

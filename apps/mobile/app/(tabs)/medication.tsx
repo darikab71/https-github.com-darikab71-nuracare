@@ -191,7 +191,7 @@ export default function MedicationScreen() {
             <Text style={styles.adherenceLabel}>7-DAY ADHERENCE</Text>
             <Text style={styles.adherenceScore}>{stats.percentage}%</Text>
             <Text style={styles.adherenceSub}>
-              {stats.taken} of {stats.total} doses taken • {stats.streak} day streak 🔥
+              {stats.taken} of {stats.total} doses taken • {stats.streak} day streak
             </Text>
           </View>
           <View style={styles.adherenceBadge}>
@@ -205,7 +205,7 @@ export default function MedicationScreen() {
         {/* AI Contextual Assistant Chip */}
         <TouchableOpacity
           style={styles.aiChip}
-          onPress={() => router.push('/chat')}
+          onPress={() => router.push('/(tabs)/chat')}
         >
           <Bot size={20} color="#16a34a" />
           <View style={{ flex: 1, marginHorizontal: 8 }}>
