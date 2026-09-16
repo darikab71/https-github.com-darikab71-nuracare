@@ -32,3 +32,6 @@ Thumbs.db
 public/*.apk
 apps/web/public/*.apk
 package-lock.json
+buildlist*
+*.tgz
+apps/mobile/*_build*.json
