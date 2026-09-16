@@ -1,48 +1,126 @@
 import { Platform } from 'react-native';
 
 const isWeb = Platform.OS === 'web';
+const memoryStore = new Map<string, string>();
 
-let storageInstance: any;
-
-if (isWeb) {
-  storageInstance = {
-    set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch(e){} },
-    getString: (k: string) => { try { return localStorage.getItem(k); } catch(e){ return null; } },
-    delete: (k: string) => { try { localStorage.removeItem(k); } catch(e){} },
-    clearAll: () => { try { localStorage.clear(); } catch(e){} },
-    contains: (k: string) => { try { return localStorage.getItem(k) !== null; } catch(e){ return false; } },
-    getAllKeys: () => [],
-    getBoolean: (k: string) => { try { return localStorage.getItem(k) === 'true'; } catch(e) { return false; } },
-    getNumber: (k: string) => { try { return Number(localStorage.getItem(k)) || 0; } catch(e) { return 0; } }
-  };
-} else {
+let mmkvInstance: any = null;
+if (!isWeb) {
   try {
     const { MMKV } = require('react-native-mmkv');
-    storageInstance = new MMKV({ id: 'nuracare-mobile-storage' });
+    mmkvInstance = new MMKV({ id: 'nuracare-mobile-storage' });
+    // Test that native read/write actually works without throwing JNI/Nitro errors
+    mmkvInstance.set('__test_probe__', '1');
+    mmkvInstance.getString('__test_probe__');
+    mmkvInstance.delete('__test_probe__');
   } catch (err) {
-    console.warn('MMKV initialization failed, using in-memory fallback', err);
-    const memoryStore = new Map<string, string>();
-    storageInstance = {
-      set: (k: string, v: string) => memoryStore.set(k, v),
-      getString: (k: string) => memoryStore.get(k) ?? null,
-      delete: (k: string) => memoryStore.delete(k),
-      clearAll: () => memoryStore.clear(),
-      contains: (k: string) => memoryStore.has(k),
-      getAllKeys: () => Array.from(memoryStore.keys()),
-      getBoolean: (k: string) => memoryStore.get(k) === 'true',
-      getNumber: (k: string) => Number(memoryStore.get(k)) || 0,
-    };
+    console.warn('MMKV initialization failed, using in-memory fallback:', err);
+    mmkvInstance = null;
   }
 }
 
-export const storage = storageInstance;
+export const storage = {
+  set: (k: string, v: string) => {
+    if (isWeb) {
+      try { localStorage.setItem(k, v); return; } catch (e) {}
+    }
+    if (mmkvInstance) {
+      try {
+        mmkvInstance.set(k, v);
+        return;
+      } catch (e) {
+        console.warn('MMKV.set runtime error, falling back to memory store:', e);
+        mmkvInstance = null;
+      }
+    }
+    memoryStore.set(k, v);
+  },
+  getString: (k: string): string | null => {
+    if (isWeb) {
+      try { return localStorage.getItem(k); } catch (e) { return null; }
+    }
+    if (mmkvInstance) {
+      try {
+        return mmkvInstance.getString(k) ?? null;
+      } catch (e) {
+        console.warn('MMKV.getString runtime error, falling back to memory store:', e);
+        mmkvInstance = null;
+      }
+    }
+    return memoryStore.get(k) ?? null;
+  },
+  delete: (k: string) => {
+    if (isWeb) {
+      try { localStorage.removeItem(k); return; } catch (e) {}
+    }
+    if (mmkvInstance) {
+      try {
+        mmkvInstance.delete(k);
+        return;
+      } catch (e) {
+        mmkvInstance = null;
+      }
+    }
+    memoryStore.delete(k);
+  },
+  clearAll: () => {
+    if (isWeb) {
+      try { localStorage.clear(); return; } catch (e) {}
+    }
+    if (mmkvInstance) {
+      try {
+        mmkvInstance.clearAll();
+        return;
+      } catch (e) {
+        mmkvInstance = null;
+      }
+    }
+    memoryStore.clear();
+  },
+  contains: (k: string): boolean => {
+    if (isWeb) {
+      try { return localStorage.getItem(k) !== null; } catch (e) { return false; }
+    }
+    if (mmkvInstance) {
+      try {
+        return mmkvInstance.contains(k);
+      } catch (e) {
+        mmkvInstance = null;
+      }
+    }
+    return memoryStore.has(k);
+  },
+  getAllKeys: (): string[] => {
+    if (mmkvInstance) {
+      try {
+        return mmkvInstance.getAllKeys();
+      } catch (e) {
+        mmkvInstance = null;
+      }
+    }
+    return Array.from(memoryStore.keys());
+  },
+  getBoolean: (k: string): boolean => {
+    const val = storage.getString(k);
+    return val === 'true';
+  },
+  getNumber: (k: string): number => {
+    const val = storage.getString(k);
+    return Number(val) || 0;
+  }
+};
 
 export function cacheData(key: string, data: any) {
-  storage.set(key, JSON.stringify(data));
+  try {
+    storage.set(key, JSON.stringify(data));
+  } catch (e) {}
 }
 
 export function getCachedData<T>(key: string): T | null {
-  const data = storage.getString(key);
-  return data ? JSON.parse(data) : null;
+  try {
+    const data = storage.getString(key);
+    return data ? JSON.parse(data) : null;
+  } catch (e) {
+    return null;
+  }
 }
 

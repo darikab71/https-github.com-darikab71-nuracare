@@ -1,4 +1,5 @@
 import 'react-native-gesture-handler';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Stack, router, useSegments } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useWellnessStore, useAuthStore } from '../src/store';
@@ -21,6 +22,11 @@ function InnerLayout() {
   const segments = useSegments();
 
   useEffect(() => {
+    // Hard failsafe: ensure splash screen ALWAYS hides within 1.2s regardless of any async logic
+    const splashFailsafe = setTimeout(() => {
+      SplashScreen.hideAsync().catch(() => {});
+    }, 1200);
+
     async function prepare() {
       try {
         await loadWellnessData();
@@ -29,6 +35,7 @@ function InnerLayout() {
         console.warn('Initialization error:', e);
       } finally {
         setIsReady(true);
+        clearTimeout(splashFailsafe);
         await SplashScreen.hideAsync().catch(() => {});
         // Check for updates in the background without blocking UI
         setTimeout(() => {
@@ -37,6 +44,8 @@ function InnerLayout() {
       }
     }
     prepare();
+
+    return () => clearTimeout(splashFailsafe);
   }, []);
 
   useEffect(() => {
@@ -96,5 +105,28 @@ export default function RootLayout() {
         <InnerLayout />
       </ProfileProvider>
     </AuthProvider>
+  );
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, backgroundColor: '#ffffff' }}>
+      <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#166534', marginBottom: 12 }}>NuraCare</Text>
+      <Text style={{ fontSize: 14, color: '#4b5563', textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+        The app encountered a startup issue. Tap the button below to reload cleanly.
+      </Text>
+      <TouchableOpacity
+        onPress={retry}
+        style={{
+          backgroundColor: '#16a34a',
+          paddingHorizontal: 24,
+          paddingVertical: 12,
+          borderRadius: 12,
+          elevation: 2,
+        }}
+      >
+        <Text style={{ color: '#ffffff', fontWeight: '700', fontSize: 15 }}>Reload App</Text>
+      </TouchableOpacity>
+    </View>
   );
 }

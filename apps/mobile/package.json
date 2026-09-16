@@ -1,6 +1,6 @@
 {
   "name": "nuracare-mobile",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
@@ -15,7 +15,6 @@
     "@supabase/supabase-js": "^2.108.1",
     "abort-controller": "^3.0.0",
     "expo": "~56.0.15",
-    "expo-calendar": "~56.0.9",
     "expo-constants": "~56.0.18",
     "expo-device": "~56.0.4",
     "expo-document-picker": "~56.0.4",
@@ -23,7 +22,6 @@
     "expo-glass-effect": "~56.0.4",
     "expo-image": "~56.0.11",
     "expo-linking": "~56.0.15",
-    "expo-notifications": "~56.0.4",
     "expo-router": "~56.2.14",
     "expo-splash-screen": "~56.0.12",
     "expo-status-bar": "~56.0.4",
