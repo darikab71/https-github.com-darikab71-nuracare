@@ -7,8 +7,8 @@ export default function DownloadAppModal({ isOpen = true, onClose }) {
 
   if (!isOpen) return null;
 
-  // Direct standalone APK binary link (Build with emerald green leaf app icon & adaptive icon)
-  const directCdnApkUrl = 'https://expo.dev/artifacts/eas/YVvW-8AAkIdnyBfVbkcXZy3qUAh88lbOncvs1NgCRXY.apk';
+  // Direct standalone APK binary link (Android 13 / One UI 7 compatible, green leaf icon, v1.0.2)
+  const directCdnApkUrl = 'https://expo.dev/artifacts/eas/N5gp8YJOJta4o8Shyy2Jwdb0vNeHg8nrZ8UzUMKnhV8.apk';
   const serverApkUrl = '/nuracare.apk';
   const activeDownloadUrl = directCdnApkUrl;
 

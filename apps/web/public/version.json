@@ -1,9 +1,9 @@
 {
-    "releaseDate":  "2026-09-10",
-    "minSupportedVersion":  "1.0.0",
-    "websiteUrl":  "https://nuracare.pro.et",
-    "downloadUrl":  "https://expo.dev/artifacts/eas/YVvW-8AAkIdnyBfVbkcXZy3qUAh88lbOncvs1NgCRXY.apk",
-    "versionCode":  2,
-    "appVersion":  "1.0.1",
-    "releaseNotes":  "Updated official green leaf app icon, eliminated splash screen freezing, and improved native offline performance."
+  "appVersion": "1.0.2",
+  "versionCode": 3,
+  "minSupportedVersion": "1.0.0",
+  "releaseDate": "2026-09-16",
+  "websiteUrl": "https://nuracare.pro.et",
+  "downloadUrl": "https://expo.dev/artifacts/eas/N5gp8YJOJta4o8Shyy2Jwdb0vNeHg8nrZ8UzUMKnhV8.apk",
+  "releaseNotes": "Optimized for Android 13 and Samsung One UI 7: hardened native storage initialization, guaranteed splash screen dismissal, sanitized Android permissions, and updated official emerald green leaf icon."
 }
