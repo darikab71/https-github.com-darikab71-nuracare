@@ -1,11 +1,14 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import {
   View,
+  Text,
+  TouchableOpacity,
   StyleSheet,
   Animated,
   Dimensions,
   Platform,
 } from 'react-native';
+import { Volume2, VolumeX } from 'lucide-react-native';
 import Svg, {
   Path,
   Defs,
@@ -144,20 +147,24 @@ function renderSVG(type: string, id: string | number) {
   }
 }
 
-const ELEMENT_COUNT = 10;
+const ELEMENT_COUNT = 24;
 
 export default function FloatingNatureBackground({
   children,
+  showSoundToggle = true,
 }: FloatingNatureBackgroundProps) {
+  const [isPlayingSound, setIsPlayingSound] = useState(true);
+
   // Elements configuration matching web FloatingLeaves
   const elementsConfig = useMemo(() => {
     return Array.from({ length: ELEMENT_COUNT }).map((_, i) => {
       const type = svgTypes[i % svgTypes.length];
-      const size = 18 + Math.floor(Math.random() * 14);
-      const startX = (i / ELEMENT_COUNT) * SCREEN_WIDTH + (Math.random() * 20 - 10);
-      const driftX = (Math.random() * 60 + 30) * (Math.random() > 0.5 ? 1 : -1);
-      const duration = 15000 + Math.random() * 8000;
-      const delay = i * 1200;
+      const size = 16 + Math.floor(Math.random() * 16);
+      const startX = (i / ELEMENT_COUNT) * SCREEN_WIDTH + (Math.random() * 24 - 12);
+      const driftX = (Math.random() * 70 + 35) * (i % 2 === 0 ? 1 : -1);
+      const duration = 12000 + Math.random() * 8000;
+      // Stagger initial progress across the whole vertical axis
+      const initialProgress = (i / ELEMENT_COUNT) * 0.92 + Math.random() * 0.06;
 
       return {
         id: `el-${i}`,
@@ -167,15 +174,15 @@ export default function FloatingNatureBackground({
         startX,
         driftX,
         duration,
-        delay,
-        opacity: 0.45 + Math.random() * 0.3,
+        initialProgress,
+        opacity: 0.45 + Math.random() * 0.35,
       };
     });
   }, []);
 
   const animatedValues = useRef(
-    elementsConfig.map(() => ({
-      progress: new Animated.Value(0),
+    elementsConfig.map((cfg) => ({
+      progress: new Animated.Value(cfg.initialProgress),
     }))
   ).current;
 
@@ -184,34 +191,66 @@ export default function FloatingNatureBackground({
   const windAnim2 = useRef(new Animated.Value(-SCREEN_WIDTH * 1.5)).current;
   const windOpacity = useRef(new Animated.Value(0.2)).current;
 
-  // Sound ref
-  const soundRef = useRef<Audio.Sound | null>(null);
+  // Sound refs
+  const soundRef = useRef<any>(null);
+  const webAudioRef = useRef<any>(null);
+
+  // Toggle sound handler
+  const toggleSound = async () => {
+    try {
+      if (Platform.OS === 'web') {
+        if (webAudioRef.current) {
+          if (webAudioRef.current.paused) {
+            await webAudioRef.current.play();
+            setIsPlayingSound(true);
+          } else {
+            webAudioRef.current.pause();
+            setIsPlayingSound(false);
+          }
+        }
+      } else {
+        if (soundRef.current) {
+          const status = await soundRef.current.getStatusAsync();
+          if (status.isLoaded) {
+            if (status.isPlaying) {
+              await soundRef.current.pauseAsync();
+              setIsPlayingSound(false);
+            } else {
+              await soundRef.current.playAsync();
+              setIsPlayingSound(true);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Sound toggle error:', e);
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
-    const timers: any[] = [];
 
-    // Falling 3D downward motion loop (0: top -10vh -> 1: bottom 110vh)
+    // Falling 3D downward continuous motion loop
     elementsConfig.forEach((cfg, idx) => {
       const anim = animatedValues[idx].progress;
 
-      const runFall = () => {
+      const runFall = (startVal: number) => {
         if (!isMounted) return;
-        anim.setValue(0);
+        anim.setValue(startVal);
+        const remainingDuration = cfg.duration * (1 - startVal);
 
         Animated.timing(anim, {
           toValue: 1,
-          duration: cfg.duration,
+          duration: remainingDuration,
           useNativeDriver: Platform.OS !== 'web',
         }).start(({ finished }) => {
           if (finished && isMounted) {
-            runFall();
+            runFall(0);
           }
         });
       };
 
-      const t = setTimeout(() => runFall(), cfg.delay);
-      timers.push(t);
+      runFall(cfg.initialProgress);
     });
 
     // Wind animation
@@ -244,31 +283,56 @@ export default function FloatingNatureBackground({
 
     return () => {
       isMounted = false;
-      timers.forEach((t) => clearTimeout(t));
     };
   }, []);
 
-  // Ambient sound in background (calm nature)
+  // Ambient sound setup with Web Audio fallback & Native Expo-AV
   useEffect(() => {
     let isMounted = true;
 
-    async function initSound() {
+    // 1. Web HTML5 Audio setup (works in all modern browsers)
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
       try {
-        if (!Audio?.Sound) return;
+        const audio = new (window as any).Audio('https://cdn.freesound.org/previews/530/530697_11234978-lq.mp3');
+        audio.loop = true;
+        audio.volume = 0.55;
+        webAudioRef.current = audio;
+
+        const startAudio = () => {
+          if (audio.paused) {
+            audio.play().then(() => {
+              if (isMounted) setIsPlayingSound(true);
+            }).catch(() => {});
+          }
+        };
+
+        startAudio();
+        window.addEventListener('click', startAudio, { once: true });
+        window.addEventListener('touchstart', startAudio, { once: true });
+      } catch (err) {
+        // Non-blocking
+      }
+    }
+
+    // 2. Native Expo AV Audio setup
+    async function initNativeSound() {
+      if (Platform.OS === 'web' || !Audio?.Sound) return;
+      try {
         await Audio.setAudioModeAsync({
           playsInSilentModeIOS: true,
           staysActiveInBackground: true,
-          shouldDuckAndroid: true,
+          shouldDuckAndroid: false,
         });
 
         const { sound } = await Audio.Sound.createAsync(
           { uri: 'https://cdn.freesound.org/previews/530/530697_11234978-lq.mp3' },
-          { isLooping: true, volume: 0.25, shouldPlay: true }
+          { isLooping: true, volume: 0.55, shouldPlay: true }
         );
 
         if (isMounted) {
           soundRef.current = sound;
           await sound.playAsync().catch(() => {});
+          setIsPlayingSound(true);
         } else {
           await sound.unloadAsync().catch(() => {});
         }
@@ -277,10 +341,13 @@ export default function FloatingNatureBackground({
       }
     }
 
-    initSound();
+    initNativeSound();
 
     return () => {
       isMounted = false;
+      if (webAudioRef.current) {
+        webAudioRef.current.pause();
+      }
       if (soundRef.current) {
         soundRef.current.unloadAsync().catch(() => {});
       }
@@ -391,6 +458,25 @@ export default function FloatingNatureBackground({
           </Animated.View>
         );
       })}
+
+      {/* Interactive Floating Sound Pill */}
+      {showSoundToggle && (
+        <TouchableOpacity
+          style={styles.soundPill}
+          onPress={toggleSound}
+          activeOpacity={0.8}
+          accessibilityLabel="Toggle Nature Ambience"
+        >
+          {isPlayingSound ? (
+            <Volume2 size={15} color="#16a34a" />
+          ) : (
+            <VolumeX size={15} color="#94a3b8" />
+          )}
+          <Text style={[styles.soundPillText, { color: isPlayingSound ? '#16a34a' : '#64748b' }]}>
+            {isPlayingSound ? 'Ambience ON' : 'Ambience OFF'}
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -424,5 +510,29 @@ const styles = StyleSheet.create({
   contentWrap: {
     flex: 1,
     zIndex: 2,
+  },
+  soundPill: {
+    position: 'absolute',
+    bottom: 74,
+    left: 18,
+    zIndex: 998,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.85)',
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  soundPillText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
 });

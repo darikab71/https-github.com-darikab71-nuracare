@@ -29,6 +29,7 @@ function InnerLayout() {
 
     async function prepare() {
       try {
+        useAuthStore.getState().loadUser();
         await loadWellnessData();
         startBackgroundSyncLoop();
       } catch (e) {
@@ -55,8 +56,14 @@ function InnerLayout() {
     const isGuest = currentUser?.id && String(currentUser.id).startsWith('guest_');
     
     if (!currentUser && !inAuthGroup) {
-      // Redirect to login
-      router.replace('/(auth)/login');
+      // Ensure default guest session so user can explore all tabs freely
+      const guest = {
+        id: 'guest_nura',
+        name: 'Nura Explorer',
+        fastingMode: 'Orthodox Christian (Tsom)',
+      };
+      useAuthStore.getState().setUser(guest);
+      return;
     } else if (currentUser) {
       if (isGuest) {
         if (inAuthGroup) {
@@ -67,12 +74,8 @@ function InnerLayout() {
 
       if (profileLoading) return;
       
-      const needsOnboarding = !profile || !profile.name || profile._fallback || (Array.isArray(profile.conditions) === false && !profile.age);
-      
-      if (needsOnboarding && (segments as any)[1] !== 'onboarding') {
-        router.replace('/(auth)/onboarding/step1');
-      } else if (!needsOnboarding && inAuthGroup) {
-        // Redirect away from login/onboarding if already signed in and setup
+      // If user is already authenticated and viewing login, go to tabs
+      if (inAuthGroup) {
         router.replace('/(tabs)');
       }
     }
@@ -92,6 +95,7 @@ function InnerLayout() {
       <Stack.Screen name="permissions-management" options={{ headerShown: false }} />
       <Stack.Screen name="delete-account" options={{ headerShown: false }} />
       <Stack.Screen name="legal" options={{ headerShown: false }} />
+      <Stack.Screen name="discovery" options={{ headerShown: false }} />
       <Stack.Screen name="checkin-modal" options={{ presentation: 'modal', headerShown: false }} />
       <Stack.Screen name="subscription" options={{ presentation: 'modal', headerShown: false }} />
     </Stack>
@@ -104,7 +108,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <ProfileProvider>
-        <FloatingNatureBackground showSoundToggle={false}>
+        <FloatingNatureBackground showSoundToggle={true}>
           <InnerLayout />
         </FloatingNatureBackground>
       </ProfileProvider>

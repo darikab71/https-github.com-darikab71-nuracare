@@ -26,41 +26,47 @@ import {
   Bot,
   Plus,
   Trash2,
-  User,
-  ShieldCheck,
-  Eye,
-  Sun,
-  Shield,
-  Clock,
-  ChevronRight,
+  Award,
 } from 'lucide-react-native';
 import { useWellnessStore } from '../../src/store';
 import { saveCheckin, getCheckins } from '../../src/storage/checkinStorage';
 import { getCheckups, saveCheckup, deleteCheckup } from '../../src/storage/checkupsStorage';
 
-const MOODS = [
-  { label: 'Stressed', emoji: '😢', val: 1 },
-  { label: 'Neutral', emoji: '😐', val: 2 },
-  { label: 'Good', emoji: '🙂', val: 3 },
-  { label: 'Great', emoji: '😄', val: 4 },
+const FUN_MOODS = [
+  { label: 'Radiant', sub: 'High vibes', emoji: '🤩', val: 5, color: '#16a34a' },
+  { label: 'Joyful', sub: 'Smiling & light', emoji: '😄', val: 4, color: '#22c55e' },
+  { label: 'Balanced', sub: 'Peaceful calm', emoji: '😌', val: 3, color: '#0ea5e9' },
+  { label: 'Low Energy', sub: 'Need warmth', emoji: '🥱', val: 2, color: '#f59e0b' },
+  { label: 'Stressed', sub: 'Gentle space', emoji: '🌧️', val: 1, color: '#ef4444' },
 ];
 
-const ENERGIES = [
-  { label: 'Low', emoji: '😴', val: 1 },
-  { label: 'Okay', emoji: '😐', val: 2 },
-  { label: 'Good', emoji: '🙂', val: 3 },
-  { label: 'High', emoji: '🔥', val: 4 },
+const ENERGY_LEVELS = [
+  { label: 'Recharging', pct: '25%', icon: '🪫', val: 1 },
+  { label: 'Steady', pct: '50%', icon: '🔋', val: 2 },
+  { label: 'Active', pct: '75%', icon: '⚡', val: 3 },
+  { label: 'Peak Power', pct: '100%', icon: '🚀', val: 4 },
 ];
 
-const SLEEP_OPTS = [
-  { label: '< 5 hrs', hours: 4 },
-  { label: '5-6 hrs', hours: 6 },
-  { label: '7-8 hrs', hours: 7.5 },
-  { label: '8+ hrs', hours: 9 },
+const SLEEP_CARDS = [
+  { label: '< 5 hrs', icon: '☁️', desc: 'Short nap', hours: 4 },
+  { label: '5-6 hrs', icon: '🌙', desc: 'Light sleep', hours: 6 },
+  { label: '7-8 hrs', icon: '✨', desc: 'Optimal recovery', hours: 7.5 },
+  { label: '8+ hrs', icon: '💤', desc: 'Deep slumber', hours: 9 },
 ];
 
-const PAIN_LEVELS = ['None', 'Mild', 'Moderate', 'Severe'];
-const HYDRATION_LEVELS = ['Behind', 'On Track', 'Optimal'];
+const STRESS_ZONES = [
+  { label: 'Zen Mind', desc: 'Peaceful', emoji: '🧘', val: 2, color: '#16a34a' },
+  { label: 'Gentle Flow', desc: 'Manageable', emoji: '🍃', val: 4, color: '#0ea5e9' },
+  { label: 'Active Load', desc: 'Full plate', emoji: '⚡', val: 7, color: '#f59e0b' },
+  { label: 'Overwhelmed', desc: 'Needs breath', emoji: '🌋', val: 9, color: '#ef4444' },
+];
+
+const BODY_COMFORTS = [
+  { label: '🌸 Pure Comfort', val: 'None' },
+  { label: '💆 Mild Tension', val: 'Mild' },
+  { label: '🧘 Muscle Stiffness', val: 'Moderate' },
+  { label: '🩹 Acute Pain', val: 'Severe' },
+];
 
 export default function CheckupsScreen() {
   const router = useRouter();
@@ -69,14 +75,15 @@ export default function CheckupsScreen() {
   // Top Section: 'daily' vs 'clinical'
   const [section, setSection] = useState<'daily' | 'clinical'>('daily');
 
-  // Daily Form State
-  const [mood, setMood] = useState(3);
+  // Fun Daily Form State
+  const [mood, setMood] = useState(4);
   const [energy, setEnergy] = useState(3);
   const [sleepHours, setSleepHours] = useState(7.5);
   const [stress, setStress] = useState(3);
   const [pain, setPain] = useState('None');
-  const [hydration, setHydration] = useState('On Track');
+  const [waterCups, setWaterCups] = useState(6);
   const [savedToday, setSavedToday] = useState(false);
+  const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
 
   // Clinical Planner State
   const [clinicalCheckups, setClinicalCheckups] = useState<any[]>([]);
@@ -94,7 +101,7 @@ export default function CheckupsScreen() {
     const today = new Date().toISOString().split('T')[0];
     const todayLog = getCheckins().find(c => c.date === today);
     if (todayLog) {
-      setMood(todayLog.mood || 3);
+      setMood(todayLog.mood || 4);
       setEnergy(todayLog.energy || 3);
       setSleepHours(todayLog.sleep || 7.5);
       setStress(todayLog.stress || 3);
@@ -108,6 +115,7 @@ export default function CheckupsScreen() {
 
   const handleSaveDailyCheckup = () => {
     const today = new Date().toISOString().split('T')[0];
+
     const checkinEntry: any = {
       id: 'chk_' + Date.now(),
       date: today,
@@ -117,13 +125,19 @@ export default function CheckupsScreen() {
       stress,
       tension: stress > 6 ? 'high' : stress > 3 ? 'medium' : 'low',
       urgency: stress > 7 || pain === 'Severe' ? 'high' : 'low',
-      tags: [pain !== 'None' ? `Pain: ${pain}` : '', `Hydration: ${hydration}`].filter(Boolean),
+      tags: [pain !== 'None' ? `Body: ${pain}` : '', `Hydration: ${waterCups} cups`].filter(Boolean),
     };
 
     saveCheckin(checkinEntry);
     addCheckIn(checkinEntry);
     setSavedToday(true);
-    Alert.alert('Checkup Logged', 'Great job! Your daily wellness signals have updated your health baseline.');
+
+    const affirmations = [
+      "🌟 Fantastic! You earned +25 Vitality XP and preserved your 5-day rhythm!",
+      "🌿 Wonderful check-in! Your body and mind thank you for taking this moment.",
+      "✨ Ritual complete! Nura has recalibrated your biological recovery score.",
+    ];
+    setCelebrationMessage(affirmations[Math.floor(Math.random() * affirmations.length)]);
   };
 
   const handleSaveClinicalVisit = () => {
@@ -165,16 +179,16 @@ export default function CheckupsScreen() {
   // 7-day trend calculations
   const allLogs = getCheckins();
   const recentLogs = allLogs.slice(0, 7);
-  const avgMood = recentLogs.length > 0 ? (recentLogs.reduce((a, b) => a + (b.mood || 0), 0) / recentLogs.length).toFixed(1) : '3.0';
-  const avgEnergy = recentLogs.length > 0 ? (recentLogs.reduce((a, b) => a + (b.energy || 0), 0) / recentLogs.length).toFixed(1) : '3.0';
-  const avgSleep = recentLogs.length > 0 ? (recentLogs.reduce((a, b) => a + (b.sleep || 0), 0) / recentLogs.length).toFixed(1) : '7.0';
-  const avgStress = recentLogs.length > 0 ? (recentLogs.reduce((a, b) => a + (b.stress || 0), 0) / recentLogs.length).toFixed(1) : '3.0';
+  const avgMood = recentLogs.length > 0 ? (recentLogs.reduce((a, b) => a + (b.mood || 0), 0) / recentLogs.length).toFixed(1) : '4.2';
+  const avgEnergy = recentLogs.length > 0 ? (recentLogs.reduce((a, b) => a + (b.energy || 0), 0) / recentLogs.length).toFixed(1) : '3.4';
+  const avgSleep = recentLogs.length > 0 ? (recentLogs.reduce((a, b) => a + (b.sleep || 0), 0) / recentLogs.length).toFixed(1) : '7.6';
+  const avgStress = recentLogs.length > 0 ? (recentLogs.reduce((a, b) => a + (b.stress || 0), 0) / recentLogs.length).toFixed(1) : '2.8';
 
   const defaultPlannerItems = [
-    { name: 'Annual Physical Exam', freq: 'Yearly', desc: 'Blood pressure, metabolic panel, and doctor consultation.' },
-    { name: 'Dental Check & Cleaning', freq: 'Every 6 months', desc: 'Preventive plaque cleaning and oral screening.' },
-    { name: 'Vision & Eye Exam', freq: 'Every 1-2 years', desc: 'Visual acuity and ocular pressure check.' },
-    { name: 'Cardiovascular Review', freq: 'Yearly', desc: 'Resting ECG and lipid profile checkup.' },
+    { name: 'Annual Physical Exam', freq: 'Yearly', desc: 'Comprehensive metabolic panel & vitals check.' },
+    { name: 'Dental Check & Cleaning', freq: 'Every 6 months', desc: 'Preventive oral health screening.' },
+    { name: 'Vision & Eye Exam', freq: 'Every 1-2 years', desc: 'Acuity check and ocular health review.' },
+    { name: 'Cardiovascular Review', freq: 'Yearly', desc: 'Resting ECG & lipid balance screening.' },
   ];
 
   return (
@@ -182,33 +196,36 @@ export default function CheckupsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Daily Checkups</Text>
-          <Text style={styles.subtitle}>Self-reported wellness & preventive health</Text>
+          <Text style={styles.title}>Daily Checkup</Text>
+          <Text style={styles.subtitle}>Playful self-care & health rhythm</Text>
         </View>
         <TouchableOpacity
           style={styles.aiHeaderBtn}
           onPress={() => router.push('/chat')}
+          activeOpacity={0.8}
         >
-          <Bot size={18} color="#16a34a" />
-          <Text style={styles.aiHeaderBtnText}>AI Doctor</Text>
+          <Bot size={17} color="#16a34a" />
+          <Text style={styles.aiHeaderBtnText}>Ask Nura</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Segmented control: Daily Check-in vs Clinical Records */}
+      {/* Segmented Control */}
       <View style={styles.segmentedControl}>
         <TouchableOpacity
           style={[styles.segmentBtn, section === 'daily' && styles.segmentBtnActive]}
           onPress={() => setSection('daily')}
+          activeOpacity={0.7}
         >
           <Smile size={16} color={section === 'daily' ? '#16a34a' : '#64748b'} />
           <Text style={[styles.segmentText, section === 'daily' && styles.segmentTextActive]}>
-            Daily Self-Check
+            Daily Self-Ritual
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.segmentBtn, section === 'clinical' && styles.segmentBtnActive]}
           onPress={() => setSection('clinical')}
+          activeOpacity={0.7}
         >
           <CalendarCheck size={16} color={section === 'clinical' ? '#16a34a' : '#64748b'} />
           <Text style={[styles.segmentText, section === 'clinical' && styles.segmentTextActive]}>
@@ -217,18 +234,277 @@ export default function CheckupsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 50 }}>
+      <ScrollView 
+        style={styles.content} 
+        contentContainerStyle={{ paddingBottom: 80 }}
+        showsVerticalScrollIndicator={false}
+      >
         {section === 'daily' ? (
           <View>
+            {/* Gamified Hero Card: Streak & XP */}
+            <View style={styles.streakHeroCard}>
+              <View style={styles.streakTopRow}>
+                <View style={styles.streakBadge}>
+                  <Flame size={16} color="#ef4444" />
+                  <Text style={styles.streakBadgeText}>5-DAY STREAK</Text>
+                </View>
+                <View style={styles.xpBadge}>
+                  <Award size={14} color="#16a34a" />
+                  <Text style={styles.xpBadgeText}>Level 3 Vitality</Text>
+                </View>
+              </View>
+              <Text style={styles.streakHeroTitle}>You're in Natural Rhythm ✨</Text>
+              <Text style={styles.streakHeroSub}>
+                Take 60 seconds to tune into your body and collect +25 XP today.
+              </Text>
+            </View>
+
+            {/* Celebration Notice if logged */}
+            {celebrationMessage && (
+              <View style={styles.celebrationBanner}>
+                <Sparkles size={18} color="#16a34a" />
+                <Text style={styles.celebrationBannerText}>{celebrationMessage}</Text>
+              </View>
+            )}
+
+            {/* 1. Playful Mood Avatars */}
+            <View style={styles.funCard}>
+              <View style={styles.cardHeader}>
+                <View style={styles.cardHeaderLeft}>
+                  <Text style={styles.sectionEmoji}>🌈</Text>
+                  <Text style={styles.cardTitle}>How does your spirit feel?</Text>
+                </View>
+                <Text style={styles.hintBadge}>Tap to pick</Text>
+              </View>
+
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.moodScrollRow}
+              >
+                {FUN_MOODS.map((item) => {
+                  const isSelected = mood === item.val;
+                  return (
+                    <TouchableOpacity
+                      key={item.val}
+                      style={[
+                        styles.moodAvatarCard,
+                        isSelected && {
+                          borderColor: item.color,
+                          backgroundColor: `${item.color}15`,
+                          transform: [{ scale: 1.04 }],
+                        },
+                      ]}
+                      onPress={() => setMood(item.val)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.moodAvatarEmoji}>{item.emoji}</Text>
+                      <Text style={[styles.moodAvatarTitle, isSelected && { color: item.color, fontWeight: '800' }]}>
+                        {item.label}
+                      </Text>
+                      <Text style={styles.moodAvatarSub}>{item.sub}</Text>
+                      {isSelected && (
+                        <View style={[styles.moodCheckDot, { backgroundColor: item.color }]}>
+                          <CheckCircle2 size={10} color="#ffffff" />
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
+            {/* 2. Visual Energy Battery */}
+            <View style={styles.funCard}>
+              <View style={styles.cardHeader}>
+                <View style={styles.cardHeaderLeft}>
+                  <Text style={styles.sectionEmoji}>⚡</Text>
+                  <Text style={styles.cardTitle}>Physical Energy Battery</Text>
+                </View>
+                <Text style={styles.selectedLevelText}>
+                  {ENERGY_LEVELS.find(e => e.val === energy)?.pct} Charged
+                </Text>
+              </View>
+
+              <View style={styles.energyBatteryGrid}>
+                {ENERGY_LEVELS.map((lvl) => {
+                  const isSelected = energy === lvl.val;
+                  return (
+                    <TouchableOpacity
+                      key={lvl.val}
+                      style={[
+                        styles.energyBtn,
+                        isSelected && styles.energyBtnActive,
+                      ]}
+                      onPress={() => setEnergy(lvl.val)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.energyIconText}>{lvl.icon}</Text>
+                      <Text style={[styles.energyPctText, isSelected && styles.energyPctTextActive]}>
+                        {lvl.pct}
+                      </Text>
+                      <Text style={[styles.energyLabelText, isSelected && styles.energyLabelTextActive]}>
+                        {lvl.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* 3. Sleep Journey */}
+            <View style={styles.funCard}>
+              <View style={styles.cardHeader}>
+                <View style={styles.cardHeaderLeft}>
+                  <Text style={styles.sectionEmoji}>🌙</Text>
+                  <Text style={styles.cardTitle}>Last Night's Sleep</Text>
+                </View>
+              </View>
+
+              <View style={styles.sleepCardsGrid}>
+                {SLEEP_CARDS.map((opt) => {
+                  const isSelected = sleepHours === opt.hours;
+                  return (
+                    <TouchableOpacity
+                      key={opt.hours}
+                      style={[
+                        styles.sleepCard,
+                        isSelected && styles.sleepCardActive,
+                      ]}
+                      onPress={() => setSleepHours(opt.hours)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.sleepIconText}>{opt.icon}</Text>
+                      <Text style={[styles.sleepHoursText, isSelected && styles.sleepHoursTextActive]}>
+                        {opt.label}
+                      </Text>
+                      <Text style={styles.sleepDescText}>{opt.desc}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* 4. Interactive Stress Barometer */}
+            <View style={styles.funCard}>
+              <View style={styles.cardHeader}>
+                <View style={styles.cardHeaderLeft}>
+                  <Text style={styles.sectionEmoji}>🧠</Text>
+                  <Text style={styles.cardTitle}>Nervous System Pace</Text>
+                </View>
+              </View>
+
+              <View style={styles.stressZonesGrid}>
+                {STRESS_ZONES.map((zone) => {
+                  const isSelected = (stress <= 3 && zone.val <= 2) ||
+                                     (stress > 3 && stress <= 5 && zone.val === 4) ||
+                                     (stress > 5 && stress <= 7 && zone.val === 7) ||
+                                     (stress > 7 && zone.val === 9);
+                  return (
+                    <TouchableOpacity
+                      key={zone.label}
+                      style={[
+                        styles.stressZoneCard,
+                        isSelected && {
+                          borderColor: zone.color,
+                          backgroundColor: `${zone.color}15`,
+                        },
+                      ]}
+                      onPress={() => setStress(zone.val)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.stressZoneEmoji}>{zone.emoji}</Text>
+                      <Text style={[styles.stressZoneTitle, isSelected && { color: zone.color, fontWeight: '800' }]}>
+                        {zone.label}
+                      </Text>
+                      <Text style={styles.stressZoneDesc}>{zone.desc}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* 5. Hydration Water Tracker */}
+            <View style={styles.funCard}>
+              <View style={styles.cardHeader}>
+                <View style={styles.cardHeaderLeft}>
+                  <Text style={styles.sectionEmoji}>💧</Text>
+                  <Text style={styles.cardTitle}>Daily Hydration</Text>
+                </View>
+                <Text style={styles.waterCountBadge}>{waterCups} / 8 Glasses</Text>
+              </View>
+
+              <View style={styles.waterDropsRow}>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((cup) => (
+                  <TouchableOpacity
+                    key={cup}
+                    style={[
+                      styles.waterDropBtn,
+                      cup <= waterCups && styles.waterDropBtnFilled,
+                    ]}
+                    onPress={() => setWaterCups(cup === waterCups ? cup - 1 : cup)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.waterDropEmoji}>
+                      {cup <= waterCups ? '💧' : '⚪'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.waterTipText}>
+                {waterCups >= 7 ? '🎉 Optimal hydration! Your brain and energy are glowing.' : 'Tip: A warm herbal glass in the afternoon sustains cognitive focus.'}
+              </Text>
+            </View>
+
+            {/* 6. Body Comfort */}
+            <View style={styles.funCard}>
+              <View style={styles.cardHeader}>
+                <View style={styles.cardHeaderLeft}>
+                  <Text style={styles.sectionEmoji}>🌿</Text>
+                  <Text style={styles.cardTitle}>Physical Body Sensation</Text>
+                </View>
+              </View>
+
+              <View style={styles.bodyComfortsRow}>
+                {BODY_COMFORTS.map((item) => (
+                  <TouchableOpacity
+                    key={item.val}
+                    style={[
+                      styles.comfortChip,
+                      pain === item.val && styles.comfortChipActive,
+                    ]}
+                    onPress={() => setPain(item.val)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[styles.comfortChipText, pain === item.val && styles.comfortChipTextActive]}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Celebratory Submission Button */}
+            <TouchableOpacity
+              style={styles.submitRitualBtn}
+              onPress={handleSaveDailyCheckup}
+              activeOpacity={0.88}
+            >
+              <Sparkles size={18} color="#ffffff" />
+              <Text style={styles.submitRitualBtnText}>
+                {savedToday ? '✨ Update Today’s Ritual (+25 XP)' : '✨ Log Daily Ritual (+25 XP)'}
+              </Text>
+            </TouchableOpacity>
+
             {/* 7-Day Trend Summary Strip */}
-            <View style={styles.trendCard}>
-              <Text style={styles.trendTitle}>7-DAY WELLNESS TRENDS</Text>
+            <View style={styles.trendSummaryCard}>
+              <Text style={styles.trendSummaryTitle}>7-DAY BIOMETRIC HARMONY</Text>
               <View style={styles.trendGrid}>
                 <View style={styles.trendItem}>
                   <Text style={styles.trendLabel}>Mood</Text>
                   <View style={styles.trendValRow}>
                     <Text style={styles.trendVal}>{avgMood}</Text>
-                    <TrendingUp size={16} color="#16a34a" />
+                    <TrendingUp size={15} color="#16a34a" />
                   </View>
                 </View>
 
@@ -236,7 +512,7 @@ export default function CheckupsScreen() {
                   <Text style={styles.trendLabel}>Energy</Text>
                   <View style={styles.trendValRow}>
                     <Text style={styles.trendVal}>{avgEnergy}</Text>
-                    <TrendingUp size={16} color="#16a34a" />
+                    <TrendingUp size={15} color="#16a34a" />
                   </View>
                 </View>
 
@@ -244,7 +520,7 @@ export default function CheckupsScreen() {
                   <Text style={styles.trendLabel}>Sleep</Text>
                   <View style={styles.trendValRow}>
                     <Text style={styles.trendVal}>{avgSleep}h</Text>
-                    <Minus size={16} color="#64748b" />
+                    <Minus size={15} color="#64748b" />
                   </View>
                 </View>
 
@@ -252,159 +528,24 @@ export default function CheckupsScreen() {
                   <Text style={styles.trendLabel}>Stress</Text>
                   <View style={styles.trendValRow}>
                     <Text style={styles.trendVal}>{avgStress}</Text>
-                    <TrendingDown size={16} color="#16a34a" />
+                    <TrendingDown size={15} color="#16a34a" />
                   </View>
                 </View>
               </View>
             </View>
 
-            {/* Checkup Form */}
-            <View style={styles.formCard}>
-              <View style={styles.formCardHeader}>
-                <Text style={styles.formCardTitle}>How are you feeling today?</Text>
-                {savedToday && (
-                  <View style={styles.savedPill}>
-                    <CheckCircle2 size={14} color="#16a34a" />
-                    <Text style={styles.savedPillText}>Logged Today</Text>
-                  </View>
-                )}
+            {/* AI Companion Insight */}
+            <View style={styles.aiSynthesisCard}>
+              <View style={styles.aiSynthesisHeader}>
+                <Sparkles size={18} color="#16a34a" />
+                <Text style={styles.aiSynthesisTitle}>Nura AI Daily Reflection</Text>
               </View>
-
-              {/* 1. Energy */}
-              <Text style={styles.inputHeading}>⚡ Energy Level</Text>
-              <View style={styles.tapGrid}>
-                {ENERGIES.map((opt) => (
-                  <TouchableOpacity
-                    key={opt.val}
-                    style={[styles.tapBtn, energy === opt.val && styles.tapBtnActive]}
-                    onPress={() => setEnergy(opt.val)}
-                  >
-                    <Text style={styles.tapEmoji}>{opt.emoji}</Text>
-                    <Text style={[styles.tapLabel, energy === opt.val && styles.tapLabelActive]}>
-                      {opt.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* 2. Mood */}
-              <Text style={styles.inputHeading}>😊 Mood</Text>
-              <View style={styles.tapGrid}>
-                {MOODS.map((opt) => (
-                  <TouchableOpacity
-                    key={opt.val}
-                    style={[styles.tapBtn, mood === opt.val && styles.tapBtnActive]}
-                    onPress={() => setMood(opt.val)}
-                  >
-                    <Text style={styles.tapEmoji}>{opt.emoji}</Text>
-                    <Text style={[styles.tapLabel, mood === opt.val && styles.tapLabelActive]}>
-                      {opt.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* 3. Sleep Duration */}
-              <Text style={styles.inputHeading}>🌙 Sleep Last Night</Text>
-              <View style={styles.tapGrid}>
-                {SLEEP_OPTS.map((opt) => (
-                  <TouchableOpacity
-                    key={opt.hours}
-                    style={[styles.tapBtn, sleepHours === opt.hours && styles.tapBtnActive]}
-                    onPress={() => setSleepHours(opt.hours)}
-                  >
-                    <Text style={[styles.tapLabel, sleepHours === opt.hours && styles.tapLabelActive]}>
-                      {opt.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* 4. Stress Scale (1-10) */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={styles.inputHeading}>🧠 Stress Level</Text>
-                <Text style={{ fontSize: 13, fontWeight: '700', color: stress > 6 ? '#ef4444' : '#16a34a' }}>
-                  {stress} / 10 ({stress <= 3 ? 'Calm' : stress <= 6 ? 'Moderate' : 'High'})
-                </Text>
-              </View>
-              <View style={styles.stressRow}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                  <TouchableOpacity
-                    key={num}
-                    style={[
-                      styles.stressBtn,
-                      stress === num && styles.stressBtnActive,
-                      stress === num && num > 6 && { backgroundColor: '#ef4444' },
-                    ]}
-                    onPress={() => setStress(num)}
-                  >
-                    <Text
-                      style={[
-                        styles.stressBtnText,
-                        stress === num && styles.stressBtnTextActive,
-                      ]}
-                    >
-                      {num}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* 5. Pain / Discomfort */}
-              <Text style={styles.inputHeading}>🩹 Physical Discomfort / Pain</Text>
-              <View style={styles.chipsRow}>
-                {PAIN_LEVELS.map((p) => (
-                  <TouchableOpacity
-                    key={p}
-                    style={[styles.choiceChip, pain === p && styles.choiceChipActive]}
-                    onPress={() => setPain(p)}
-                  >
-                    <Text style={[styles.choiceChipText, pain === p && styles.choiceChipTextActive]}>
-                      {p}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* 6. Hydration */}
-              <Text style={styles.inputHeading}>💧 Hydration Pace</Text>
-              <View style={styles.chipsRow}>
-                {HYDRATION_LEVELS.map((h) => (
-                  <TouchableOpacity
-                    key={h}
-                    style={[styles.choiceChip, hydration === h && styles.choiceChipActive]}
-                    onPress={() => setHydration(h)}
-                  >
-                    <Text style={[styles.choiceChipText, hydration === h && styles.choiceChipTextActive]}>
-                      {h}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* Save Button */}
-              <TouchableOpacity
-                style={styles.saveCheckinBtn}
-                onPress={handleSaveDailyCheckup}
-              >
-                <Text style={styles.saveCheckinBtnText}>
-                  {savedToday ? 'Update Today’s Checkup' : 'Submit Daily Checkup'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Instant AI Daily Wellness Summary */}
-            <View style={styles.aiSummaryCard}>
-              <View style={styles.aiSummaryHeader}>
-                <Sparkles size={20} color="#16a34a" />
-                <Text style={styles.aiSummaryTitle}>Today's Nura AI Wellness Synthesis</Text>
-              </View>
-              <Text style={styles.aiSummaryText}>
+              <Text style={styles.aiSynthesisText}>
                 {stress > 6
-                  ? 'Your stress indicator is elevated today. We recommend scheduling 10 minutes of 4-7-8 breathwork and hydrating generously before your evening meal.'
+                  ? 'Your nervous system is processing high demands today. We recommend 10 minutes of gentle diaphragmatic breathing and soothing chamomile tea.'
                   : sleepHours < 6
-                  ? 'You logged short sleep last night. Try a gentle 15-minute walk and reduce caffeine after 2:00 PM to support restorative recovery tonight.'
-                  : 'Your physiological markers are well-balanced today! Physical energy and mood are prime for a productive day. Keep up your hydration momentum.'}
+                  ? 'Short sleep noted. Consider taking a light 15-minute sunshine stroll and avoiding caffeine late in the day.'
+                  : 'Your physiological markers reflect radiant balance today! Perfect window for joyful movement and deep cognitive focus.'}
               </Text>
             </View>
           </View>
@@ -458,18 +599,16 @@ export default function CheckupsScreen() {
                 <View key={c.id} style={styles.historyCard}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.historyTitle}>{c.name}</Text>
-                    {c.doctor ? <Text style={styles.historyDoctor}>Dr. {c.doctor}</Text> : null}
+                    {c.doctor ? <Text style={styles.historyDoctor}>{c.doctor}</Text> : null}
                     <Text style={styles.historyDate}>Logged on: {c.date_logged}</Text>
-                    {c.next_visit ? (
-                      <Text style={styles.historyNext}>Next due: {c.next_visit}</Text>
-                    ) : null}
-                    {c.notes ? <Text style={styles.historyNotes}>Notes: {c.notes}</Text> : null}
+                    {c.next_visit ? <Text style={styles.historyNext}>Next target: {c.next_visit}</Text> : null}
+                    {c.notes ? <Text style={styles.historyNotes}>{c.notes}</Text> : null}
                   </View>
                   <TouchableOpacity
-                    onPress={() => handleDeleteClinical(c.id)}
                     style={styles.deleteVisitBtn}
+                    onPress={() => handleDeleteClinical(c.id)}
                   >
-                    <Trash2 size={16} color="#ef4444" />
+                    <Trash2 size={18} color="#ef4444" />
                   </TouchableOpacity>
                 </View>
               ))
@@ -535,7 +674,10 @@ export default function CheckupsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
+  container: { 
+    flex: 1, 
+    backgroundColor: 'transparent' 
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -552,12 +694,12 @@ const styles = StyleSheet.create({
   aiHeaderBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0fdf4',
+    backgroundColor: 'rgba(240, 253, 244, 0.85)',
     paddingVertical: 7,
     paddingHorizontal: 12,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#bbf7d0',
+    borderColor: 'rgba(187, 247, 208, 0.85)',
     gap: 4,
   },
   aiHeaderBtnText: { color: '#16a34a', fontWeight: '700', fontSize: 12 },
@@ -576,119 +718,472 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 10,
     backgroundColor: '#f1f5f9',
     gap: 6,
   },
-  segmentBtnActive: { backgroundColor: '#dcfce7' },
+  segmentBtnActive: { 
+    backgroundColor: '#dcfce7',
+    borderWidth: 1,
+    borderColor: 'rgba(187, 247, 208, 0.9)',
+  },
   segmentText: { fontSize: 13, fontWeight: '600', color: '#64748b' },
-  segmentTextActive: { color: '#16a34a' },
-  content: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
-  trendCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginBottom: 14,
+  segmentTextActive: { color: '#16a34a', fontWeight: '800' },
+  content: { 
+    flex: 1, 
+    paddingHorizontal: 16, 
+    paddingTop: 16 
   },
-  trendTitle: { fontSize: 11, fontWeight: '700', color: '#64748b', letterSpacing: 0.8, marginBottom: 10 },
-  trendGrid: { flexDirection: 'row', justifyContent: 'space-between' },
-  trendItem: { alignItems: 'center' },
-  trendLabel: { fontSize: 12, color: '#64748b' },
-  trendValRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  trendVal: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
-  formCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+
+  // Gamified Hero Card
+  streakHeroCard: {
+    backgroundColor: 'rgba(240, 253, 244, 0.82)',
+    borderRadius: 20,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginBottom: 14,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.85)',
+    marginBottom: 16,
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  formCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  formCardTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
-  savedPill: {
+  streakTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  streakBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#dcfce7',
-    paddingHorizontal: 8,
+    gap: 5,
+    backgroundColor: 'rgba(254, 242, 242, 0.9)',
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    gap: 4,
+    borderWidth: 1,
+    borderColor: '#fecaca',
   },
-  savedPillText: { fontSize: 11, fontWeight: '700', color: '#16a34a' },
-  inputHeading: { fontSize: 13, fontWeight: '700', color: '#334155', marginTop: 12, marginBottom: 8 },
-  tapGrid: { flexDirection: 'row', gap: 8 },
-  tapBtn: {
+  streakBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#ef4444',
+  },
+  xpBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(187, 247, 208, 0.85)',
+  },
+  xpBadgeText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#16a34a',
+  },
+  streakHeroTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 3,
+  },
+  streakHeroSub: {
+    fontSize: 12.5,
+    color: '#475569',
+    lineHeight: 18,
+  },
+
+  // Celebration Banner
+  celebrationBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0fdf4',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: '#86efac',
+    gap: 8,
+    marginBottom: 16,
+  },
+  celebrationBannerText: {
     flex: 1,
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#166534',
+  },
+
+  // Generic Fun Section Card
+  funCard: {
+    backgroundColor: 'rgba(240, 253, 244, 0.72)',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.75)',
+    marginBottom: 16,
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  cardHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sectionEmoji: {
+    fontSize: 20,
+  },
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  hintBadge: {
+    fontSize: 11,
+    color: '#94a3b8',
+    fontWeight: '600',
+  },
+  selectedLevelText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#16a34a',
+  },
+
+  // Mood Avatars
+  moodScrollRow: {
+    gap: 10,
+    paddingRight: 10,
+  },
+  moodAvatarCard: {
+    width: 102,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.65)',
+    position: 'relative',
+  },
+  moodAvatarEmoji: {
+    fontSize: 32,
+    marginBottom: 6,
+  },
+  moodAvatarTitle: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 2,
+  },
+  moodAvatarSub: {
+    fontSize: 10,
+    color: '#64748b',
+    textAlign: 'center',
+  },
+  moodCheckDot: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    backgroundColor: '#f8fafc',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
-  tapBtnActive: {
+
+  // Energy Battery
+  energyBatteryGrid: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  energyBtn: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.6)',
+  },
+  energyBtnActive: {
     backgroundColor: '#dcfce7',
     borderColor: '#16a34a',
   },
-  tapEmoji: { fontSize: 20, marginBottom: 2 },
-  tapLabel: { fontSize: 11, fontWeight: '600', color: '#64748b' },
-  tapLabelActive: { color: '#16a34a', fontWeight: '800' },
-  stressRow: { flexDirection: 'row', gap: 4, marginTop: 8 },
-  stressBtn: {
+  energyIconText: {
+    fontSize: 22,
+    marginBottom: 4,
+  },
+  energyPctText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 2,
+  },
+  energyPctTextActive: {
+    color: '#16a34a',
+  },
+  energyLabelText: {
+    fontSize: 10,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  energyLabelTextActive: {
+    color: '#16a34a',
+    fontWeight: '700',
+  },
+
+  // Sleep Cards
+  sleepCardsGrid: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  sleepCard: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.6)',
   },
-  stressBtnActive: { backgroundColor: '#16a34a' },
-  stressBtnText: { fontSize: 11, fontWeight: '700', color: '#64748b' },
-  stressBtnTextActive: { color: '#ffffff' },
-  chipsRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  choiceChip: {
-    paddingVertical: 7,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    backgroundColor: '#f1f5f9',
+  sleepCardActive: {
+    backgroundColor: '#dcfce7',
+    borderColor: '#16a34a',
+  },
+  sleepIconText: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  sleepHoursText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 2,
+  },
+  sleepHoursTextActive: {
+    color: '#16a34a',
+    fontWeight: '800',
+  },
+  sleepDescText: {
+    fontSize: 9.5,
+    color: '#64748b',
+    textAlign: 'center',
+  },
+
+  // Stress Barometer
+  stressZonesGrid: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  stressZoneCard: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.6)',
+  },
+  stressZoneEmoji: {
+    fontSize: 22,
+    marginBottom: 4,
+  },
+  stressZoneTitle: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  stressZoneDesc: {
+    fontSize: 9.5,
+    color: '#64748b',
+    textAlign: 'center',
+  },
+
+  // Hydration Tracker
+  waterCountBadge: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#0284c7',
+  },
+  waterDropsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  waterDropBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
-  choiceChipActive: { backgroundColor: '#dcfce7', borderColor: '#16a34a' },
-  choiceChipText: { fontSize: 12, fontWeight: '600', color: '#64748b' },
-  choiceChipTextActive: { color: '#16a34a', fontWeight: '700' },
-  saveCheckinBtn: {
-    backgroundColor: '#16a34a',
-    paddingVertical: 13,
-    borderRadius: 12,
+  waterDropBtnFilled: {
+    backgroundColor: '#e0f2fe',
+    borderColor: '#7dd3fc',
+  },
+  waterDropEmoji: {
+    fontSize: 16,
+  },
+  waterTipText: {
+    fontSize: 11.5,
+    color: '#0284c7',
+    fontWeight: '500',
+    marginTop: 10,
+  },
+
+  // Body Comfort
+  bodyComfortsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  comfortChip: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.7)',
+  },
+  comfortChipActive: {
+    backgroundColor: '#dcfce7',
+    borderColor: '#16a34a',
+  },
+  comfortChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
+  },
+  comfortChipTextActive: {
+    color: '#16a34a',
+    fontWeight: '800',
+  },
+
+  // Submit Button
+  submitRitualBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-  },
-  saveCheckinBtnText: { color: '#ffffff', fontSize: 14, fontWeight: '800' },
-  aiSummaryCard: {
-    backgroundColor: '#f0fdf4',
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#16a34a',
+    borderRadius: 18,
+    paddingVertical: 15,
     marginBottom: 20,
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  aiSummaryHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  aiSummaryTitle: { fontSize: 13, fontWeight: '800', color: '#166534' },
-  aiSummaryText: { fontSize: 12, color: '#14532d', lineHeight: 18 },
-  clinicalHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  submitRitualBtnText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+
+  // Trend Summary
+  trendSummaryCard: {
+    backgroundColor: 'rgba(240, 253, 244, 0.72)',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.75)',
+    marginBottom: 16,
+  },
+  trendSummaryTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#16a34a',
+    letterSpacing: 0.6,
+    marginBottom: 12,
+  },
+  trendGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  trendItem: {
+    alignItems: 'center',
+  },
+  trendLabel: {
+    fontSize: 11.5,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  trendValRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  trendVal: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#0f172a',
+  },
+
+  // AI Synthesis
+  aiSynthesisCard: {
+    backgroundColor: '#f0fdf4',
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1.2,
+    borderColor: '#bbf7d0',
+    marginBottom: 24,
+  },
+  aiSynthesisHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  aiSynthesisTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#166534',
+  },
+  aiSynthesisText: {
+    fontSize: 12.5,
+    color: '#14532d',
+    lineHeight: 18,
+  },
+
+  // Clinical Section Styles
+  clinicalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   sectionHeading: { fontSize: 17, fontWeight: '800', color: '#0f172a' },
   addVisitBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#16a34a',
-    paddingVertical: 6,
+    paddingVertical: 7,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 10,
     gap: 4,
   },
   addVisitBtnText: { color: '#ffffff', fontSize: 12, fontWeight: '700' },
@@ -697,12 +1192,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     padding: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.7)',
   },
   screeningTitle: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
   screeningDesc: { fontSize: 12, color: '#64748b', marginTop: 2 },
@@ -719,20 +1214,20 @@ const styles = StyleSheet.create({
   emptyClinical: {
     alignItems: 'center',
     padding: 30,
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.7)',
   },
   emptyClinicalText: { fontSize: 13, color: '#94a3b8', marginTop: 8 },
   historyCard: {
     flexDirection: 'row',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     padding: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.7)',
     alignItems: 'center',
   },
   historyTitle: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
@@ -750,11 +1245,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     padding: 20,
+    zIndex: 999,
   },
   modalCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 20,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   modalTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a', marginBottom: 12 },
   inputLabel: { fontSize: 11, fontWeight: '700', color: '#475569', marginTop: 8, marginBottom: 4 },
@@ -762,14 +1260,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 10,
     fontSize: 13,
     color: '#0f172a',
   },
   modalActionBtn: {
     paddingVertical: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },

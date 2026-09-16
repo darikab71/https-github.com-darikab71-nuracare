@@ -7,7 +7,8 @@ import {
   TouchableOpacity, 
   RefreshControl, 
   Alert,
-  Modal 
+  Modal,
+  Image 
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useProfile } from '../../src/context/ProfileContext';
@@ -196,15 +197,57 @@ export default function AdaptiveHomeScreen() {
     }
   }, [burnoutAssessment]);
 
-  // Horizontal Quick Actions List
+  // Horizontal Quick Actions List with rich curated photography
   const quickActions = [
-    { label: 'Checkup', desc: 'Daily vitals', icon: <CalendarCheck size={20} color="#16a34a" />, route: '/(tabs)/checkups' },
-    { label: 'Medication', desc: 'Dose schedule', icon: <Pill size={20} color="#0284c7" />, route: '/(tabs)/medication' },
-    { label: 'Lifestyle', desc: 'Nutrition & rest', icon: <Heart size={20} color="#e11d48" />, route: '/(tabs)/lifestyle' },
-    { label: 'Community', desc: 'Health circle', icon: <Users size={20} color="#7c3aed" />, route: '/(tabs)/community' },
-    { label: 'Devices', desc: 'Sync vitals', icon: <Watch size={20} color="#d97706" />, route: '/devices' },
-    { label: 'Records', desc: 'Labs & history', icon: <ClipboardList size={20} color="#0d9488" />, route: '/records' },
-    { label: 'Privacy Hub', desc: 'Safe storage', icon: <ShieldCheck size={20} color="#475569" />, route: '/privacy-center' },
+    { 
+      label: 'Checkup', 
+      desc: 'Daily vitals & mood', 
+      icon: <CalendarCheck size={18} color="#ffffff" />, 
+      route: '/(tabs)/checkups',
+      image: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=600&auto=format&fit=crop&q=80'
+    },
+    { 
+      label: 'Medication', 
+      desc: 'Dose schedule & botanicals', 
+      icon: <Pill size={18} color="#ffffff" />, 
+      route: '/(tabs)/medication',
+      image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&auto=format&fit=crop&q=80'
+    },
+    { 
+      label: 'Lifestyle', 
+      desc: 'Nutrition & restorative rest', 
+      icon: <Heart size={18} color="#ffffff" />, 
+      route: '/(tabs)/lifestyle',
+      image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&auto=format&fit=crop&q=80'
+    },
+    { 
+      label: 'Community', 
+      desc: 'Health circles & peers', 
+      icon: <Users size={18} color="#ffffff" />, 
+      route: '/(tabs)/community',
+      image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&auto=format&fit=crop&q=80'
+    },
+    { 
+      label: 'Devices', 
+      desc: 'Sync vitals & wearables', 
+      icon: <Watch size={18} color="#ffffff" />, 
+      route: '/devices',
+      image: 'https://images.unsplash.com/photo-1508615039623-a25605d2b022?w=600&auto=format&fit=crop&q=80'
+    },
+    { 
+      label: 'Records', 
+      desc: 'Secure labs & health history', 
+      icon: <ClipboardList size={18} color="#ffffff" />, 
+      route: '/records',
+      image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&auto=format&fit=crop&q=80'
+    },
+    { 
+      label: 'Privacy Hub', 
+      desc: 'Sovereign vault & control', 
+      icon: <ShieldCheck size={18} color="#ffffff" />, 
+      route: '/privacy-center',
+      image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80'
+    },
   ];
 
   const handleCallNura = () => {
@@ -243,29 +286,31 @@ export default function AdaptiveHomeScreen() {
           </View>
         </View>
 
-        {/* 1. TOP: Today's Insight */}
-        <View style={styles.insightCard}>
-          <View style={styles.insightTopRow}>
-            <View style={styles.insightPill}>
-              <Sparkles size={13} color="#16a34a" />
-              <Text style={styles.insightPillText}>TODAY'S INSIGHT</Text>
+        {/* 1. TOP: Thin / Slim Today's Insight Banner ("tin") */}
+        <View style={styles.insightCardSlim}>
+          <View style={styles.insightSlimLeft}>
+            <View style={styles.insightSlimPill}>
+              <Sparkles size={11} color="#16a34a" />
+              <Text style={styles.insightSlimPillText}>INSIGHT</Text>
             </View>
-            <View style={[styles.stateTag, { backgroundColor: `${todayInsight.badgeColor}15` }]}>
-              <View style={[styles.stateDot, { backgroundColor: todayInsight.badgeColor }]} />
-              <Text style={[styles.stateTagText, { color: todayInsight.badgeColor }]}>{todayInsight.tag}</Text>
-            </View>
+            <Text style={styles.insightSlimTitle} numberOfLines={1}>
+              {todayInsight.title}: <Text style={styles.insightSlimDesc}>{todayInsight.desc}</Text>
+            </Text>
           </View>
-          <Text style={styles.insightTitle}>{todayInsight.title}</Text>
-          <Text style={styles.insightDesc}>{todayInsight.desc}</Text>
+          <View style={[styles.stateDotSlim, { backgroundColor: todayInsight.badgeColor }]} />
         </View>
 
-        {/* 2. 3D ANIMATION RESERVED SPACE + CIRCLE INFO TELLERS (Wellness & Burnout) */}
+        {/* 2. ENLARGED 3D ANIMATION BALANCE SPACE + CIRCLE INFO TELLERS */}
         <View style={styles.stage3DContainer}>
-          {/* Reserved Canvas backdrop for upcoming 3D visual */}
+          {/* Expanded 3D Canvas visual with glowing orbital atmosphere */}
           <View style={styles.canvas3DPlaceholder}>
-            <View style={styles.canvasGlow} />
-            <Compass size={28} color="rgba(34, 197, 94, 0.35)" />
-            <Text style={styles.canvasNote}>Living 3D Balance Space</Text>
+            <View style={styles.canvasGlowOuter} />
+            <View style={styles.canvasGlowInner} />
+            <View style={styles.gyroscopeRing}>
+              <Compass size={36} color="#16a34a" />
+            </View>
+            <Text style={styles.canvasTitle}>Living 3D Balance Sphere</Text>
+            <Text style={styles.canvasNote}>Dynamic biological rhythm & nervous equilibrium</Text>
           </View>
 
           {/* Circle Info Tellers overlaying in compact circular method */}
@@ -323,7 +368,7 @@ export default function AdaptiveHomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* 4. QUICK ACTION CARDS: HORIZONTAL DISPLAY WITH SHIFT SCROLL */}
+        {/* 4. QUICK ACTION CARDS: HORIZONTAL DISPLAY WITH IMAGE & HOVERING TEXT */}
         <View style={styles.quickSection}>
           <View style={styles.quickHeader}>
             <Text style={styles.quickSectionTitle}>Quick Actions</Text>
@@ -335,18 +380,40 @@ export default function AdaptiveHomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.horizontalScrollContent}
             decelerationRate="fast"
-            snapToInterval={212}
+            snapToInterval={222}
           >
             {quickActions.map((act, index) => (
               <TouchableOpacity
                 key={index}
                 style={styles.actionCardShift}
                 onPress={() => router.push(act.route as any)}
-                activeOpacity={0.75}
+                activeOpacity={0.82}
               >
-                <View style={styles.actionCardIconWrap}>{act.icon}</View>
-                <Text style={styles.actionCardTitle}>{act.label}</Text>
-                <Text style={styles.actionCardDesc}>{act.desc}</Text>
+                {/* Background Image */}
+                <Image 
+                  source={{ uri: act.image }} 
+                  style={StyleSheet.absoluteFillObject}
+                  resizeMode="cover"
+                />
+                {/* Semi-transparent Emerald Glass & Dark Overlay */}
+                <View style={styles.actionCardImageOverlay} />
+
+                {/* Text and Icon Hovering Cleanly Over Image */}
+                <View style={styles.actionCardContentHover}>
+                  <View style={styles.actionCardTopRowHover}>
+                    <View style={styles.actionCardIconWrapHover}>
+                      {act.icon}
+                    </View>
+                    <View style={styles.shiftBadgeHover}>
+                      <Text style={styles.shiftBadgeTextHover}>0{index + 1}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.actionTextHoverWrap}>
+                    <Text style={styles.actionCardTitleHover}>{act.label}</Text>
+                    <Text style={styles.actionCardDescHover} numberOfLines={2}>{act.desc}</Text>
+                  </View>
+                </View>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -359,7 +426,9 @@ export default function AdaptiveHomeScreen() {
               <Sparkles size={16} color="#16a34a" />
               <Text style={styles.discoverySectionTitle}>Natural Discovery</Text>
             </View>
-            <Text style={styles.discoverySectionHint}>Tap remedy to explore</Text>
+            <TouchableOpacity onPress={() => router.push('/discovery')} activeOpacity={0.7}>
+              <Text style={styles.discoverySectionHint}>View All →</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Category Filter Tabs */}
@@ -434,14 +503,20 @@ export default function AdaptiveHomeScreen() {
           </ScrollView>
         </View>
 
-        {/* Check for App Updates */}
+        {/* Discover More Button */}
         <TouchableOpacity 
-          style={styles.updateCheckBtn}
-          onPress={() => checkForAppUpdates(true)}
+          style={styles.discoverMoreBtn}
+          onPress={() => router.push('/discovery')}
           activeOpacity={0.8}
         >
-          <Download size={15} color="#15803d" />
-          <Text style={styles.updateCheckBtnText}>Check for Updates</Text>
+          <View style={styles.discoverMoreIconCircle}>
+            <Compass size={18} color="#ffffff" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.discoverMoreBtnTitle}>Discover More</Text>
+            <Text style={styles.discoverMoreBtnSubtitle}>Explore Ethiopian remedies, superfoods & daily habits</Text>
+          </View>
+          <ChevronRight size={18} color="#16a34a" />
         </TouchableOpacity>
       </ScrollView>
 
@@ -529,108 +604,134 @@ const styles = StyleSheet.create({
     marginTop: 2
   },
 
-  // 1. Today's Insight
-  insightCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1.5
-  },
-  insightTopRow: {
+  // 1. Today's Insight (Compact Thin Banner - "tin")
+  insightCardSlim: {
+    backgroundColor: 'rgba(240, 253, 244, 0.78)',
+    borderRadius: 14,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.8)',
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 1.5,
   },
-  insightPill: {
+  insightSlimLeft: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    backgroundColor: '#f0fdf4',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8
+    gap: 8,
+    marginRight: 8,
   },
-  insightPillText: {
-    fontSize: 11,
+  insightSlimPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: 'rgba(187, 247, 208, 0.8)',
+  },
+  insightSlimPillText: {
+    fontSize: 10,
     fontWeight: '800',
     color: '#16a34a',
-    letterSpacing: 0.5
+    letterSpacing: 0.5,
   },
-  stateTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8
-  },
-  stateDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3
-  },
-  stateTagText: {
-    fontSize: 11,
-    fontWeight: '700'
-  },
-  insightTitle: {
-    fontSize: 16,
+  insightSlimTitle: {
+    flex: 1,
+    fontSize: 12.5,
     fontWeight: '800',
     color: '#0f172a',
-    marginBottom: 4
   },
-  insightDesc: {
-    fontSize: 12.5,
+  insightSlimDesc: {
+    fontSize: 12,
+    fontWeight: '400',
     color: '#475569',
-    lineHeight: 18
+  },
+  stateDotSlim: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
 
-  // 2. 3D Space + Circle Info Tellers
+  // 2. Enlarged 3D Space + Circle Info Tellers
   stage3DContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 22,
-    padding: 14,
+    backgroundColor: 'rgba(240, 253, 244, 0.72)',
+    borderRadius: 24,
+    padding: 16,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.75)',
     alignItems: 'center',
     shadowColor: '#16a34a',
-    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
     shadowRadius: 10,
-    elevation: 1
+    elevation: 2,
   },
   canvas3DPlaceholder: {
     width: '100%',
-    height: 110,
-    borderRadius: 16,
-    backgroundColor: '#f8fafc',
+    height: 160,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.82)',
     borderWidth: 1,
-    borderColor: '#f1f5f9',
+    borderColor: 'rgba(187, 247, 208, 0.6)',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
     overflow: 'hidden',
-    marginBottom: 14
+    marginBottom: 16,
   },
-  canvasGlow: {
+  canvasGlowOuter: {
     position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: 'rgba(34, 197, 94, 0.08)',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(34, 197, 94, 0.12)',
+  },
+  canvasGlowInner: {
+    position: 'absolute',
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    backgroundColor: 'rgba(134, 239, 172, 0.25)',
+  },
+  gyroscopeRing: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: '#16a34a',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 6,
+    shadowColor: '#16a34a',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  canvasTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginTop: 4,
   },
   canvasNote: {
-    fontSize: 11.5,
-    color: '#94a3b8',
+    fontSize: 11,
+    color: '#16a34a',
     fontWeight: '600',
-    marginTop: 6
+    marginTop: 2,
   },
   circlesRow: {
     flexDirection: 'row',
@@ -704,20 +805,20 @@ const styles = StyleSheet.create({
   },
   callNuraBtn: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(240, 253, 244, 0.78)',
     borderRadius: 14,
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderWidth: 1.2,
-    borderColor: '#bbf7d0',
+    borderColor: 'rgba(187, 247, 208, 0.85)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.02,
-    shadowRadius: 4,
-    elevation: 1
+    shadowColor: '#16a34a',
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 1.5
   },
   callIconWrap: {
     width: 28,
@@ -762,37 +863,76 @@ const styles = StyleSheet.create({
     gap: 12
   },
   actionCardShift: {
-    width: 200,
-    minHeight: 148,
-    backgroundColor: '#ffffff',
+    width: 216,
+    height: 156,
     borderRadius: 20,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1.5,
-    justifyContent: 'space-between'
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.85)',
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  actionCardIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: '#f8fafc',
+  actionCardImageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(15, 23, 42, 0.48)',
+  },
+  actionCardContentHover: {
+    flex: 1,
+    justifyContent: 'space-between',
+    padding: 14,
+    zIndex: 2,
+  },
+  actionCardTopRowHover: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  actionCardIconWrapHover: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(22, 163, 74, 0.85)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
-  actionCardTitle: {
-    fontSize: 15,
+  shiftBadgeHover: {
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 0.8,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  shiftBadgeTextHover: {
+    color: '#ffffff',
+    fontSize: 10.5,
     fontWeight: '800',
-    color: '#0f172a',
-    marginBottom: 3
   },
-  actionCardDesc: {
-    fontSize: 12,
-    color: '#64748b'
+  actionTextHoverWrap: {
+    marginTop: 'auto',
+  },
+  actionCardTitleHover: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#ffffff',
+    textShadowColor: 'rgba(0, 0, 0, 0.45)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+    marginBottom: 2,
+  },
+  actionCardDescHover: {
+    fontSize: 11.5,
+    color: 'rgba(240, 253, 244, 0.95)',
+    fontWeight: '500',
+    textShadowColor: 'rgba(0, 0, 0, 0.35)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
 
   // 5. Natural Discovery
@@ -812,8 +952,8 @@ const styles = StyleSheet.create({
   },
   discoverySectionHint: {
     fontSize: 11,
-    color: '#94a3b8',
-    fontWeight: '600'
+    color: '#16a34a',
+    fontWeight: '700'
   },
   filterPillsRow: {
     gap: 8,
@@ -822,11 +962,11 @@ const styles = StyleSheet.create({
   },
   filterPill: {
     paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#e2e8f0'
+    backgroundColor: 'rgba(240, 253, 244, 0.7)',
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.75)'
   },
   filterPillActive: {
     backgroundColor: '#16a34a',
@@ -843,15 +983,16 @@ const styles = StyleSheet.create({
   discoveryCard: {
     width: 215,
     minHeight: 160,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(240, 253, 244, 0.72)',
     borderRadius: 20,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1.5,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.75)',
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
     justifyContent: 'space-between'
   },
   discoveryCardTop: {
@@ -864,6 +1005,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    borderWidth: 1,
+    borderColor: 'rgba(187, 247, 208, 0.5)',
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -892,7 +1036,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
+    borderTopColor: 'rgba(187, 247, 208, 0.5)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end'
@@ -914,11 +1058,13 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 24,
     padding: 22,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.8)',
+    shadowColor: '#16a34a',
+    shadowOpacity: 0.18,
     shadowRadius: 20,
     elevation: 8
   },
@@ -994,24 +1140,42 @@ const styles = StyleSheet.create({
     fontWeight: '800'
   },
 
-  // Updates Button
-  updateCheckBtn: {
+  // Discover More Button
+  discoverMoreBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#f0fdf4',
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    borderRadius: 12,
-    paddingVertical: 10,
-    marginTop: 6,
-    marginBottom: 14
+    backgroundColor: 'rgba(240, 253, 244, 0.82)',
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.85)',
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 20,
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    gap: 12
   },
-  updateCheckBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#15803d'
+  discoverMoreIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#16a34a',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  discoverMoreBtnTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#0f172a'
+  },
+  discoverMoreBtnSubtitle: {
+    fontSize: 11.5,
+    color: '#15803d',
+    marginTop: 1
   }
 });
 

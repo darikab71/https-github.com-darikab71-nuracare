@@ -9,16 +9,25 @@ interface AuthState {
   loadUser: () => void;
 }
 
+const defaultGuestUser: User = {
+  id: 'guest_nura',
+  name: 'Nura Explorer',
+  email: 'guest@nuracare.internal',
+  fastingMode: 'Orthodox Christian (Tsom)',
+};
+
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
+  user: defaultGuestUser,
   setUser: (user) => {
-    set({ user });
-    cacheData('auth_user', user);
+    set({ user: user || defaultGuestUser });
+    cacheData('auth_user', user || defaultGuestUser);
   },
   loadUser: () => {
     const cachedUser = getCachedData<User>('auth_user');
     if (cachedUser) {
       set({ user: cachedUser });
+    } else {
+      set({ user: defaultGuestUser });
     }
   }
 }));
