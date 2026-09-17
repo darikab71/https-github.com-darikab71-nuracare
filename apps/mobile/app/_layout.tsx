@@ -120,9 +120,16 @@ export function ErrorBoundary({ error, retry }: { error: Error; retry: () => voi
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, backgroundColor: '#ffffff' }}>
       <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#166534', marginBottom: 12 }}>NuraCare</Text>
-      <Text style={{ fontSize: 14, color: '#4b5563', textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+      <Text style={{ fontSize: 14, color: '#4b5563', textAlign: 'center', marginBottom: 16, lineHeight: 20 }}>
         The app encountered a startup issue. Tap the button below to reload cleanly.
       </Text>
+      {error?.message ? (
+        <View style={{ backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', padding: 12, borderRadius: 8, marginBottom: 20, maxWidth: '90%' }}>
+          <Text style={{ color: '#dc2626', fontSize: 12, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }}>
+            {error.message}
+          </Text>
+        </View>
+      ) : null}
       <TouchableOpacity
         onPress={retry}
         style={{
