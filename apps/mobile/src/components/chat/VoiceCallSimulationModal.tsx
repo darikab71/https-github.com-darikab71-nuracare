@@ -226,6 +226,7 @@ export default function VoiceCallSimulationModal({
                   style={[
                     styles.waveBar,
                     {
+                      backgroundColor: theme.accent,
                       height: anim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [6, 28],
@@ -392,7 +393,7 @@ const styles = StyleSheet.create({
   waveBar: {
     width: 4,
     borderRadius: 2,
-    backgroundColor: theme.accent,
+    backgroundColor: '#16a34a',
   },
   captionBox: {
     flexDirection: 'row',
