@@ -68,20 +68,20 @@ export default function ThreeAvatarCanvas({
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // 4. LIGHTING (Soft cartoon studio setup)
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+    // 4. LIGHTING (Soft cartoon studio setup with even face illumination)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfff5ea, 1.1);
-    keyLight.position.set(2, 3, 3);
+    const keyLight = new THREE.DirectionalLight(0xfff8f0, 0.8);
+    keyLight.position.set(1.5, 2.5, 3);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xd4f4e2, 0.6); // Soft sage fill
-    fillLight.position.set(-2.5, 1, 2);
+    const fillLight = new THREE.DirectionalLight(0xfff8f0, 0.7); // Balanced warm fill
+    fillLight.position.set(-1.5, 2.0, 3);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0x4ade80, 0.8); // Mint rim accent
-    rimLight.position.set(0, -2, -2);
+    const rimLight = new THREE.DirectionalLight(0x86efac, 0.4); // Subtle mint accent
+    rimLight.position.set(0, -1.5, -2);
     scene.add(rimLight);
 
     // 5. BUILD 3D CARTOON CHARACTER
@@ -293,7 +293,12 @@ export default function ThreeAvatarCanvas({
     const nuriHoodieColor = 0x22c55e;
     const darkHairColor = 0x241711;
 
-    const skinMat = new THREE.MeshToonMaterial({ color: skinColor });
+    // Warm radiant cartoon skin tone
+    const skinMat = new THREE.MeshStandardMaterial({
+      color: skinColor,
+      roughness: 0.6,
+      metalness: 0.02,
+    });
     const hairMat = new THREE.MeshToonMaterial({ color: darkHairColor });
     const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const pupilMat = new THREE.MeshBasicMaterial({ color: 0x1f1917 });
@@ -488,17 +493,27 @@ export default function ThreeAvatarCanvas({
 
     // 6. CHARACTER-SPECIFIC HAIR & ACCESSORIES
     if (char === 'nura') {
-      const hairCapGeo = new THREE.SphereGeometry(0.55, 24, 24, 0, Math.PI * 2, 0, Math.PI / 1.7);
+      // Hair cap sculpted strictly to top and back of skull (never covers face)
+      const hairCapGeo = new THREE.SphereGeometry(0.53, 24, 24, 0, Math.PI * 2, 0, Math.PI / 2.2);
       const hairCap = new THREE.Mesh(hairCapGeo, hairMat);
-      hairCap.position.set(0, 0.04, -0.04);
+      hairCap.position.set(0, 0.08, -0.08);
       headGroup.add(hairCap);
 
+      // Back hair volume
+      const backHairGeo = new THREE.SphereGeometry(0.38, 20, 20);
+      backHairGeo.scale(1.1, 1.2, 0.8);
+      const backHair = new THREE.Mesh(backHairGeo, hairMat);
+      backHair.position.set(0, 0.12, -0.26);
+      headGroup.add(backHair);
+
+      // Topknot bun
       const bunGeo = new THREE.SphereGeometry(0.24, 20, 20);
       bunGeo.scale(1.15, 0.9, 1.15);
       const bun = new THREE.Mesh(bunGeo, hairMat);
       bun.position.set(0, 0.64, -0.06);
       headGroup.add(bun);
 
+      // Bun tie ribbon (Emerald green)
       const tieGeo = new THREE.TorusGeometry(0.16, 0.035, 10, 24);
       const tieMat = new THREE.MeshToonMaterial({ color: 0x15803d });
       const tie = new THREE.Mesh(tieGeo, tieMat);
@@ -506,11 +521,12 @@ export default function ThreeAvatarCanvas({
       tie.position.set(0, 0.54, -0.06);
       headGroup.add(tie);
 
-      const bangGeo = new THREE.SphereGeometry(0.18, 16, 16);
-      bangGeo.scale(1.8, 0.6, 0.5);
+      // Sleek top bangs resting cleanly above forehead
+      const bangGeo = new THREE.SphereGeometry(0.14, 16, 16);
+      bangGeo.scale(1.6, 0.5, 0.5);
       const bang = new THREE.Mesh(bangGeo, hairMat);
-      bang.position.set(-0.06, 0.42, 0.38);
-      bang.rotation.z = -0.15;
+      bang.position.set(-0.04, 0.46, 0.34);
+      bang.rotation.z = -0.12;
       headGroup.add(bang);
 
       const hoopGeo = new THREE.TorusGeometry(0.085, 0.016, 10, 24);

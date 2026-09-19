@@ -3,1354 +3,954 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
-  TextInput,
   Modal,
+  ScrollView,
+  TextInput,
   Alert,
   Platform,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import {
-  Users,
-  MessageSquare,
-  Rss,
-  Heart,
-  MessageCircle,
-  Share2,
-  Plus,
-  Search,
-  CheckCircle2,
   ShieldCheck,
   Lock,
-  Globe,
-  Bell,
-  Sparkles,
-  Bot,
+  MessageSquare,
+  Heart,
+  X,
   Send,
-  XCircle,
-  ChevronRight,
-  UserCheck,
-  UserPlus,
-  AlertCircle,
+  Share2,
   ShieldAlert,
+  CheckCircle2,
 } from 'lucide-react-native';
 
-export type CommunitySection = 'feed' | 'groups' | 'messages';
+import {
+  CommunityPrimaryTab,
+  CommunityGroup,
+  CommunityChallenge,
+  CommunityDiscussion,
+  SuggestedPerson,
+  DirectThread,
+  DirectMessage,
+} from '../../src/types/communityTypes';
 
-interface CommunityPost {
-  id: string;
-  type: 'post' | 'challenge' | 'story' | 'announcement';
-  author: string;
-  authorBadge?: string;
-  avatarColor: string;
-  timeAgo: string;
-  title?: string;
-  content: string;
-  likes: number;
-  comments: number;
-  userLiked?: boolean;
-  challengeData?: {
-    participants: number;
-    progressPercent: number;
-    joined: boolean;
-  };
-  storyLinkText?: string;
-}
+import {
+  INITIAL_COMMUNITY_GROUPS,
+  INITIAL_COMMUNITY_CHALLENGES,
+  INITIAL_COMMUNITY_DISCUSSIONS,
+  INITIAL_SUGGESTED_PEOPLE,
+  INITIAL_DIRECT_THREADS,
+} from '../../src/data/communityData';
 
-interface CommunityGroup {
-  id: string;
-  name: string;
-  category: string;
-  icon: string;
-  membersCount: string;
-  description: string;
-  privacy: 'Public' | 'Private' | 'Hidden';
-  joined: boolean;
-}
+import CommunityNavBar from '../../src/components/community/CommunityNavBar';
+import DiscoveryHub from '../../src/components/community/DiscoveryHub';
+import ChallengesHub from '../../src/components/community/ChallengesHub';
+import CommunityGroupsHub from '../../src/components/community/CommunityGroupsHub';
+import InboxHub from '../../src/components/community/InboxHub';
+import ReportModal from '../../src/components/community/ReportModal';
 
-interface MessageThread {
-  id: string;
-  senderName: string;
-  isGroup: boolean;
-  avatarText: string;
-  avatarBg: string;
-  lastMessage: string;
-  timeAgo: string;
-  unreadCount: number;
-  messages: Array<{
-    id: string;
-    sender: 'them' | 'me';
-    text: string;
-    time: string;
-  }>;
-}
+export default function CommunityCenterScreen() {
+  // 1. Root Tab State (Discovery | Challenges | Community | Inbox)
+  const [activeTab, setActiveTab] = useState<CommunityPrimaryTab>('discovery');
 
-const INITIAL_POSTS: CommunityPost[] = [
-  {
-    id: 'post-1',
-    type: 'post',
-    author: 'Sarah M.',
-    avatarColor: '#ec4899',
-    timeAgo: '2h ago',
-    content: 'Finished my 7-day hydration challenge!\n\nMaintained 92% hydration consistency this week. Energy levels have visibly normalized during morning routines.',
-    likes: 24,
-    comments: 7,
-  },
-  {
-    id: 'post-2',
-    type: 'challenge',
-    author: 'NuraCare Health Team',
-    authorBadge: 'Official',
-    avatarColor: '#16a34a',
-    timeAgo: '5h ago',
-    title: '7-Day Hydration Challenge',
-    content: 'Reach your daily water target 7 days in a row. Sync with your local wellness group and earn the Hydrated Pioneer badge.',
-    likes: 58,
-    comments: 14,
-    challengeData: {
-      participants: 312,
-      progressPercent: 80,
-      joined: false,
-    },
-  },
-  {
-    id: 'post-3',
-    type: 'story',
-    author: 'Dr. Yared (Wellness Contributor)',
-    authorBadge: 'Nutritionist',
-    avatarColor: '#8b5cf6',
-    timeAgo: '1d ago',
-    title: 'Ethiopian Wellness Tip (Teff & Gut Health)',
-    content: 'How traditional Teff-based meals can fit seamlessly into a balanced nutrition and glycemic control routine. Teff contains resistant starch that supports a diverse microbiome.',
-    likes: 92,
-    comments: 21,
-    storyLinkText: 'Read Full Cultural Guide',
-  },
-  {
-    id: 'post-4',
-    type: 'announcement',
-    author: 'NuraCare Community',
-    authorBadge: 'Verified',
-    avatarColor: '#0284c7',
-    timeAgo: '1d ago',
-    title: 'Community Wellness Challenge',
-    content: 'New community challenge starting this Monday: "Morning Eskesta & Walk (10,000 steps)". Join your regional group to participate.',
-    likes: 41,
-    comments: 5,
-  },
-  {
-    id: 'post-5',
-    type: 'challenge',
-    author: 'NuraCare Recovery Lab',
-    authorBadge: 'Official',
-    avatarColor: '#6366f1',
-    timeAgo: '4h ago',
-    title: '7-Day Screen-Free Evening Sanctuary',
-    content: 'Disconnect all entertainment screens 45 minutes before sleep for 7 consecutive days. Protect stage N3 deep sleep and nervous system restoration. (Privacy protected: your personal screen time is never shared).',
-    likes: 76,
-    comments: 19,
-    challengeData: {
-      participants: 489,
-      progressPercent: 65,
-      joined: true,
-    },
-  },
-];
+  // 2. Main Community State
+  const [groups, setGroups] = useState<CommunityGroup[]>(INITIAL_COMMUNITY_GROUPS);
+  const [challenges, setChallenges] = useState<CommunityChallenge[]>(INITIAL_COMMUNITY_CHALLENGES);
+  const [discussions, setDiscussions] = useState<CommunityDiscussion[]>(INITIAL_COMMUNITY_DISCUSSIONS);
+  const [people, setPeople] = useState<SuggestedPerson[]>(INITIAL_SUGGESTED_PEOPLE);
+  const [threads, setThreads] = useState<DirectThread[]>(INITIAL_DIRECT_THREADS);
 
-const INITIAL_GROUPS: CommunityGroup[] = [
-  {
-    id: 'grp-1',
-    name: 'Running Ethiopia ',
-    category: 'Cardio & Athletics',
-    icon: '',
-    membersCount: '12.4K',
-    description: 'For Ethiopian runners sharing routes, morning distance goals, motivation, and regional half-marathons.',
-    privacy: 'Public',
-    joined: true,
-  },
-  {
-    id: 'grp-2',
-    name: 'Addis Fitness ',
-    category: 'Workouts & Gyms',
-    icon: '',
-    membersCount: '8.2K',
-    description: 'Active gym-goers and fitness enthusiasts discussing workout splits, local training centers, and recovery.',
-    privacy: 'Public',
-    joined: false,
-  },
-  {
-    id: 'grp-3',
-    name: 'Healthy Ethiopian Cooking ',
-    category: 'Nutrition & Tsom',
-    icon: '',
-    membersCount: '15.1K',
-    description: 'Sharing healthy recipes: high-protein Shiro, low-oil Misir, Telba smoothies, and nutritious fasting meals.',
-    privacy: 'Public',
-    joined: true,
-  },
-  {
-    id: 'grp-4',
-    name: 'Mindfulness & Stress ',
-    category: 'Mental Wellness',
-    icon: '',
-    membersCount: '6.3K',
-    description: 'Daily breathwork reflections, meditation tips, stress resilience techniques, and mindful living.',
-    privacy: 'Public',
-    joined: false,
-  },
-  {
-    id: 'grp-5',
-    name: 'Hydration Challenge ',
-    category: 'Habit Building',
-    icon: '',
-    membersCount: '9.8K',
-    description: 'Accountability group for maintaining optimal daily hydration and sharing water tracking milestones.',
-    privacy: 'Public',
-    joined: false,
-  },
-  {
-    id: 'grp-6',
-    name: 'Muscle Building ',
-    category: 'Strength Training',
-    icon: '',
-    membersCount: '4.5K',
-    description: 'Hypertrophy principles, bodyweight calisthenics, and plant-based protein pairing during fasting.',
-    privacy: 'Public',
-    joined: false,
-  },
-  {
-    id: 'grp-7',
-    name: 'Healthy Lifestyle ',
-    category: 'General Wellness',
-    icon: '',
-    membersCount: '11.0K',
-    description: 'Holistic wellness tips, restorative sleep routines, and sustainable lifestyle habit changes.',
-    privacy: 'Public',
-    joined: false,
-  },
-  {
-    id: 'grp-8',
-    name: 'Digital Reset & Sanctuary ',
-    category: 'Digital Wellness',
-    icon: '',
-    membersCount: '5.2K',
-    description: 'Intentional phone use, bedtime digital wind-down, focus sessions, and burnout recovery support.',
-    privacy: 'Public',
-    joined: true,
-  },
-];
+  // 3. Selection & Modal States
+  const [selectedDiscussion, setSelectedDiscussion] = useState<CommunityDiscussion | null>(null);
+  const [replyInputText, setReplyInputText] = useState('');
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [messagingPrivacy, setMessagingPrivacy] = useState<'Everyone' | 'Group Members' | 'Nobody'>('Group Members');
+  const [activityPrivacy, setActivityPrivacy] = useState(true);
 
-const INITIAL_THREADS: MessageThread[] = [
-  {
-    id: 'thread-1',
-    senderName: 'Hana T.',
-    isGroup: false,
-    avatarText: 'HT',
-    avatarBg: '#0284c7',
-    lastMessage: 'See you at the morning walk tomorrow at Entoto!',
-    timeAgo: '2m',
-    unreadCount: 1,
-    messages: [
-      { id: 'm1', sender: 'them', text: 'Hey! Are you still participating in the 10k step challenge?', time: '9:40 AM' },
-      { id: 'm2', sender: 'me', text: 'Yes, absolutely! Logged 6,000 steps so far today.', time: '9:42 AM' },
-      { id: 'm3', sender: 'them', text: 'See you at the morning walk tomorrow at Entoto!', time: '9:45 AM' },
-    ],
-  },
-  {
-    id: 'thread-2',
-    senderName: 'Abel K.',
-    isGroup: false,
-    avatarText: 'AK',
-    avatarBg: '#16a34a',
-    lastMessage: 'Great job on the hydration challenge!',
-    timeAgo: '15m',
-    unreadCount: 0,
-    messages: [
-      { id: 'm20', sender: 'them', text: 'Saw your update on the feed!', time: 'Yesterday' },
-      { id: 'm21', sender: 'them', text: 'Great job on the hydration challenge!', time: '10:00 AM' },
-    ],
-  },
-  {
-    id: 'thread-3',
-    senderName: 'Running Ethiopia',
-    isGroup: true,
-    avatarText: 'RE',
-    avatarBg: '#f59e0b',
-    lastMessage: 'New challenge announcement: Weekend 5K group run.',
-    timeAgo: '1h',
-    unreadCount: 2,
-    messages: [
-      { id: 'm30', sender: 'them', text: 'Moderator: Please review the route map for Saturday morning.', time: '8:00 AM' },
-      { id: 'm31', sender: 'them', text: 'New challenge announcement: Weekend 5K group run.', time: '8:30 AM' },
-    ],
-  },
-];
+  // 4. Report Modal State
+  const [reportConfig, setReportConfig] = useState<{
+    visible: boolean;
+    type: 'post' | 'group' | 'discussion' | 'user';
+    title: string;
+  }>({
+    visible: false,
+    type: 'discussion',
+    title: '',
+  });
 
-export default function CommunityScreen() {
-  const router = useRouter();
-
-  // TOP SEGMENTED NAVIGATION: exactly 3 sections: Feed | Groups | Messages
-  const [activeSection, setActiveSection] = useState<CommunitySection>('feed');
-
-  // Feed State
-  const [posts, setPosts] = useState<CommunityPost[]>(INITIAL_POSTS);
-  const [showCreatePost, setShowCreatePost] = useState(false);
-  const [newPostText, setNewPostText] = useState('');
-
-  // Groups State
-  const [groups, setGroups] = useState<CommunityGroup[]>(INITIAL_GROUPS);
-  const [selectedGroup, setSelectedGroup] = useState<CommunityGroup | null>(null);
-
-  // Messages State
-  const [threads, setThreads] = useState<MessageThread[]>(INITIAL_THREADS);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeChatThread, setActiveChatThread] = useState<MessageThread | null>(null);
-  const [chatInputText, setChatInputText] = useState('');
-
-  // Privacy Modal State
-  const [showPrivacySettings, setShowPrivacySettings] = useState(false);
-  const [whoCanMessage, setWhoCanMessage] = useState<'Everyone' | 'People I follow' | 'Group members' | 'Nobody'>('Group members');
-
-  // Handle Like
-  const handleToggleLike = (postId: string) => {
-    setPosts(prev =>
-      prev.map(p => {
-        if (p.id === postId) {
-          const liked = !p.userLiked;
-          return {
-            ...p,
-            userLiked: liked,
-            likes: liked ? p.likes + 1 : p.likes - 1,
-          };
-        }
-        return p;
-      })
-    );
-  };
-
-  // Handle Challenge Join
-  const handleToggleJoinChallenge = (postId: string) => {
-    setPosts(prev =>
-      prev.map(p => {
-        if (p.id === postId && p.challengeData) {
-          const isJoined = !p.challengeData.joined;
-          return {
-            ...p,
-            challengeData: {
-              ...p.challengeData,
-              joined: isJoined,
-              participants: isJoined
-                ? p.challengeData.participants + 1
-                : p.challengeData.participants - 1,
-            },
-          };
-        }
-        return p;
-      })
-    );
-  };
-
-  // Create Post
-  const handlePublishPost = () => {
-    if (!newPostText.trim()) {
-      Alert.alert('Empty Post', 'Please write something before posting.');
-      return;
-    }
-    const newPost: CommunityPost = {
-      id: 'post_' + Date.now(),
-      type: 'post',
-      author: 'You',
-      avatarColor: '#16a34a',
-      timeAgo: 'Just now',
-      content: newPostText.trim(),
-      likes: 0,
-      comments: 0,
-    };
-    setPosts([newPost, ...posts]);
-    setNewPostText('');
-    setShowCreatePost(false);
-  };
+  // Calculate unread message count for bottom nav badge
+  const totalUnreadCount = threads.reduce((acc, t) => acc + (t.unreadCount || 0), 0);
+  const hasActiveChallenges = challenges.some((c) => c.isJoined && !c.isCompleted);
 
   // Toggle Group Membership
-  const handleToggleGroup = (groupId: string) => {
-    setGroups(prev =>
-      prev.map(g => {
+  const handleToggleJoinGroup = (groupId: string) => {
+    setGroups((prev) =>
+      prev.map((g) => {
         if (g.id === groupId) {
           const isNowJoined = !g.joined;
-          return { ...g, joined: isNowJoined };
+          return {
+            ...g,
+            joined: isNowJoined,
+            role: isNowJoined ? 'Member' : undefined,
+          };
         }
         return g;
       })
     );
   };
 
-  // Send Message in Active Chat
-  const handleSendMessage = () => {
-    if (!chatInputText.trim() || !activeChatThread) return;
-    const newMsg = {
-      id: 'm_' + Date.now(),
-      sender: 'me' as const,
-      text: chatInputText.trim(),
-      time: 'Just now',
-    };
-
-    const updatedThreads = threads.map(t => {
-      if (t.id === activeChatThread.id) {
-        return {
-          ...t,
-          lastMessage: newMsg.text,
-          timeAgo: 'Just now',
-          messages: [...t.messages, newMsg],
-        };
-      }
-      return t;
-    });
-
-    setThreads(updatedThreads);
-    setActiveChatThread(prev =>
-      prev ? { ...prev, messages: [...prev.messages, newMsg], lastMessage: newMsg.text } : null
+  // Toggle Challenge Membership
+  const handleToggleJoinChallenge = (challengeId: string) => {
+    setChallenges((prev) =>
+      prev.map((c) => {
+        if (c.id === challengeId) {
+          const isNowJoined = !c.isJoined;
+          return {
+            ...c,
+            isJoined: isNowJoined,
+            participantsCount: isNowJoined
+              ? c.participantsCount + 1
+              : Math.max(0, c.participantsCount - 1),
+          };
+        }
+        return c;
+      })
     );
-    setChatInputText('');
   };
 
-  const filteredThreads = threads.filter(t =>
-    t.senderName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Complete Day for Challenge
+  const handleCompleteDay = (challengeId: string) => {
+    setChallenges((prev) =>
+      prev.map((c) => {
+        if (c.id === challengeId) {
+          const isAlreadyCompletedToday = c.completedDays.includes(c.currentDay);
+          if (isAlreadyCompletedToday) return c;
+
+          const updatedDays = [...c.completedDays, c.currentDay];
+          const nextDay = Math.min(c.durationDays, c.currentDay + 1);
+          const isCompleted = updatedDays.length >= c.durationDays;
+
+          return {
+            ...c,
+            completedDays: updatedDays,
+            currentDay: isCompleted ? c.currentDay : nextDay,
+            streak: c.streak + 1,
+            isCompleted,
+          };
+        }
+        return c;
+      })
+    );
+  };
+
+  // Create Challenge
+  const handleCreateChallenge = (newChallengeData: Partial<CommunityChallenge>) => {
+    const newChallenge: CommunityChallenge = {
+      id: 'ch_' + Date.now(),
+      title: newChallengeData.title || 'Untitled Challenge',
+      category: newChallengeData.category || 'Fitness',
+      description: newChallengeData.description || '',
+      creator: 'You',
+      creatorBadge: 'Member',
+      participantsCount: 1,
+      durationDays: newChallengeData.durationDays || 7,
+      difficulty: newChallengeData.difficulty || 'Easy',
+      startDate: 'Today',
+      endDate: `${newChallengeData.durationDays || 7} Days`,
+      rules: newChallengeData.rules || ['Stay consistent and listen to your body.'],
+      dailyGoal: newChallengeData.dailyGoal || 'Daily wellness check-in',
+      currentDay: 1,
+      streak: 1,
+      isJoined: true,
+      isCompleted: false,
+      completedDays: [1],
+      coverColor: '#16a34a',
+      iconName: 'Flame',
+    };
+    setChallenges([newChallenge, ...challenges]);
+  };
+
+  // Create Group
+  const handleCreateGroup = (newGroupData: Partial<CommunityGroup>) => {
+    const newGroup: CommunityGroup = {
+      id: 'grp_' + Date.now(),
+      name: newGroupData.name || 'New Community',
+      category: newGroupData.category || 'General Wellness',
+      description: newGroupData.description || '',
+      iconName: 'Users',
+      membersCount: '1',
+      privacy: newGroupData.privacy || 'Public',
+      joined: true,
+      role: 'Owner',
+      coverGradient: ['#16a34a', '#14532d'],
+      activeChallengesCount: 0,
+      recentDiscussionsCount: 0,
+      rules: newGroupData.rules || ['Be respectful and support positive wellness habits.'],
+    };
+    setGroups([newGroup, ...groups]);
+  };
+
+  // Toggle Discussion Support (Reaction)
+  const handleToggleSupportDiscussion = (discussionId: string) => {
+    setDiscussions((prev) =>
+      prev.map((d) => {
+        if (d.id === discussionId) {
+          const supported = !d.userSupported;
+          return {
+            ...d,
+            userSupported: supported,
+            supportCount: supported ? d.supportCount + 1 : Math.max(0, d.supportCount - 1),
+          };
+        }
+        return d;
+      })
+    );
+
+    if (selectedDiscussion && selectedDiscussion.id === discussionId) {
+      const supported = !selectedDiscussion.userSupported;
+      setSelectedDiscussion({
+        ...selectedDiscussion,
+        userSupported: supported,
+        supportCount: supported
+          ? selectedDiscussion.supportCount + 1
+          : Math.max(0, selectedDiscussion.supportCount - 1),
+      });
+    }
+  };
+
+  // Post new discussion in group
+  const handlePostDiscussion = (groupId: string, title: string, content: string) => {
+    const targetGroup = groups.find((g) => g.id === groupId);
+    const newDiscussion: CommunityDiscussion = {
+      id: 'disc_' + Date.now(),
+      groupId,
+      groupName: targetGroup ? targetGroup.name : 'Community',
+      author: 'You',
+      avatarColor: '#16a34a',
+      timeAgo: 'Just now',
+      title,
+      content,
+      supportCount: 0,
+      userSupported: false,
+      commentCount: 0,
+      replies: [],
+    };
+    setDiscussions([newDiscussion, ...discussions]);
+  };
+
+  // Add reply to discussion
+  const handleAddReply = () => {
+    if (!replyInputText.trim() || !selectedDiscussion) return;
+    const newReply = {
+      id: 'rep_' + Date.now(),
+      author: 'You',
+      authorRole: 'Member',
+      avatarColor: '#16a34a',
+      content: replyInputText.trim(),
+      timestamp: 'Just now',
+      supportCount: 0,
+      userSupported: false,
+    };
+
+    const updatedDiscussion = {
+      ...selectedDiscussion,
+      commentCount: selectedDiscussion.commentCount + 1,
+      replies: [...selectedDiscussion.replies, newReply],
+    };
+
+    setSelectedDiscussion(updatedDiscussion);
+    setDiscussions((prev) =>
+      prev.map((d) => (d.id === selectedDiscussion.id ? updatedDiscussion : d))
+    );
+    setReplyInputText('');
+  };
+
+  // Direct Message Send
+  const handleSendMessage = (threadId: string, text: string) => {
+    const newMsg: DirectMessage = {
+      id: 'msg_' + Date.now(),
+      sender: 'me',
+      text,
+      time: 'Just now',
+      status: 'sent',
+    };
+
+    setThreads((prev) =>
+      prev.map((t) => {
+        if (t.id === threadId) {
+          return {
+            ...t,
+            lastMessage: text,
+            timeAgo: 'Just now',
+            messages: [...t.messages, newMsg],
+          };
+        }
+        return t;
+      })
+    );
+  };
+
+  // Message Requests: Accept & Ignore
+  const handleAcceptRequest = (threadId: string) => {
+    setThreads((prev) =>
+      prev.map((t) => (t.id === threadId ? { ...t, isRequest: false } : t))
+    );
+    Alert.alert('Request Accepted', 'You can now message directly.');
+  };
+
+  const handleIgnoreRequest = (threadId: string) => {
+    setThreads((prev) => prev.filter((t) => t.id !== threadId));
+    Alert.alert('Request Ignored', 'Message request removed.');
+  };
+
+  // Reporting Trigger
+  const handleOpenReport = (type: 'post' | 'group' | 'discussion' | 'user', title: string) => {
+    setReportConfig({
+      visible: true,
+      type,
+      title,
+    });
+  };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Community</Text>
-          <Text style={styles.subtitle}>Connect, encourage & share wellness journeys</Text>
+    <View style={styles.screenContainer}>
+      {/* Top Header Bar with Privacy Action */}
+      <View style={styles.topAppBar}>
+        <View style={styles.brandTitleRow}>
+          <Text style={styles.brandTitle}>NuraCare Community</Text>
         </View>
+
         <TouchableOpacity
-          style={styles.privacyLockBtn}
-          onPress={() => setShowPrivacySettings(true)}
-          accessibilityLabel="Community Privacy Settings"
+          style={styles.privacyButton}
+          onPress={() => setShowPrivacyModal(true)}
+          activeOpacity={0.8}
+          accessibilityLabel="Privacy and Safety Settings"
         >
-          <Lock size={16} color="#16a34a" />
-          <Text style={styles.privacyLockText}>Privacy</Text>
+          <Lock size={14} color="#16a34a" />
+          <Text style={styles.privacyButtonText}>Privacy</Text>
         </TouchableOpacity>
       </View>
 
-      {/* TOP SEGMENTED NAVIGATION: Feed | Groups | Messages */}
-      <View style={styles.topSegmentedBar}>
-        <TouchableOpacity
-          style={[styles.topSegmentTab, activeSection === 'feed' && styles.topSegmentTabActive]}
-          onPress={() => setActiveSection('feed')}
-        >
-          <Rss size={16} color={activeSection === 'feed' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.topSegmentText, activeSection === 'feed' && styles.topSegmentTextActive]}>
-            Feed
-          </Text>
-        </TouchableOpacity>
+      {/* Main Hub Content Area */}
+      <View style={styles.hubContent}>
+        {activeTab === 'discovery' && (
+          <DiscoveryHub
+            groups={groups}
+            challenges={challenges}
+            discussions={discussions}
+            people={people}
+            onSelectGroup={(grp) => {
+              setActiveTab('community');
+            }}
+            onSelectChallenge={(ch) => {
+              setActiveTab('challenges');
+            }}
+            onSelectDiscussion={(disc) => setSelectedDiscussion(disc)}
+            onToggleJoinGroup={handleToggleJoinGroup}
+            onToggleJoinChallenge={handleToggleJoinChallenge}
+            onToggleSupportDiscussion={handleToggleSupportDiscussion}
+            onReportItem={handleOpenReport}
+          />
+        )}
 
-        <TouchableOpacity
-          style={[styles.topSegmentTab, activeSection === 'groups' && styles.topSegmentTabActive]}
-          onPress={() => setActiveSection('groups')}
-        >
-          <Users size={16} color={activeSection === 'groups' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.topSegmentText, activeSection === 'groups' && styles.topSegmentTextActive]}>
-            Groups
-          </Text>
-        </TouchableOpacity>
+        {activeTab === 'challenges' && (
+          <ChallengesHub
+            challenges={challenges}
+            onToggleJoin={handleToggleJoinChallenge}
+            onCompleteDay={handleCompleteDay}
+            onCreateChallenge={handleCreateChallenge}
+          />
+        )}
 
-        <TouchableOpacity
-          style={[styles.topSegmentTab, activeSection === 'messages' && styles.topSegmentTabActive]}
-          onPress={() => setActiveSection('messages')}
+        {activeTab === 'community' && (
+          <CommunityGroupsHub
+            groups={groups}
+            discussions={discussions}
+            challenges={challenges}
+            onToggleJoinGroup={handleToggleJoinGroup}
+            onSelectDiscussion={(disc) => setSelectedDiscussion(disc)}
+            onToggleSupportDiscussion={handleToggleSupportDiscussion}
+            onCreateGroup={handleCreateGroup}
+            onPostDiscussion={handlePostDiscussion}
+            onReportItem={handleOpenReport}
+          />
+        )}
+
+        {activeTab === 'inbox' && (
+          <InboxHub
+            threads={threads}
+            onSendMessage={handleSendMessage}
+            onAcceptRequest={handleAcceptRequest}
+            onIgnoreRequest={handleIgnoreRequest}
+            onReportUser={(name) => handleOpenReport('user', name)}
+          />
+        )}
+      </View>
+
+      {/* Bottom 4-Tab Navigation Bar */}
+      <CommunityNavBar
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        unreadCount={totalUnreadCount}
+        hasActiveChallenge={hasActiveChallenges}
+      />
+
+      {/* ======================================================== */}
+      {/* DISCUSSION THREAD MODAL                                  */}
+      {/* ======================================================== */}
+      {selectedDiscussion && (
+        <Modal
+          visible={!!selectedDiscussion}
+          animationType="slide"
+          onRequestClose={() => setSelectedDiscussion(null)}
         >
-          <MessageSquare size={16} color={activeSection === 'messages' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.topSegmentText, activeSection === 'messages' && styles.topSegmentTextActive]}>
-            Messages
-          </Text>
-          {threads.reduce((acc, t) => acc + t.unreadCount, 0) > 0 && (
-            <View style={styles.unreadBadgePill}>
-              <Text style={styles.unreadBadgePillText}>
-                {threads.reduce((acc, t) => acc + t.unreadCount, 0)}
-              </Text>
+          <View style={styles.discussionModalContainer}>
+            <View style={styles.discussionModalHeader}>
+              <TouchableOpacity
+                onPress={() => setSelectedDiscussion(null)}
+                style={styles.discBackBtn}
+              >
+                <X size={20} color="#0f172a" />
+              </TouchableOpacity>
+              <Text style={styles.discModalHeaderTitle}>Discussion</Text>
+              <TouchableOpacity
+                onPress={() =>
+                  handleOpenReport('discussion', selectedDiscussion.title)
+                }
+              >
+                <ShieldAlert size={18} color="#94a3b8" />
+              </TouchableOpacity>
             </View>
-          )}
-        </TouchableOpacity>
-      </View>
 
-      {/* AI Contextual Assistant Trigger for Community */}
-      <View style={styles.aiHelperStrip}>
-        <Bot size={18} color="#16a34a" />
-        <Text style={styles.aiHelperText}>
-          {activeSection === 'feed'
-            ? "Ask Nura AI: 'Show me challenges related to hydration'"
-            : activeSection === 'groups'
-            ? "Ask Nura AI: 'Find me a running or healthy cooking group'"
-            : "Ask Nura AI: 'Tips for respectful community engagement'"}
-        </Text>
-        <TouchableOpacity onPress={() => router.push('/chat')}>
-          <ChevronRight size={18} color="#16a34a" />
-        </TouchableOpacity>
-      </View>
-
-      {/* SECTION 1: FEED */}
-      {activeSection === 'feed' && (
-        <ScrollView style={styles.sectionScroll} contentContainerStyle={{ paddingBottom: 60 }}>
-          {/* Post Composer Bar */}
-          <TouchableOpacity
-            style={styles.composerBar}
-            onPress={() => setShowCreatePost(true)}
-          >
-            <View style={styles.composerAvatar}>
-              <Text style={{ color: '#ffffff', fontWeight: '700' }}>You</Text>
-            </View>
-            <Text style={styles.composerPlaceholder}>Share a wellness win or habit milestone...</Text>
-            <Plus size={20} color="#16a34a" />
-          </TouchableOpacity>
-
-          {/* Privacy Protection Notice */}
-          <View style={styles.privacyNoticeBanner}>
-            <ShieldCheck size={16} color="#16a34a" />
-            <Text style={styles.privacyNoticeText}>
-              Protected: Medications, checkup answers, and clinical vitals are permanently excluded from Community.
-            </Text>
-          </View>
-
-          {/* Feed List */}
-          {posts.map(post => (
-            <View key={post.id} style={styles.postCard}>
-              {/* Author Row */}
-              <View style={styles.postAuthorRow}>
-                <View style={[styles.avatarCircle, { backgroundColor: post.avatarColor }]}>
-                  <Text style={styles.avatarText}>{post.author.substring(0, 2).toUpperCase()}</Text>
+            <ScrollView style={styles.discussionModalBody} contentContainerStyle={{ padding: 18 }}>
+              {/* Topic Author Header */}
+              <View style={styles.discAuthorRow}>
+                <View style={[styles.avatarCircle, { backgroundColor: selectedDiscussion.avatarColor }]}>
+                  <Text style={styles.avatarInitial}>{selectedDiscussion.author[0]}</Text>
                 </View>
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={styles.authorName}>{post.author}</Text>
-                    {post.authorBadge && (
-                      <View style={styles.authorBadgePill}>
-                        <Text style={styles.authorBadgeText}>{post.authorBadge}</Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text style={styles.timeAgoText}>{post.timeAgo}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.discAuthorName}>{selectedDiscussion.author}</Text>
+                  <Text style={styles.discAuthorSub}>
+                    in {selectedDiscussion.groupName || 'General Community'} • {selectedDiscussion.timeAgo}
+                  </Text>
                 </View>
               </View>
 
-              {/* Title if challenge/story */}
-              {post.title && <Text style={styles.postTitle}>{post.title}</Text>}
+              {/* Topic Content */}
+              <Text style={styles.discFullTitle}>{selectedDiscussion.title}</Text>
+              <Text style={styles.discFullContent}>{selectedDiscussion.content}</Text>
 
-              {/* Body */}
-              <Text style={styles.postContent}>{post.content}</Text>
-
-              {/* Challenge Component */}
-              {post.challengeData && (
-                <View style={styles.challengeBox}>
-                  <View style={styles.challengeMetaRow}>
-                    <Text style={styles.participantsText}>
-                       {post.challengeData.participants} participants
-                    </Text>
-                    <Text style={styles.percentText}>
-                      {post.challengeData.progressPercent}% Target
-                    </Text>
-                  </View>
-                  {/* Progress Bar */}
-                  <View style={styles.progressBarTrack}>
-                    <View
-                      style={[
-                        styles.progressBarFill,
-                        { width: `${post.challengeData.progressPercent}%` },
-                      ]}
-                    />
-                  </View>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.challengeActionBtn,
-                      post.challengeData.joined && styles.challengeActionBtnJoined,
-                    ]}
-                    onPress={() => handleToggleJoinChallenge(post.id)}
-                  >
-                    <Text
-                      style={[
-                        styles.challengeActionBtnText,
-                        post.challengeData.joined && styles.challengeActionBtnTextJoined,
-                      ]}
-                    >
-                      {post.challengeData.joined ? 'Joined ✓' : 'Join Challenge'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {/* Story Link */}
-              {post.storyLinkText && (
+              {/* Topic Support Reaction */}
+              <View style={styles.discActionRow}>
                 <TouchableOpacity
-                  style={styles.storyLinkBtn}
-                  onPress={() => Alert.alert('Wellness Story', post.content)}
-                >
-                  <Text style={styles.storyLinkBtnText}>[ {post.storyLinkText} ]</Text>
-                </TouchableOpacity>
-              )}
-
-              {/* Actions Footer */}
-              <View style={styles.postFooter}>
-                <TouchableOpacity
-                  style={styles.postFooterBtn}
-                  onPress={() => handleToggleLike(post.id)}
+                  style={[
+                    styles.discSupportBtn,
+                    selectedDiscussion.userSupported && styles.discSupportBtnActive,
+                  ]}
+                  onPress={() => handleToggleSupportDiscussion(selectedDiscussion.id)}
                 >
                   <Heart
-                    size={18}
-                    color={post.userLiked ? '#ef4444' : '#64748b'}
-                    fill={post.userLiked ? '#ef4444' : 'transparent'}
+                    size={16}
+                    color={selectedDiscussion.userSupported ? '#dc2626' : '#64748b'}
+                    fill={selectedDiscussion.userSupported ? '#dc2626' : 'none'}
                   />
-                  <Text style={[styles.footerBtnText, post.userLiked && { color: '#ef4444', fontWeight: '700' }]}>
-                    {post.likes}
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.postFooterBtn}
-                  onPress={() => Alert.alert('Comments', `${post.comments} comments on this post.`)}
-                >
-                  <MessageCircle size={18} color="#64748b" />
-                  <Text style={styles.footerBtnText}>{post.comments}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.postFooterBtn}
-                  onPress={() => Alert.alert('Share', 'Share this milestone with your group.')}
-                >
-                  <Share2 size={18} color="#64748b" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-        </ScrollView>
-      )}
-
-      {/* SECTION 2: GROUPS */}
-      {activeSection === 'groups' && (
-        <ScrollView style={styles.sectionScroll} contentContainerStyle={{ paddingBottom: 60 }}>
-          <View style={styles.groupsHeader}>
-            <Text style={styles.groupsHeaderTitle}>Discover Wellness Communities</Text>
-            <Text style={styles.groupsHeaderSub}>
-              Connect around sports, nutrition, local running, and healthy habits.
-            </Text>
-          </View>
-
-          {groups.map(group => (
-            <View key={group.id} style={styles.groupCard}>
-              <View style={styles.groupTopRow}>
-                <Text style={styles.groupIconEmoji}>{group.icon}</Text>
-                <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={styles.groupName}>{group.name}</Text>
-                  <Text style={styles.groupMeta}>
-                    {group.membersCount} members • {group.privacy}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  style={[styles.groupJoinBtn, group.joined && styles.groupJoinedBtn]}
-                  onPress={() => handleToggleGroup(group.id)}
-                >
-                  <Text style={[styles.groupJoinBtnText, group.joined && styles.groupJoinedBtnText]}>
-                    {group.joined ? 'Joined' : 'Join Group'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <Text style={styles.groupDesc}>{group.description}</Text>
-
-              <View style={styles.groupFooter}>
-                <View style={styles.privacyBadge}>
-                  {group.privacy === 'Public' ? (
-                    <Globe size={13} color="#16a34a" />
-                  ) : (
-                    <Lock size={13} color="#64748b" />
-                  )}
-                  <Text style={styles.privacyBadgeText}>{group.privacy} Group</Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.groupDetailsBtn}
-                  onPress={() => setSelectedGroup(group)}
-                >
-                  <Text style={styles.groupDetailsBtnText}>View Group Feed →</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-        </ScrollView>
-      )}
-
-      {/* SECTION 3: MESSAGES */}
-      {activeSection === 'messages' && (
-        <View style={{ flex: 1 }}>
-          {/* Search Bar */}
-          <View style={styles.searchBarContainer}>
-            <Search size={18} color="#94a3b8" />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search messages & contacts..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-
-          <ScrollView style={styles.sectionScroll} contentContainerStyle={{ paddingBottom: 60 }}>
-            {filteredThreads.map(thread => (
-              <TouchableOpacity
-                key={thread.id}
-                style={styles.threadCard}
-                onPress={() => setActiveChatThread(thread)}
-              >
-                <View style={[styles.threadAvatar, { backgroundColor: thread.avatarBg }]}>
-                  <Text style={styles.threadAvatarText}>{thread.avatarText}</Text>
-                </View>
-
-                <View style={{ flex: 1, marginLeft: 12 }}>
-                  <View style={styles.threadHeaderRow}>
-                    <Text style={styles.threadSenderName}>{thread.senderName}</Text>
-                    <Text style={styles.threadTimeAgo}>{thread.timeAgo}</Text>
-                  </View>
                   <Text
                     style={[
-                      styles.threadLastMessage,
-                      thread.unreadCount > 0 && styles.threadLastMessageUnread,
+                      styles.discSupportBtnText,
+                      selectedDiscussion.userSupported && styles.discSupportBtnTextActive,
                     ]}
-                    numberOfLines={1}
                   >
-                    {thread.lastMessage}
+                    {selectedDiscussion.supportCount} Support
+                  </Text>
+                </TouchableOpacity>
+
+                <View style={styles.discCommentCount}>
+                  <MessageSquare size={15} color="#64748b" />
+                  <Text style={styles.discCommentCountText}>
+                    {selectedDiscussion.commentCount} Replies
                   </Text>
                 </View>
+              </View>
 
-                {thread.unreadCount > 0 && (
-                  <View style={styles.threadUnreadCircle}>
-                    <Text style={styles.threadUnreadCircleText}>{thread.unreadCount}</Text>
-                  </View>
+              {/* Replies Section */}
+              <View style={styles.repliesList}>
+                <Text style={styles.repliesHeading}>Community Replies</Text>
+                {selectedDiscussion.replies.length > 0 ? (
+                  selectedDiscussion.replies.map((rep) => (
+                    <View key={rep.id} style={styles.replyCard}>
+                      <View style={styles.replyHeader}>
+                        <View style={[styles.avatarCircleSmall, { backgroundColor: rep.avatarColor }]}>
+                          <Text style={styles.avatarInitialSmall}>{rep.author[0]}</Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.replyAuthor}>{rep.author}</Text>
+                          <Text style={styles.replyTime}>{rep.timestamp}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.replyContent}>{rep.content}</Text>
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.noRepliesText}>
+                    No replies yet. Be the first to share your thoughts below.
+                  </Text>
                 )}
-              </TouchableOpacity>
-            ))}
-
-            <View style={styles.messagesPrivacyFooter}>
-              <Lock size={14} color="#64748b" />
-              <Text style={styles.messagesPrivacyFooterText}>
-                Encrypted private channel. NuraCare AI only accesses conversations when explicitly requested.
-              </Text>
-            </View>
-          </ScrollView>
-        </View>
-      )}
-
-      {/* MODAL: Active Chat Conversation */}
-      {activeChatThread && (
-        <Modal visible={!!activeChatThread} animationType="slide">
-          <View style={styles.chatModalContainer}>
-            {/* Header */}
-            <View style={styles.chatModalHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <View style={[styles.threadAvatarSmall, { backgroundColor: activeChatThread.avatarBg }]}>
-                  <Text style={{ color: '#ffffff', fontWeight: '800', fontSize: 13 }}>
-                    {activeChatThread.avatarText}
-                  </Text>
-                </View>
-                <View>
-                  <Text style={styles.chatModalTitle}>{activeChatThread.senderName}</Text>
-                  <Text style={styles.chatModalSub}>Active now • Private wellness chat</Text>
-                </View>
               </View>
-              <TouchableOpacity onPress={() => setActiveChatThread(null)}>
-                <XCircle size={26} color="#64748b" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Conversation Messages */}
-            <ScrollView style={styles.chatMessagesScroll} contentContainerStyle={{ padding: 16 }}>
-              {activeChatThread.messages.map(msg => (
-                <View
-                  key={msg.id}
-                  style={[
-                    styles.chatBubble,
-                    msg.sender === 'me' ? styles.chatBubbleMe : styles.chatBubbleThem,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.chatBubbleText,
-                      msg.sender === 'me' ? styles.chatBubbleTextMe : styles.chatBubbleTextThem,
-                    ]}
-                  >
-                    {msg.text}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.chatBubbleTime,
-                      msg.sender === 'me' ? styles.chatBubbleTimeMe : styles.chatBubbleTimeThem,
-                    ]}
-                  >
-                    {msg.time}
-                  </Text>
-                </View>
-              ))}
             </ScrollView>
 
-            {/* Input Bar */}
-            <View style={styles.chatInputBar}>
+            {/* Reply Input Bar */}
+            <View style={styles.replyComposerBar}>
               <TextInput
-                style={styles.chatInput}
-                placeholder="Write a supportive message..."
-                value={chatInputText}
-                onChangeText={setChatInputText}
+                style={styles.replyInput}
+                placeholder="Write a supportive reply..."
+                placeholderTextColor="#94a3b8"
+                value={replyInputText}
+                onChangeText={setReplyInputText}
+                multiline
               />
-              <TouchableOpacity style={styles.chatSendBtn} onPress={handleSendMessage}>
-                <Send size={18} color="#ffffff" />
+              <TouchableOpacity
+                style={[
+                  styles.replySendBtn,
+                  !replyInputText.trim() && styles.replySendBtnDisabled,
+                ]}
+                onPress={handleAddReply}
+                disabled={!replyInputText.trim()}
+              >
+                <Send size={16} color="#ffffff" />
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
       )}
 
-      {/* MODAL: Create Post */}
-      <Modal visible={showCreatePost} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.createPostModalCard}>
-            <View style={styles.modalTopRow}>
-              <Text style={styles.modalTitle}>Share with Community</Text>
-              <TouchableOpacity onPress={() => setShowCreatePost(false)}>
-                <XCircle size={24} color="#64748b" />
-              </TouchableOpacity>
-            </View>
-
-            <TextInput
-              style={styles.createPostInput}
-              placeholder="What wellness milestone or habit are you celebrating today?"
-              multiline
-              numberOfLines={4}
-              value={newPostText}
-              onChangeText={setNewPostText}
-            />
-
-            <View style={styles.modalSafetyNote}>
-              <ShieldCheck size={14} color="#16a34a" />
-              <Text style={styles.modalSafetyNoteText}>
-                Posts are public to community members. Never post private medication or medical diagnoses.
-              </Text>
-            </View>
-
-            <TouchableOpacity style={styles.publishBtn} onPress={handlePublishPost}>
-              <Text style={styles.publishBtnText}>Publish Post</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* MODAL: Privacy Settings */}
-      <Modal visible={showPrivacySettings} animationType="slide" transparent>
+      {/* ======================================================== */}
+      {/* PRIVACY & SAFETY MODAL                                   */}
+      {/* ======================================================== */}
+      <Modal
+        visible={showPrivacyModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowPrivacyModal(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.privacyModalCard}>
-            <View style={styles.modalTopRow}>
-              <Text style={styles.modalTitle}>Community Privacy & Safety</Text>
-              <TouchableOpacity onPress={() => setShowPrivacySettings(false)}>
-                <XCircle size={24} color="#64748b" />
+            <View style={styles.privacyHeader}>
+              <ShieldCheck size={20} color="#16a34a" />
+              <Text style={styles.privacyTitle}>Community Privacy & Safety</Text>
+              <TouchableOpacity onPress={() => setShowPrivacyModal(false)}>
+                <X size={18} color="#64748b" />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.privacySubHeading}>Who can send you direct messages?</Text>
-            {(['Everyone', 'People I follow', 'Group members', 'Nobody'] as const).map(opt => (
+            <Text style={styles.privacySectionHeading}>Who Can Message You</Text>
+            {(['Everyone', 'Group Members', 'Nobody'] as const).map((opt) => (
               <TouchableOpacity
                 key={opt}
                 style={[
-                  styles.privacyChoiceRow,
-                  whoCanMessage === opt && styles.privacyChoiceRowSelected,
+                  styles.privacyOption,
+                  messagingPrivacy === opt && styles.privacyOptionSelected,
                 ]}
-                onPress={() => setWhoCanMessage(opt)}
+                onPress={() => setMessagingPrivacy(opt)}
               >
                 <Text
                   style={[
-                    styles.privacyChoiceText,
-                    whoCanMessage === opt && styles.privacyChoiceTextSelected,
+                    styles.privacyOptionText,
+                    messagingPrivacy === opt && styles.privacyOptionTextSelected,
                   ]}
                 >
                   {opt}
                 </Text>
-                {whoCanMessage === opt && <CheckCircle2 size={18} color="#16a34a" />}
+                {messagingPrivacy === opt && <CheckCircle2 size={16} color="#16a34a" />}
               </TouchableOpacity>
             ))}
 
-            <View style={styles.privacyShieldBox}>
-              <ShieldAlert size={20} color="#b45309" />
-              <Text style={styles.privacyShieldText}>
-                Permanent Policy: Medication schedules, dosages, symptoms, and checkup entries are completely excluded from Community feeds and group views.
-              </Text>
-            </View>
+            <Text style={[styles.privacySectionHeading, { marginTop: 16 }]}>
+              Health Data Protection
+            </Text>
+            <TouchableOpacity
+              style={styles.privacyToggleRow}
+              onPress={() => setActivityPrivacy(!activityPrivacy)}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={styles.toggleRowTitle}>Share Challenge Progress</Text>
+                <Text style={styles.toggleRowSub}>
+                  Allows peers in joined challenges to celebrate your daily streaks. Sensitive biometrics are never shared.
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.toggleSwitch,
+                  activityPrivacy && styles.toggleSwitchActive,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.toggleThumb,
+                    activityPrivacy && styles.toggleThumbActive,
+                  ]}
+                />
+              </View>
+            </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.publishBtn}
-              onPress={() => setShowPrivacySettings(false)}
+              style={styles.donePrivacyBtn}
+              onPress={() => setShowPrivacyModal(false)}
             >
-              <Text style={styles.publishBtnText}>Save Preferences</Text>
+              <Text style={styles.donePrivacyBtnText}>Save Preferences</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* MODAL: Group Detail View */}
-      {selectedGroup && (
-        <Modal visible={!!selectedGroup} animationType="slide">
-          <View style={styles.chatModalContainer}>
-            <View style={styles.chatModalHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Text style={{ fontSize: 24 }}>{selectedGroup.icon}</Text>
-                <View>
-                  <Text style={styles.chatModalTitle}>{selectedGroup.name}</Text>
-                  <Text style={styles.chatModalSub}>
-                    {selectedGroup.membersCount} members • {selectedGroup.category}
-                  </Text>
-                </View>
-              </View>
-              <TouchableOpacity onPress={() => setSelectedGroup(null)}>
-                <XCircle size={26} color="#64748b" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={{ flex: 1, padding: 16 }}>
-              <Text style={{ fontSize: 14, color: '#334155', lineHeight: 20, marginBottom: 16 }}>
-                {selectedGroup.description}
-              </Text>
-
-              <TouchableOpacity
-                style={[
-                  styles.groupJoinBtn,
-                  selectedGroup.joined && styles.groupJoinedBtn,
-                  { alignSelf: 'flex-start', paddingHorizontal: 20, paddingVertical: 10, marginBottom: 20 },
-                ]}
-                onPress={() => handleToggleGroup(selectedGroup.id)}
-              >
-                <Text
-                  style={[
-                    styles.groupJoinBtnText,
-                    selectedGroup.joined && styles.groupJoinedBtnText,
-                  ]}
-                >
-                  {selectedGroup.joined ? 'Joined Community ✓' : 'Join This Group'}
-                </Text>
-              </TouchableOpacity>
-
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 12 }}>
-                Recent Group Activity
-              </Text>
-
-              <View style={styles.postCard}>
-                <Text style={{ fontWeight: '700', color: '#0f172a', marginBottom: 4 }}>
-                  Group Moderator Announcement
-                </Text>
-                <Text style={{ fontSize: 13, color: '#475569', lineHeight: 18 }}>
-                  Welcome new members! Please check in with your goals and support each other.
-                </Text>
-              </View>
-            </ScrollView>
-          </View>
-        </Modal>
-      )}
+      {/* Safety & Moderation Report Modal */}
+      <ReportModal
+        visible={reportConfig.visible}
+        onClose={() => setReportConfig({ ...reportConfig, visible: false })}
+        targetType={reportConfig.type}
+        targetTitle={reportConfig.title}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 56 : 48,
-    paddingBottom: 14,
-    backgroundColor: '#ffffff',
-  },
-  title: { fontSize: 24, fontWeight: '800', color: '#0f172a' },
-  subtitle: { fontSize: 13, color: '#64748b', marginTop: 2 },
-  privacyLockBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0fdf4',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    gap: 4,
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-  },
-  privacyLockText: { fontSize: 12, fontWeight: '700', color: '#16a34a' },
-  topSegmentedBar: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-    paddingHorizontal: 16,
-  },
-  topSegmentTab: {
+  screenContainer: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-    gap: 6,
-  },
-  topSegmentTabActive: {
-    borderBottomColor: '#16a34a',
-  },
-  topSegmentText: { fontSize: 14, fontWeight: '600', color: '#64748b' },
-  topSegmentTextActive: { color: '#16a34a', fontWeight: '800' },
-  unreadBadgePill: {
-    backgroundColor: '#ef4444',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 10,
-  },
-  unreadBadgePillText: { color: '#ffffff', fontSize: 10, fontWeight: '800' },
-  aiHelperStrip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0fdf4',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#dcfce7',
-    gap: 8,
-  },
-  aiHelperText: { flex: 1, fontSize: 12, color: '#166534', fontWeight: '500' },
-  sectionScroll: { flex: 1, paddingHorizontal: 16, paddingTop: 14 },
-  composerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#ffffff',
-    padding: 12,
-    borderRadius: 12,
+  },
+  topAppBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+    backgroundColor: '#ffffff',
+  },
+  brandTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  brandTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0f172a',
+    letterSpacing: -0.3,
+  },
+  privacyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#f0fdf4',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#dcfce7',
+  },
+  privacyButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#16a34a',
+  },
+  hubContent: {
+    flex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  privacyModalCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 20,
+    width: '100%',
+    maxWidth: 420,
+  },
+  privacyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  privacyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0f172a',
+    flex: 1,
+    marginLeft: 8,
+  },
+  privacySectionHeading: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+    marginBottom: 8,
+  },
+  privacyOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: '#f8fafc',
+    marginBottom: 6,
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    marginBottom: 12,
-    gap: 10,
   },
-  composerAvatar: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#16a34a',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  composerPlaceholder: { flex: 1, fontSize: 13, color: '#94a3b8' },
-  privacyNoticeBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  privacyOptionSelected: {
     backgroundColor: '#f0fdf4',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 14,
-    gap: 8,
-    borderWidth: 1,
     borderColor: '#bbf7d0',
   },
-  privacyNoticeText: { flex: 1, fontSize: 11, color: '#166534', lineHeight: 15 },
-  postCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+  privacyOptionText: {
+    fontSize: 13,
+    color: '#334155',
   },
-  postAuthorRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  avatarCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  privacyOptionTextSelected: {
+    fontWeight: '700',
+    color: '#16a34a',
+  },
+  privacyToggleRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { color: '#ffffff', fontWeight: '800', fontSize: 14 },
-  authorName: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
-  authorBadgePill: {
-    backgroundColor: '#e0f2fe',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  authorBadgeText: { fontSize: 10, fontWeight: '700', color: '#0284c7' },
-  timeAgoText: { fontSize: 11, color: '#94a3b8', marginTop: 1 },
-  postTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 6 },
-  postContent: { fontSize: 13, color: '#334155', lineHeight: 19, marginBottom: 12 },
-  challengeBox: {
-    backgroundColor: '#f8fafc',
-    padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginBottom: 12,
-  },
-  challengeMetaRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  participantsText: { fontSize: 12, fontWeight: '700', color: '#475569' },
-  percentText: { fontSize: 12, fontWeight: '700', color: '#16a34a' },
-  progressBarTrack: {
-    height: 8,
-    backgroundColor: '#e2e8f0',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginBottom: 10,
-  },
-  progressBarFill: { height: '100%', backgroundColor: '#16a34a' },
-  challengeActionBtn: {
-    backgroundColor: '#16a34a',
+    gap: 12,
     paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center',
   },
-  challengeActionBtnJoined: {
-    backgroundColor: '#dcfce7',
-    borderWidth: 1,
-    borderColor: '#16a34a',
+  toggleRowTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0f172a',
   },
-  challengeActionBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
-  challengeActionBtnTextJoined: { color: '#16a34a' },
-  storyLinkBtn: { marginBottom: 12 },
-  storyLinkBtnText: { fontSize: 13, fontWeight: '700', color: '#16a34a' },
-  postFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
-    paddingTop: 10,
+  toggleRowSub: {
+    fontSize: 11,
+    color: '#64748b',
+    marginTop: 2,
+    lineHeight: 15,
   },
-  postFooterBtn: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  footerBtnText: { fontSize: 12, color: '#64748b' },
-  groupsHeader: { marginBottom: 14 },
-  groupsHeaderTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a' },
-  groupsHeaderSub: { fontSize: 12, color: '#64748b', marginTop: 2 },
-  groupCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  groupTopRow: { flexDirection: 'row', alignItems: 'center' },
-  groupIconEmoji: { fontSize: 28 },
-  groupName: { fontSize: 15, fontWeight: '800', color: '#0f172a' },
-  groupMeta: { fontSize: 11, color: '#64748b', marginTop: 2 },
-  groupJoinBtn: {
-    backgroundColor: '#16a34a',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-  },
-  groupJoinedBtn: { backgroundColor: '#f1f5f9', borderWidth: 1, borderColor: '#cbd5e1' },
-  groupJoinBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 12 },
-  groupJoinedBtnText: { color: '#64748b' },
-  groupDesc: { fontSize: 12, color: '#475569', lineHeight: 17, marginVertical: 10 },
-  groupFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
-    paddingTop: 8,
-  },
-  privacyBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  privacyBadgeText: { fontSize: 11, color: '#64748b', fontWeight: '600' },
-  groupDetailsBtn: {},
-  groupDetailsBtnText: { fontSize: 12, fontWeight: '700', color: '#16a34a' },
-  searchBarContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    marginHorizontal: 16,
-    marginTop: 14,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    gap: 8,
-  },
-  searchInput: { flex: 1, paddingVertical: 10, fontSize: 13, color: '#0f172a' },
-  threadCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  threadAvatar: {
+  toggleSwitch: {
     width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#cbd5e1',
+    padding: 2,
     justifyContent: 'center',
   },
-  threadAvatarSmall: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  threadAvatarText: { color: '#ffffff', fontWeight: '800', fontSize: 14 },
-  threadHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  threadSenderName: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
-  threadTimeAgo: { fontSize: 11, color: '#94a3b8' },
-  threadLastMessage: { fontSize: 12, color: '#64748b', marginTop: 3 },
-  threadLastMessageUnread: { color: '#0f172a', fontWeight: '700' },
-  threadUnreadCircle: {
+  toggleSwitchActive: {
     backgroundColor: '#16a34a',
+  },
+  toggleThumb: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 8,
+    backgroundColor: '#ffffff',
   },
-  threadUnreadCircleText: { color: '#ffffff', fontSize: 10, fontWeight: '800' },
-  messagesPrivacyFooter: {
+  toggleThumbActive: {
+    alignSelf: 'flex-end',
+  },
+  donePrivacyBtn: {
+    backgroundColor: '#16a34a',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 18,
+  },
+  donePrivacyBtnText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  discussionModalContainer: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  discussionModalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  discBackBtn: {
+    padding: 6,
+  },
+  discModalHeaderTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  discussionModalBody: {
+    flex: 1,
+  },
+  discAuthorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 14,
+  },
+  avatarCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+  },
+  avatarInitial: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  discAuthorName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  discAuthorSub: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 1,
+  },
+  discFullTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 10,
+    lineHeight: 24,
+  },
+  discFullContent: {
+    fontSize: 14,
+    color: '#334155',
+    lineHeight: 22,
+    marginBottom: 16,
+  },
+  discActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#f1f5f9',
+    marginBottom: 16,
+  },
+  discSupportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#f8fafc',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  discSupportBtnActive: {
+    backgroundColor: '#fef2f2',
+  },
+  discSupportBtnText: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  discSupportBtnTextActive: {
+    color: '#dc2626',
+    fontWeight: '700',
+  },
+  discCommentCount: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
   },
-  messagesPrivacyFooterText: { fontSize: 11, color: '#64748b', textAlign: 'center', flex: 1 },
-  chatModalContainer: { flex: 1, backgroundColor: '#f8fafc' },
-  chatModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 56 : 48,
-    paddingBottom: 12,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+  discCommentCountText: {
+    fontSize: 13,
+    color: '#64748b',
   },
-  chatModalTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a' },
-  chatModalSub: { fontSize: 11, color: '#64748b' },
-  chatMessagesScroll: { flex: 1 },
-  chatBubble: { maxWidth: '78%', padding: 12, borderRadius: 14, marginBottom: 8 },
-  chatBubbleMe: { alignSelf: 'flex-end', backgroundColor: '#16a34a', borderBottomRightRadius: 2 },
-  chatBubbleThem: { alignSelf: 'flex-start', backgroundColor: '#ffffff', borderBottomLeftRadius: 2, borderWidth: 1, borderColor: '#e2e8f0' },
-  chatBubbleText: { fontSize: 13, lineHeight: 18 },
-  chatBubbleTextMe: { color: '#ffffff' },
-  chatBubbleTextThem: { color: '#0f172a' },
-  chatBubbleTime: { fontSize: 9, marginTop: 4 },
-  chatBubbleTimeMe: { color: '#dcfce7', alignSelf: 'flex-end' },
-  chatBubbleTimeThem: { color: '#94a3b8', alignSelf: 'flex-end' },
-  chatInputBar: {
+  repliesList: {
+    gap: 12,
+  },
+  repliesHeading: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 4,
+  },
+  replyCard: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  replyHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    backgroundColor: '#ffffff',
+    gap: 8,
+    marginBottom: 6,
+  },
+  avatarCircleSmall: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitialSmall: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  replyAuthor: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  replyTime: {
+    fontSize: 10,
+    color: '#94a3b8',
+  },
+  replyContent: {
+    fontSize: 13,
+    color: '#334155',
+    lineHeight: 18,
+  },
+  noRepliesText: {
+    fontSize: 13,
+    color: '#94a3b8',
+    fontStyle: 'italic',
+    paddingVertical: 12,
+  },
+  replyComposerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
+    borderTopColor: '#f1f5f9',
+    backgroundColor: '#ffffff',
     gap: 8,
   },
-  chatInput: {
+  replyInput: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 20,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 8,
     fontSize: 13,
     color: '#0f172a',
+    maxHeight: 80,
   },
-  chatSendBtn: {
+  replySendBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: '#16a34a',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
+  replySendBtnDisabled: {
+    backgroundColor: '#cbd5e1',
   },
-  createPostModalCard: {
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-  },
-  modalTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  modalTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a' },
-  createPostInput: {
-    backgroundColor: '#f8fafc',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 14,
-    color: '#0f172a',
-    height: 110,
-    textAlignVertical: 'top',
-  },
-  modalSafetyNote: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0fdf4',
-    padding: 10,
-    borderRadius: 8,
-    marginVertical: 12,
-    gap: 6,
-  },
-  modalSafetyNoteText: { flex: 1, fontSize: 11, color: '#166534' },
-  publishBtn: {
-    backgroundColor: '#16a34a',
-    paddingVertical: 13,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  publishBtnText: { color: '#ffffff', fontSize: 14, fontWeight: '800' },
-  privacyModalCard: {
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-  },
-  privacySubHeading: { fontSize: 13, fontWeight: '700', color: '#475569', marginBottom: 10 },
-  privacyChoiceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginBottom: 8,
-  },
-  privacyChoiceRowSelected: {
-    backgroundColor: '#f0fdf4',
-    borderColor: '#16a34a',
-  },
-  privacyChoiceText: { fontSize: 13, color: '#334155', fontWeight: '500' },
-  privacyChoiceTextSelected: { color: '#16a34a', fontWeight: '700' },
-  privacyShieldBox: {
-    flexDirection: 'row',
-    backgroundColor: '#fffbeb',
-    padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#fef3c7',
-    marginVertical: 14,
-    gap: 8,
-  },
-  privacyShieldText: { flex: 1, fontSize: 11, color: '#92400e', lineHeight: 16 },
 });
