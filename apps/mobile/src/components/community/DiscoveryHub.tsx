@@ -32,6 +32,7 @@ import {
   CommunityDiscussion,
   SuggestedPerson,
 } from '../../types/communityTypes';
+import { useTheme } from '../../context/ThemeContext';
 
 interface DiscoveryHubProps {
   groups: CommunityGroup[];

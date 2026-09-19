@@ -20,6 +20,7 @@ import {
   Sparkles,
   ShieldCheck,
 } from 'lucide-react-native';
+import { useTheme } from '../../context/ThemeContext';
 
 interface VoiceCallSimulationModalProps {
   visible: boolean;
