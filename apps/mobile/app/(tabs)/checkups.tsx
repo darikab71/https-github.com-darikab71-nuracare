@@ -84,6 +84,7 @@ const BODY_COMFORTS = [
 
 export default function CheckupsScreen() {
   const router = useRouter();
+  const { theme, isDark } = useTheme();
   const { checkIns, addCheckIn, loadWellnessData } = useWellnessStore();
 
   // Top Section: 'daily' vs 'clinical'

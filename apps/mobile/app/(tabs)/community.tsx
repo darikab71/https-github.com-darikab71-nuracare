@@ -49,6 +49,7 @@ import InboxHub from '../../src/components/community/InboxHub';
 import ReportModal from '../../src/components/community/ReportModal';
 
 export default function CommunityCenterScreen() {
+  const { theme, isDark } = useTheme();
   // 1. Root Tab State (Discovery | Challenges | Community | Inbox)
   const [activeTab, setActiveTab] = useState<CommunityPrimaryTab>('discovery');
 
