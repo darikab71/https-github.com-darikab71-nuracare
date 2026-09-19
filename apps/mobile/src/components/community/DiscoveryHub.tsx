@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  Image,
 } from 'react-native';
 import {
   Search,
@@ -25,6 +26,7 @@ import {
   UserPlus,
   UserCheck,
   ShieldAlert,
+  Play,
 } from 'lucide-react-native';
 import {
   CommunityGroup,
@@ -33,6 +35,8 @@ import {
   SuggestedPerson,
 } from '../../types/communityTypes';
 import { useTheme } from '../../context/ThemeContext';
+import CommunityWelcomeCard from './CommunityWelcomeCard';
+import CreatePostModal from './CreatePostModal';
 
 interface DiscoveryHubProps {
   groups: CommunityGroup[];
@@ -46,6 +50,7 @@ interface DiscoveryHubProps {
   onToggleJoinChallenge: (challengeId: string) => void;
   onToggleSupportDiscussion: (discussionId: string) => void;
   onReportItem: (type: 'post' | 'group' | 'discussion' | 'user', title: string) => void;
+  onCreateDiscussion?: (newDiscussion: Partial<CommunityDiscussion>) => void;
 }
 
 type SearchCategory = 'All' | 'Groups' | 'Challenges' | 'People' | 'Discussions';
@@ -62,7 +67,9 @@ export default function DiscoveryHub({
   onToggleJoinChallenge,
   onToggleSupportDiscussion,
   onReportItem,
+  onCreateDiscussion,
 }: DiscoveryHubProps) {
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const { theme, isDark } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<SearchCategory>('All');
@@ -354,6 +361,14 @@ export default function DiscoveryHub({
       ) : (
         /* 4. Default Curated Sections */
         <View style={styles.sectionsContainer}>
+          {/* Welcome Banner Card */}
+          <CommunityWelcomeCard
+            onOpenCreatePost={() => setShowCreateModal(true)}
+            onExploreChallenges={() => {
+              if (challenges.length > 0) onSelectChallenge(challenges[0]);
+            }}
+          />
+
           {/* Section A: Recommended For You */}
           <View style={styles.sectionWrap}>
             <View style={styles.sectionHeader}>
@@ -498,6 +513,46 @@ export default function DiscoveryHub({
                     {d.content}
                   </Text>
 
+                  {/* Picture & Video Media Attachment */}
+                  {d.media && d.media.length > 0 && (
+                    <View style={styles.mediaContainer}>
+                      {d.media.map((m, mIdx) => (
+                        <View key={mIdx} style={styles.mediaItemWrap}>
+                          {m.type === 'image' ? (
+                            <Image
+                              source={{ uri: m.url }}
+                              style={styles.mediaImage}
+                              resizeMode="cover"
+                            />
+                          ) : (
+                            <View style={styles.videoWrap}>
+                              <Image
+                                source={{ uri: m.thumbnailUrl || m.url }}
+                                style={styles.mediaImage}
+                                resizeMode="cover"
+                              />
+                              <View style={styles.videoOverlay}>
+                                <View style={styles.videoPlayCircle}>
+                                  <Play size={18} color="#ffffff" fill="#ffffff" />
+                                </View>
+                                {m.duration && (
+                                  <View style={styles.videoDurationPill}>
+                                    <Text style={styles.videoDurationText}>▶ {m.duration}</Text>
+                                  </View>
+                                )}
+                              </View>
+                            </View>
+                          )}
+                          {m.caption && (
+                            <Text style={[styles.mediaCaption, { color: theme.textSecondary }]}>
+                              {m.caption}
+                            </Text>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
                   <View style={styles.discussionFooter}>
                     <TouchableOpacity
                       style={[
@@ -591,6 +646,14 @@ export default function DiscoveryHub({
           </View>
         </View>
       )}
+      <CreatePostModal
+        visible={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={(post) => {
+          if (onCreateDiscussion) onCreateDiscussion(post);
+          setShowCreateModal(false);
+        }}
+      />
     </ScrollView>
   );
 }
@@ -1095,5 +1158,58 @@ const styles = StyleSheet.create({
     color: '#64748b',
     textAlign: 'center',
     maxWidth: 260,
+  },
+  mediaContainer: {
+    marginTop: 10,
+    marginBottom: 4,
+    gap: 8,
+  },
+  mediaItemWrap: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  mediaImage: {
+    width: '100%',
+    height: 165,
+    borderRadius: 12,
+  },
+  videoWrap: {
+    position: 'relative',
+    height: 165,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  videoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  videoPlayCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  videoDurationPill: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  videoDurationText: {
+    color: '#ffffff',
+    fontSize: 10.5,
+    fontWeight: '700',
+  },
+  mediaCaption: {
+    fontSize: 11,
+    fontStyle: 'italic',
+    marginTop: 4,
   },
 });

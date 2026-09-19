@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
-import { X, Moon, Activity, Utensils, Wind, ShieldCheck, Zap, Droplets, Sparkles, Leaf } from 'lucide-react-native';
+import { X, Moon, Activity, Utensils, Wind, ShieldCheck, Zap, Droplets, Sparkles, Leaf, Flame } from 'lucide-react-native';
 import { useTheme } from '../../context/ThemeContext';
 
 interface CategoryDetailModalProps {
   visible: boolean;
-  category: 'recovery' | 'movement' | 'nourishment' | 'mindfulness' | null;
+  category: 'recovery' | 'movement' | 'nourishment' | 'mindfulness' | 'gymNutrition' | null;
   onClose: () => void;
 }
 
@@ -20,6 +20,31 @@ export default function CategoryDetailModal({
 
   const getDetails = () => {
     switch (category) {
+      case 'gymNutrition':
+        return {
+          title: 'Gym & Athletic Nutrition Protocol',
+          subtitle: 'Pre-workout fueling, protein synthesis & musculoskeletal repair',
+          icon: Flame,
+          color: '#ea580c',
+          sections: [
+            {
+              heading: 'Pre-Workout Metabolic Fueling (45-60m prior)',
+              body: 'Prioritize complex low-glycemic carbohydrates combined with clean natural vasodilators (e.g. sprouted teff porridge, banana with pinch of cinnamon, or beetroot). Avoid heavy fats immediately prior to lifting to prevent sluggish gastric emptying and digestive fatigue.',
+            },
+            {
+              heading: 'Intra-Workout Mineral Homeostasis',
+              body: 'Pure water paired with sodium, potassium, and magnesium prevents cellular dehydration and maintains neuromuscular conduction during heavy hypertrophy or high-volume compound lifts.',
+            },
+            {
+              heading: 'Post-Workout Anabolic Window (within 45m)',
+              body: 'Consume 25–35g of complete bioavailable protein paired with rapid-digesting carbs. This activates mTOR signaling for muscle protein synthesis and restores depleted intramuscular glycogen stores.',
+            },
+            {
+              heading: 'Ethiopian Athletic Superfoods',
+              body: 'Sprouted Teff flour delivers 13% plant protein and bioavailable iron; Roasted Chickpea (Kolo / Shimbra powder) offers rich branched-chain amino acids (BCAAs); Toasted Telba (flaxseed) infuses high anti-inflammatory Omega-3 for connective joint elasticity.',
+            },
+          ],
+        };
       case 'recovery':
         return {
           title: 'Rest & Recovery Protocol',

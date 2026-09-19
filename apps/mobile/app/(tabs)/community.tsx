@@ -170,6 +170,27 @@ export default function CommunityCenterScreen() {
     setChallenges([newChallenge, ...challenges]);
   };
 
+  // Create Discussion / Post with Media
+  const handleCreateDiscussion = (newDiscussionData: Partial<CommunityDiscussion>) => {
+    const newDisc: CommunityDiscussion = {
+      id: 'disc-' + Date.now(),
+      title: newDiscussionData.title || 'New Discussion',
+      content: newDiscussionData.content || '',
+      author: newDiscussionData.author || 'You (Explorer)',
+      authorBadge: newDiscussionData.authorBadge || 'Member',
+      avatarColor: newDiscussionData.avatarColor || '#16a34a',
+      timeAgo: 'Just now',
+      groupName: newDiscussionData.groupName || 'Community',
+      supportCount: 1,
+      userSupported: true,
+      commentCount: 0,
+      replies: [],
+      media: newDiscussionData.media || [],
+    };
+    setDiscussions((prev) => [newDisc, ...prev]);
+    Alert.alert('Post Published', 'Your story and media has been shared with the NuraCare Community!');
+  };
+
   // Create Group
   const handleCreateGroup = (newGroupData: Partial<CommunityGroup>) => {
     const newGroup: CommunityGroup = {
@@ -358,6 +379,7 @@ export default function CommunityCenterScreen() {
             onToggleJoinChallenge={handleToggleJoinChallenge}
             onToggleSupportDiscussion={handleToggleSupportDiscussion}
             onReportItem={handleOpenReport}
+            onCreateDiscussion={handleCreateDiscussion}
           />
         )}
 
@@ -381,6 +403,7 @@ export default function CommunityCenterScreen() {
             onCreateGroup={handleCreateGroup}
             onPostDiscussion={handlePostDiscussion}
             onReportItem={handleOpenReport}
+            onCreateDiscussion={handleCreateDiscussion}
           />
         )}
 

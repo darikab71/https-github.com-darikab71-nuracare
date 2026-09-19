@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Moon, Activity, Droplets, Wind, Plus, Utensils, Check } from 'lucide-react-native';
+import { Moon, Activity, Droplets, Wind, Plus, Flame, Utensils } from 'lucide-react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { LifestyleSnapshot } from '../../storage/lifestyleStorage';
 
@@ -8,14 +8,16 @@ interface DailySnapshotGridProps {
   snapshot: LifestyleSnapshot;
   onLogWater: () => void;
   onLogSteps: () => void;
+  onLogProtein: () => void;
   onOpenBreathwork: () => void;
-  onOpenCategory: (category: 'recovery' | 'movement' | 'nourishment' | 'mindfulness') => void;
+  onOpenCategory: (category: 'recovery' | 'movement' | 'nourishment' | 'mindfulness' | 'gymNutrition') => void;
 }
 
 export default function DailySnapshotGrid({
   snapshot,
   onLogWater,
   onLogSteps,
+  onLogProtein,
   onOpenBreathwork,
   onOpenCategory,
 }: DailySnapshotGridProps) {
@@ -24,6 +26,7 @@ export default function DailySnapshotGrid({
   const sleepPct = Math.min(100, Math.round((snapshot.sleepHours / snapshot.sleepTarget) * 100));
   const stepsPct = Math.min(100, Math.round((snapshot.steps / snapshot.stepsTarget) * 100));
   const waterPct = Math.min(100, Math.round((snapshot.waterMl / snapshot.waterTargetMl) * 100));
+  const proteinPct = Math.min(100, Math.round((snapshot.proteinGrams / snapshot.proteinTargetGrams) * 100));
   const mindfulPct = Math.min(100, Math.round((snapshot.mindfulnessMins / snapshot.mindfulnessTargetMins) * 100));
 
   return (
@@ -62,7 +65,10 @@ export default function DailySnapshotGrid({
             </View>
             <TouchableOpacity
               style={[styles.quickPlusBtn, { backgroundColor: theme.surfaceElevated }]}
-              onPress={onLogSteps}
+              onPress={(e) => {
+                e.stopPropagation();
+                onLogSteps();
+              }}
             >
               <Plus size={12} color={theme.accent} />
             </TouchableOpacity>
@@ -71,6 +77,33 @@ export default function DailySnapshotGrid({
           <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>{stepsPct}% of 9k goal</Text>
           <View style={[styles.miniTrack, { backgroundColor: isDark ? theme.surfaceElevated : '#e2e8f0' }]}>
             <View style={[styles.miniBar, { width: `${stepsPct}%`, backgroundColor: '#10b981' }]} />
+          </View>
+        </TouchableOpacity>
+
+        {/* GYM NUTRITION & PROTEIN CARD */}
+        <TouchableOpacity
+          style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+          onPress={() => onOpenCategory('gymNutrition')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.cardHeader}>
+            <View style={[styles.iconWrap, { backgroundColor: 'rgba(234, 88, 12, 0.12)' }]}>
+              <Flame size={16} color="#ea580c" />
+            </View>
+            <TouchableOpacity
+              style={[styles.quickActionTag, { backgroundColor: 'rgba(234, 88, 12, 0.18)' }]}
+              onPress={(e) => {
+                e.stopPropagation();
+                onLogProtein();
+              }}
+            >
+              <Text style={[styles.quickActionTagText, { color: '#ea580c' }]}>+25g</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={[styles.metricValue, { color: theme.textPrimary }]}>{snapshot.proteinGrams}g</Text>
+          <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>Protein: {proteinPct}% of 130g</Text>
+          <View style={[styles.miniTrack, { backgroundColor: isDark ? theme.surfaceElevated : '#e2e8f0' }]}>
+            <View style={[styles.miniBar, { width: `${proteinPct}%`, backgroundColor: '#ea580c' }]} />
           </View>
         </TouchableOpacity>
 
@@ -97,7 +130,7 @@ export default function DailySnapshotGrid({
 
         {/* MINDFULNESS / RESET CARD */}
         <TouchableOpacity
-          style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+          style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border, minWidth: '100%' }]}
           onPress={onOpenBreathwork}
           activeOpacity={0.8}
         >
@@ -105,10 +138,12 @@ export default function DailySnapshotGrid({
             <View style={[styles.iconWrap, { backgroundColor: 'rgba(245, 158, 11, 0.12)' }]}>
               <Wind size={16} color="#f59e0b" />
             </View>
-            <Text style={[styles.statusBadge, { color: '#f59e0b' }]}>4-7-8 Active</Text>
+            <Text style={[styles.statusBadge, { color: '#f59e0b' }]}>4-7-8 Parasympathetic Reset Active</Text>
           </View>
-          <Text style={[styles.metricValue, { color: theme.textPrimary }]}>{snapshot.mindfulnessMins}m</Text>
-          <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>Mindful Reset</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <Text style={[styles.metricValue, { color: theme.textPrimary }]}>{snapshot.mindfulnessMins} min</Text>
+            <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>Target: {snapshot.mindfulnessTargetMins} min</Text>
+          </View>
           <View style={[styles.miniTrack, { backgroundColor: isDark ? theme.surfaceElevated : '#e2e8f0' }]}>
             <View style={[styles.miniBar, { width: `${mindfulPct}%`, backgroundColor: '#f59e0b' }]} />
           </View>

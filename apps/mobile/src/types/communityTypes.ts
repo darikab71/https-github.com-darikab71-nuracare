@@ -52,6 +52,14 @@ export interface CommunityGroup {
   recentDiscussionsCount: number;
 }
 
+export interface MediaItem {
+  type: 'image' | 'video';
+  url: string;
+  thumbnailUrl?: string;
+  duration?: string; // e.g. '0:45'
+  caption?: string;
+}
+
 export interface DiscussionReply {
   id: string;
   author: string;
@@ -79,6 +87,7 @@ export interface CommunityDiscussion {
   replies: DiscussionReply[];
   tags?: string[];
   pinned?: boolean;
+  media?: MediaItem[];
 }
 
 export interface SuggestedPerson {

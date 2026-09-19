@@ -25,6 +25,7 @@ import {
   Droplets,
   Heart,
   Compass,
+  Flame,
 } from 'lucide-react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useProfile } from '../../src/context/ProfileContext';
@@ -35,6 +36,7 @@ import {
   getLifestyleSnapshot,
   logWater,
   logSteps,
+  logProtein,
   getLifestyleGoals,
   toggleLifestyleGoal,
   addLifestyleGoal,
@@ -53,6 +55,7 @@ import {
 
 // Lifestyle Components
 import LifestyleHeader from '../../src/components/lifestyle/LifestyleHeader';
+import LifestyleWelcomeCard from '../../src/components/lifestyle/LifestyleWelcomeCard';
 import LifestyleOverviewCard from '../../src/components/lifestyle/LifestyleOverviewCard';
 import DailySnapshotGrid from '../../src/components/lifestyle/DailySnapshotGrid';
 import TodaysGoalsSection from '../../src/components/lifestyle/TodaysGoalsSection';
@@ -77,7 +80,7 @@ export default function LifestyleScreen() {
   const [trendPoints, setTrendPoints] = useState<DayTrendPoint[]>(getWeeklyTrendPoints());
 
   // Category Detail Modal
-  const [activeCategoryModal, setActiveCategoryModal] = useState<'recovery' | 'movement' | 'nourishment' | 'mindfulness' | null>(null);
+  const [activeCategoryModal, setActiveCategoryModal] = useState<'recovery' | 'movement' | 'nourishment' | 'mindfulness' | 'gymNutrition' | null>(null);
 
   // Interactive 4-7-8 Breathwork
   const [breathingActive, setBreathingActive] = useState(false);
@@ -143,6 +146,11 @@ export default function LifestyleScreen() {
     setSnapshot(updated);
   };
 
+  const handleLogProtein = () => {
+    const updated = logProtein(25);
+    setSnapshot(updated);
+  };
+
   const handleToggleGoal = (id: string) => {
     const updated = toggleLifestyleGoal(id);
     setGoals(updated);
@@ -184,49 +192,78 @@ export default function LifestyleScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 2. Today's Lifestyle Overview Card */}
+        {/* 2. Welcome Picture Hero Banner */}
+        <LifestyleWelcomeCard
+          balanceScore={snapshot.balanceScore}
+          streakDays={5}
+          onLogWater={handleLogWater}
+          onLogProtein={handleLogProtein}
+          onOpenBreathwork={() => setBreathingActive(true)}
+          onOpenGymNutrition={() => setActiveCategoryModal('gymNutrition')}
+        />
+
+        {/* 3. Today's Lifestyle Overview Card */}
         <LifestyleOverviewCard snapshot={snapshot} />
 
-        {/* 3. Daily Snapshot Grid */}
+        {/* 4. Daily Snapshot Grid (including Gym Nutrition & Protein) */}
         <DailySnapshotGrid
           snapshot={snapshot}
           onLogWater={handleLogWater}
           onLogSteps={handleLogSteps}
+          onLogProtein={handleLogProtein}
           onOpenBreathwork={() => setBreathingActive(true)}
           onOpenCategory={(cat) => setActiveCategoryModal(cat)}
         />
 
-        {/* 4. Today's Goals Section */}
+        {/* 5. Today's Goals Section */}
         <TodaysGoalsSection
           goals={goals}
           onToggleGoal={handleToggleGoal}
           onAddGoal={handleAddGoal}
         />
 
-        {/* 5. Weekly Trends ("Your Week") */}
+        {/* 6. Weekly Trends ("Your Week") */}
         <WeeklyTrendsSection trendPoints={trendPoints} />
 
-        {/* 6. Weekly Habit Consistency Matrix */}
+        {/* 7. Weekly Habit Consistency Matrix */}
         <HabitTrackerGrid
           habits={habits}
           onToggleHabit={handleToggleHabit}
         />
 
-        {/* 7. Daily Routines Timeline (Morning / Evening) */}
+        {/* 8. Daily Routines Timeline (Morning / Evening) */}
         <RoutinesTimelineSection
           routines={routines}
           onToggleStep={handleToggleRoutineStep}
           onResetRoutine={handleResetRoutine}
         />
 
-        {/* 8. Lifestyle Categories & Evidence Protocols */}
+        {/* 9. Lifestyle Categories & Evidence Protocols */}
         <View style={styles.categoriesSection}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Lifestyle Protocols</Text>
           <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
-            Evidence-based biological rhythms & integrative medicine
+            Evidence-based biological rhythms, gym nutrition & integrative medicine
           </Text>
 
           <View style={styles.protocolCardsList}>
+            {/* Gym & Athletic Nutrition */}
+            <TouchableOpacity
+              style={[styles.protocolCard, { backgroundColor: theme.surface, borderColor: theme.border }]}
+              onPress={() => setActiveCategoryModal('gymNutrition')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.protocolIconWrap, { backgroundColor: 'rgba(234, 88, 12, 0.12)' }]}>
+                <Flame size={18} color="#ea580c" />
+              </View>
+              <View style={styles.protocolTextWrap}>
+                <Text style={[styles.protocolTitle, { color: theme.textPrimary }]}>Gym Nutrition & Muscle Recovery</Text>
+                <Text style={[styles.protocolSnippet, { color: theme.textSecondary }]}>
+                  Pre-workout complex carbs, intra-set electrolytes & 30g post-workout teff protein timing.
+                </Text>
+              </View>
+              <ChevronRight size={18} color={theme.textTertiary} />
+            </TouchableOpacity>
+
             {/* Rest & Recovery */}
             <TouchableOpacity
               style={[styles.protocolCard, { backgroundColor: theme.surface, borderColor: theme.border }]}
@@ -274,7 +311,7 @@ export default function LifestyleScreen() {
               </View>
               <View style={styles.protocolTextWrap}>
                 <Text style={[styles.protocolTitle, { color: theme.textPrimary }]}>
-                  Prebiotic Whole Teff & Telba {isFasting ? '(Fasting)' : ''}
+                  Prebiotic Whole Teff & Telba {isFasting ? '(Fasting Active)' : ''}
                 </Text>
                 <Text style={[styles.protocolSnippet, { color: theme.textSecondary }]}>
                   Microbiome nourishment with resistant starch and anti-inflammatory flaxseed omega.
@@ -285,7 +322,7 @@ export default function LifestyleScreen() {
           </View>
         </View>
 
-        {/* 9. Interactive 4-7-8 Autonomic Breathwork Module */}
+        {/* 10. Interactive 4-7-8 Autonomic Breathwork Module */}
         <View style={[styles.breathworkContainer, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={[styles.breathBadge, { backgroundColor: theme.accentGlow, borderColor: theme.accentSecondary + '40' }]}>
             <Wind size={13} color={theme.accent} />
@@ -337,15 +374,15 @@ export default function LifestyleScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* 10. Recommended for You (Contextual AI Insight) */}
+        {/* 11. Recommended for You (Contextual AI Insight) */}
         <View style={[styles.recCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
           <View style={[styles.recIconWrap, { backgroundColor: theme.accentGlow }]}>
             <Sparkles size={16} color={theme.accent} />
           </View>
           <View style={styles.recTextWrap}>
-            <Text style={[styles.recTitle, { color: theme.textPrimary }]}>Recommended for You</Text>
+            <Text style={[styles.recTitle, { color: theme.textPrimary }]}>Gym Nutrition & Sleep Synergy</Text>
             <Text style={[styles.recBody, { color: theme.textSecondary }]}>
-              Your activity pattern is consistent. Try completing your evening digital sunset 45 minutes earlier to elevate slow-wave sleep recovery.
+              Consuming your post-workout protein with toasted telba omega-3 accelerates muscle repair, allowing deeper slow-wave sleep recovery tonight.
             </Text>
           </View>
         </View>

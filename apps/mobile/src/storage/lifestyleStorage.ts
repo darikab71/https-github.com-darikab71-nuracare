@@ -9,6 +9,8 @@ export interface LifestyleSnapshot {
   stepsTarget: number;
   waterMl: number;
   waterTargetMl: number;
+  proteinGrams: number;
+  proteinTargetGrams: number;
   mindfulnessMins: number;
   mindfulnessTargetMins: number;
   fastingWindowActive: boolean;
@@ -30,7 +32,7 @@ export interface LifestyleHabit {
   detail: string;
   category: 'sleep' | 'movement' | 'hydration' | 'mindfulness' | 'nutrition';
   iconName: string;
-  completedDates: string[]; // ['2026-09-18', '2026-09-19', ...]
+  completedDates: string[];
 }
 
 export interface RoutineStep {
@@ -49,12 +51,13 @@ export interface RoutineData {
 }
 
 export interface DayTrendPoint {
-  dayLabel: string; // 'Mon', 'Tue', ...
+  dayLabel: string;
   dateStr: string;
   balanceScore: number;
   sleepHours: number;
   steps: number;
   waterLiters: number;
+  proteinGrams: number;
   habitCompletionPct: number;
 }
 
@@ -76,16 +79,19 @@ const DEFAULT_SNAPSHOT: LifestyleSnapshot = {
   stepsTarget: 9000,
   waterMl: 1800,
   waterTargetMl: 2500,
+  proteinGrams: 95,
+  proteinTargetGrams: 130,
   mindfulnessMins: 12,
   mindfulnessTargetMins: 15,
   fastingWindowActive: true,
   fastingHoursElapsed: 14,
-  balanceScore: 84,
+  balanceScore: 86,
 };
 
 const DEFAULT_GOALS: LifestyleGoal[] = [
   { id: 'goal-1', title: 'Complete Morning Sunlight & Mobility', category: 'movement', completed: true, target: '15 min' },
   { id: 'goal-2', title: 'Drink 2.5L Filtered Spring Water', category: 'hydration', completed: false, target: '2.5 L' },
+  { id: 'goal-gym', title: 'Post-Workout Protein & Glycogen Window', category: 'nutrition', completed: true, target: '30g protein' },
   { id: 'goal-3', title: 'Post-Meal 15 Min Glucose Walk', category: 'movement', completed: true, target: '15 min' },
   { id: 'goal-4', title: '4-7-8 Parasympathetic Reset', category: 'mindfulness', completed: false, target: '1 session' },
   { id: 'goal-5', title: 'Digital Sunset (Screens off 60m prior)', category: 'sleep', completed: false, target: '10:00 PM' },
@@ -106,6 +112,14 @@ const DEFAULT_HABITS: LifestyleHabit[] = [
     detail: '500ml water before morning coffee or tea',
     category: 'hydration',
     iconName: 'Droplets',
+    completedDates: [],
+  },
+  {
+    id: 'habit-gym-nutrition',
+    label: 'Gym Nutrition & Protein Target',
+    detail: '130g daily target with pre/post workout timing',
+    category: 'nutrition',
+    iconName: 'Flame',
     completedDates: [],
   },
   {
@@ -167,6 +181,11 @@ export function getLifestyleSnapshot(): LifestyleSnapshot {
     if (parsed.date !== getTodayStr()) {
       return { ...parsed, date: getTodayStr() };
     }
+    // ensure protein fields exist
+    if (parsed.proteinGrams === undefined) {
+      parsed.proteinGrams = DEFAULT_SNAPSHOT.proteinGrams;
+      parsed.proteinTargetGrams = DEFAULT_SNAPSHOT.proteinTargetGrams;
+    }
     return parsed;
   } catch {
     return DEFAULT_SNAPSHOT;
@@ -177,12 +196,13 @@ export function saveLifestyleSnapshot(snapshot: LifestyleSnapshot): void {
   storage.set(SNAPSHOT_KEY, JSON.stringify(snapshot));
 }
 
-function calculateBalance(sleep: number, steps: number, water: number, mindful: number): number {
-  const sleepRatio = Math.min(1, sleep / 8.0) * 30;
-  const stepsRatio = Math.min(1, steps / 9000) * 30;
+function calculateBalance(sleep: number, steps: number, water: number, mindful: number, protein: number): number {
+  const sleepRatio = Math.min(1, sleep / 8.0) * 25;
+  const stepsRatio = Math.min(1, steps / 9000) * 25;
   const waterRatio = Math.min(1, water / 2500) * 20;
-  const mindfulRatio = Math.min(1, mindful / 15) * 20;
-  return Math.min(100, Math.round(sleepRatio + stepsRatio + waterRatio + mindfulRatio));
+  const mindfulRatio = Math.min(1, mindful / 15) * 15;
+  const proteinRatio = Math.min(1, protein / 130) * 15;
+  return Math.min(100, Math.round(sleepRatio + stepsRatio + waterRatio + mindfulRatio + proteinRatio));
 }
 
 export function logWater(deltaMl: number): LifestyleSnapshot {
@@ -191,7 +211,7 @@ export function logWater(deltaMl: number): LifestyleSnapshot {
   const updated: LifestyleSnapshot = {
     ...current,
     waterMl: nextWater,
-    balanceScore: calculateBalance(current.sleepHours, current.steps, nextWater, current.mindfulnessMins),
+    balanceScore: calculateBalance(current.sleepHours, current.steps, nextWater, current.mindfulnessMins, current.proteinGrams),
   };
   saveLifestyleSnapshot(updated);
   return updated;
@@ -203,7 +223,19 @@ export function logSteps(deltaSteps: number): LifestyleSnapshot {
   const updated: LifestyleSnapshot = {
     ...current,
     steps: nextSteps,
-    balanceScore: calculateBalance(current.sleepHours, nextSteps, current.waterMl, current.mindfulnessMins),
+    balanceScore: calculateBalance(current.sleepHours, nextSteps, current.waterMl, current.mindfulnessMins, current.proteinGrams),
+  };
+  saveLifestyleSnapshot(updated);
+  return updated;
+}
+
+export function logProtein(deltaGrams: number): LifestyleSnapshot {
+  const current = getLifestyleSnapshot();
+  const nextProtein = Math.max(0, current.proteinGrams + deltaGrams);
+  const updated: LifestyleSnapshot = {
+    ...current,
+    proteinGrams: nextProtein,
+    balanceScore: calculateBalance(current.sleepHours, current.steps, current.waterMl, current.mindfulnessMins, nextProtein),
   };
   saveLifestyleSnapshot(updated);
   return updated;
@@ -358,19 +390,21 @@ export function getWeeklyTrendPoints(): DayTrendPoint[] {
     const dateStr = d.toISOString().split('T')[0];
     const dayName = days[d.getDay()];
 
-    const scoreBase = 76 + ((i * 3 + 4) % 18);
+    const scoreBase = 78 + ((i * 3 + 4) % 16);
     const sleepBase = 7.0 + ((i * 2 + 1) % 15) / 10;
     const stepsBase = 5800 + ((i * 700 + 350) % 3800);
     const waterBase = 1.6 + ((i * 3 + 2) % 10) / 10;
+    const proteinBase = 85 + ((i * 8 + 5) % 45);
     const habitsPct = 60 + ((i * 7) % 35);
 
     points.push({
       dayLabel: dayName,
       dateStr,
-      balanceScore: i === 0 ? 84 : scoreBase,
+      balanceScore: i === 0 ? 86 : scoreBase,
       sleepHours: i === 0 ? 7.4 : sleepBase,
       steps: i === 0 ? 6482 : stepsBase,
       waterLiters: i === 0 ? 1.8 : waterBase,
+      proteinGrams: i === 0 ? 95 : proteinBase,
       habitCompletionPct: i === 0 ? 80 : habitsPct,
     });
   }
