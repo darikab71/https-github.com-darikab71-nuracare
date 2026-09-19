@@ -1,27 +1,84 @@
 import { storage } from './mmkv';
 
+export type LifestyleCategoryKey =
+  | 'nutrition'
+  | 'fitness'
+  | 'sleep'
+  | 'digital'
+  | 'mental'
+  | 'hydration'
+  | 'habits'
+  | 'social';
+
+export interface CategoryOverviewData {
+  key: LifestyleCategoryKey;
+  name: string;
+  shortDesc: string;
+  iconName: string;
+  color: string;
+  primaryMetric: string;
+  statusLabel: string;
+  progressPct: number;
+}
+
 export interface LifestyleSnapshot {
   date: string;
+  balanceScore: number;
+
+  // 1. Nutrition
+  mealsLogged: number;
+  mealsTarget: number;
+  nutritionConsistencyPct: number;
+  proteinGrams: number;
+  proteinTargetGrams: number;
+  fastingWindowActive: boolean;
+
+  // 2. Fitness & Gym
+  steps: number;
+  stepsTarget: number;
+  activeMinutes: number;
+  activeMinutesTarget: number;
+  workoutsThisWeek: number;
+  workoutsWeeklyTarget: number;
+
+  // 3. Sleep & Recovery
   sleepHours: number;
   sleepTarget: number;
   sleepQuality: 'Optimal' | 'Good' | 'Fair' | 'Restless';
-  steps: number;
-  stepsTarget: number;
-  waterMl: number;
-  waterTargetMl: number;
-  proteinGrams: number;
-  proteinTargetGrams: number;
+  sleepConsistencyPct: number;
+  bedtimeAnchor: string;
+
+  // 4. Digital Wellbeing
+  screenMinutes: number;
+  screenLimitMinutes: number;
+  digitalBreaksCount: number;
+  focusMinutes: number;
+
+  // 5. Mental Wellbeing
+  currentMood: 'Great' | 'Good' | 'Okay' | 'Low' | 'Difficult';
+  stressLevel: 'Low' | 'Moderate' | 'Elevated';
   mindfulnessMins: number;
   mindfulnessTargetMins: number;
-  fastingWindowActive: boolean;
-  fastingHoursElapsed: number;
-  balanceScore: number;
+
+  // 6. Hydration
+  waterMl: number;
+  waterTargetMl: number;
+
+  // 7. Habits & Routines
+  completedHabitsCount: number;
+  totalHabitsCount: number;
+  habitStreakDays: number;
+
+  // 8. Social Wellbeing
+  connectionsThisWeek: number;
+  connectionWeeklyTarget: number;
+  lastSocialCheckIn: string;
 }
 
 export interface LifestyleGoal {
   id: string;
   title: string;
-  category: 'sleep' | 'movement' | 'hydration' | 'mindfulness' | 'nutrition';
+  category: LifestyleCategoryKey;
   completed: boolean;
   target?: string;
 }
@@ -30,7 +87,7 @@ export interface LifestyleHabit {
   id: string;
   label: string;
   detail: string;
-  category: 'sleep' | 'movement' | 'hydration' | 'mindfulness' | 'nutrition';
+  category: LifestyleCategoryKey;
   iconName: string;
   completedDates: string[];
 }
@@ -58,10 +115,11 @@ export interface DayTrendPoint {
   steps: number;
   waterLiters: number;
   proteinGrams: number;
+  screenMinutes: number;
   habitCompletionPct: number;
 }
 
-const SNAPSHOT_KEY = 'nuracare_lifestyle_snapshot';
+const SNAPSHOT_KEY = 'nuracare_lifestyle_hub_snapshot';
 const GOALS_KEY = 'nuracare_lifestyle_goals';
 const HABITS_KEY = 'nuracare_lifestyle_habits';
 const ROUTINES_KEY = 'nuracare_lifestyle_routines';
@@ -72,80 +130,75 @@ function getTodayStr(): string {
 
 const DEFAULT_SNAPSHOT: LifestyleSnapshot = {
   date: getTodayStr(),
+  balanceScore: 84,
+
+  // 1. Nutrition
+  mealsLogged: 3,
+  mealsTarget: 3,
+  nutritionConsistencyPct: 82,
+  proteinGrams: 95,
+  proteinTargetGrams: 130,
+  fastingWindowActive: true,
+
+  // 2. Fitness & Gym
+  steps: 6482,
+  stepsTarget: 9000,
+  activeMinutes: 42,
+  activeMinutesTarget: 45,
+  workoutsThisWeek: 4,
+  workoutsWeeklyTarget: 5,
+
+  // 3. Sleep & Recovery
   sleepHours: 7.4,
   sleepTarget: 8.0,
   sleepQuality: 'Good',
-  steps: 6482,
-  stepsTarget: 9000,
-  waterMl: 1800,
-  waterTargetMl: 2500,
-  proteinGrams: 95,
-  proteinTargetGrams: 130,
+  sleepConsistencyPct: 84,
+  bedtimeAnchor: '23:15',
+
+  // 4. Digital Wellbeing
+  screenMinutes: 252, // 4h 12m
+  screenLimitMinutes: 300, // 5h 00m
+  digitalBreaksCount: 3,
+  focusMinutes: 100, // 1h 40m
+
+  // 5. Mental Wellbeing
+  currentMood: 'Good',
+  stressLevel: 'Low',
   mindfulnessMins: 12,
   mindfulnessTargetMins: 15,
-  fastingWindowActive: true,
-  fastingHoursElapsed: 14,
-  balanceScore: 86,
+
+  // 6. Hydration
+  waterMl: 1800,
+  waterTargetMl: 2500,
+
+  // 7. Habits & Routines
+  completedHabitsCount: 4,
+  totalHabitsCount: 5,
+  habitStreakDays: 5,
+
+  // 8. Social Wellbeing
+  connectionsThisWeek: 2,
+  connectionWeeklyTarget: 3,
+  lastSocialCheckIn: 'Family call (Yesterday)',
 };
 
 const DEFAULT_GOALS: LifestyleGoal[] = [
-  { id: 'goal-1', title: 'Complete Morning Sunlight & Mobility', category: 'movement', completed: true, target: '15 min' },
-  { id: 'goal-2', title: 'Drink 2.5L Filtered Spring Water', category: 'hydration', completed: false, target: '2.5 L' },
-  { id: 'goal-gym', title: 'Post-Workout Protein & Glycogen Window', category: 'nutrition', completed: true, target: '30g protein' },
-  { id: 'goal-3', title: 'Post-Meal 15 Min Glucose Walk', category: 'movement', completed: true, target: '15 min' },
-  { id: 'goal-4', title: '4-7-8 Parasympathetic Reset', category: 'mindfulness', completed: false, target: '1 session' },
-  { id: 'goal-5', title: 'Digital Sunset (Screens off 60m prior)', category: 'sleep', completed: false, target: '10:00 PM' },
+  { id: 'g-nutr', title: 'Consume 30g Post-Workout Teff Protein', category: 'nutrition', completed: true, target: '30g protein' },
+  { id: 'g-fit', title: 'Reach 8,500 Steps with Post-Meal Walk', category: 'fitness', completed: false, target: '8,500 steps' },
+  { id: 'g-sleep', title: 'Digital Sunset 60 Minutes Before Bed', category: 'sleep', completed: false, target: '22:15' },
+  { id: 'g-dig', title: 'Take 3 Hourly Screen-Free Breaks', category: 'digital', completed: true, target: '3 breaks' },
+  { id: 'g-ment', title: 'Evening 4-7-8 Breathwork Session', category: 'mental', completed: false, target: '2 min' },
+  { id: 'g-hydr', title: 'Drink 2.5L Filtered Mineral Water', category: 'hydration', completed: false, target: '2.5 L' },
+  { id: 'g-hab', title: 'Complete Morning Awakening Routine', category: 'habits', completed: true, target: 'Morning' },
+  { id: 'g-soc', title: 'Call a Friend or Family Member', category: 'social', completed: false, target: 'Weekly' },
 ];
 
 const DEFAULT_HABITS: LifestyleHabit[] = [
-  {
-    id: 'habit-sun',
-    label: 'Morning Sunlight',
-    detail: 'Suprachiasmatic reset within 1h of waking',
-    category: 'mindfulness',
-    iconName: 'Sun',
-    completedDates: [],
-  },
-  {
-    id: 'habit-water',
-    label: 'Hydration Starter',
-    detail: '500ml water before morning coffee or tea',
-    category: 'hydration',
-    iconName: 'Droplets',
-    completedDates: [],
-  },
-  {
-    id: 'habit-gym-nutrition',
-    label: 'Gym Nutrition & Protein Target',
-    detail: '130g daily target with pre/post workout timing',
-    category: 'nutrition',
-    iconName: 'Flame',
-    completedDates: [],
-  },
-  {
-    id: 'habit-eskista',
-    label: 'Thoracic Mobility Reset',
-    detail: '5 min scapular release for desk posture',
-    category: 'movement',
-    iconName: 'Activity',
-    completedDates: [],
-  },
-  {
-    id: 'habit-teff',
-    label: 'Prebiotic Teff Whole Grain',
-    detail: 'Fermented resistant starch for gut microbiome',
-    category: 'nutrition',
-    iconName: 'Leaf',
-    completedDates: [],
-  },
-  {
-    id: 'habit-breath',
-    label: '4-7-8 Nervous Reset',
-    detail: 'Down-regulate evening sympathetic arousal',
-    category: 'mindfulness',
-    iconName: 'Wind',
-    completedDates: [],
-  },
+  { id: 'h-1', label: 'Morning Sunlight', detail: '10-15m natural light anchor', category: 'sleep', iconName: 'Sun', completedDates: [] },
+  { id: 'h-2', label: 'Hydration Starter', detail: '500ml water upon waking', category: 'hydration', iconName: 'Droplets', completedDates: [] },
+  { id: 'h-3', label: 'Gym & Mobility Reset', detail: 'Eskista scapular release or lifting', category: 'fitness', iconName: 'Flame', completedDates: [] },
+  { id: 'h-4', label: 'Prebiotic Teff Grain', detail: 'Fermented resistant gut starch', category: 'nutrition', iconName: 'Leaf', completedDates: [] },
+  { id: 'h-5', label: 'Digital Sunset', detail: 'Blue light filters off at night', category: 'digital', iconName: 'Moon', completedDates: [] },
 ];
 
 const DEFAULT_ROUTINES: { morning: RoutineData; evening: RoutineData } = {
@@ -157,7 +210,7 @@ const DEFAULT_ROUTINES: { morning: RoutineData; evening: RoutineData } = {
       { id: 'm-1', time: '06:30', title: 'Natural Awakening', detail: 'Consistent wake window anchor', completed: true },
       { id: 'm-2', time: '06:35', title: 'Electrolyte Hydration', detail: '500ml water with pinch of sea salt', completed: true },
       { id: 'm-3', time: '06:45', title: 'Solar Exposure', detail: '10-15 mins direct morning sunlight', completed: true },
-      { id: 'm-4', time: '07:05', title: 'Gentle Mobility Reset', detail: 'Thoracic rotations & deep joint flossing', completed: false },
+      { id: 'm-4', time: '07:05', title: 'Gentle Mobility Reset', detail: 'Thoracic rotations & joint flossing', completed: false },
     ],
   },
   evening: {
@@ -181,12 +234,7 @@ export function getLifestyleSnapshot(): LifestyleSnapshot {
     if (parsed.date !== getTodayStr()) {
       return { ...parsed, date: getTodayStr() };
     }
-    // ensure protein fields exist
-    if (parsed.proteinGrams === undefined) {
-      parsed.proteinGrams = DEFAULT_SNAPSHOT.proteinGrams;
-      parsed.proteinTargetGrams = DEFAULT_SNAPSHOT.proteinTargetGrams;
-    }
-    return parsed;
+    return { ...DEFAULT_SNAPSHOT, ...parsed };
   } catch {
     return DEFAULT_SNAPSHOT;
   }
@@ -196,23 +244,95 @@ export function saveLifestyleSnapshot(snapshot: LifestyleSnapshot): void {
   storage.set(SNAPSHOT_KEY, JSON.stringify(snapshot));
 }
 
-function calculateBalance(sleep: number, steps: number, water: number, mindful: number, protein: number): number {
-  const sleepRatio = Math.min(1, sleep / 8.0) * 25;
-  const stepsRatio = Math.min(1, steps / 9000) * 25;
-  const waterRatio = Math.min(1, water / 2500) * 20;
-  const mindfulRatio = Math.min(1, mindful / 15) * 15;
-  const proteinRatio = Math.min(1, protein / 130) * 15;
-  return Math.min(100, Math.round(sleepRatio + stepsRatio + waterRatio + mindfulRatio + proteinRatio));
+export function getCategoriesOverview(snapshot: LifestyleSnapshot): CategoryOverviewData[] {
+  return [
+    {
+      key: 'nutrition',
+      name: 'Nutrition',
+      shortDesc: 'Understand eating patterns & metabolic fuel',
+      iconName: 'Utensils',
+      color: '#16a34a',
+      primaryMetric: `${snapshot.mealsLogged}/${snapshot.mealsTarget} Meals`,
+      statusLabel: `${snapshot.proteinGrams}g Protein`,
+      progressPct: snapshot.nutritionConsistencyPct,
+    },
+    {
+      key: 'fitness',
+      name: 'Fitness & Gym',
+      shortDesc: 'Track movement, training & active vigor',
+      iconName: 'Activity',
+      color: '#ea580c',
+      primaryMetric: `${snapshot.steps.toLocaleString()} Steps`,
+      statusLabel: `${snapshot.workoutsThisWeek}/${snapshot.workoutsWeeklyTarget} Workouts`,
+      progressPct: Math.min(100, Math.round((snapshot.steps / snapshot.stepsTarget) * 100)),
+    },
+    {
+      key: 'sleep',
+      name: 'Sleep & Recovery',
+      shortDesc: 'Build restorative sleep & circadian rhythm',
+      iconName: 'Moon',
+      color: '#6366f1',
+      primaryMetric: `${snapshot.sleepHours}h Sleep`,
+      statusLabel: `${snapshot.sleepQuality} Quality`,
+      progressPct: Math.min(100, Math.round((snapshot.sleepHours / snapshot.sleepTarget) * 100)),
+    },
+    {
+      key: 'digital',
+      name: 'Digital Wellbeing',
+      shortDesc: 'Create intentional screen & focus habits',
+      iconName: 'Smartphone',
+      color: '#0284c7',
+      primaryMetric: `${Math.floor(snapshot.screenMinutes / 60)}h ${snapshot.screenMinutes % 60}m`,
+      statusLabel: `${snapshot.digitalBreaksCount} Breaks Taken`,
+      progressPct: Math.min(100, Math.round((snapshot.screenMinutes / snapshot.screenLimitMinutes) * 100)),
+    },
+    {
+      key: 'mental',
+      name: 'Mental Wellbeing',
+      shortDesc: 'Reflect, reset & balance autonomic tone',
+      iconName: 'Wind',
+      color: '#f59e0b',
+      primaryMetric: `${snapshot.currentMood} Mood`,
+      statusLabel: `${snapshot.stressLevel} Stress`,
+      progressPct: Math.min(100, Math.round((snapshot.mindfulnessMins / snapshot.mindfulnessTargetMins) * 100)),
+    },
+    {
+      key: 'hydration',
+      name: 'Hydration',
+      shortDesc: 'Stay steady with cellular hydration',
+      iconName: 'Droplets',
+      color: '#0ea5e9',
+      primaryMetric: `${(snapshot.waterMl / 1000).toFixed(1)} L`,
+      statusLabel: `${Math.round((snapshot.waterMl / snapshot.waterTargetMl) * 100)}% of 2.5L`,
+      progressPct: Math.min(100, Math.round((snapshot.waterMl / snapshot.waterTargetMl) * 100)),
+    },
+    {
+      key: 'habits',
+      name: 'Habits & Routines',
+      shortDesc: 'Build grounding daily consistency that lasts',
+      iconName: 'CheckCircle2',
+      color: '#10b981',
+      primaryMetric: `${snapshot.completedHabitsCount}/${snapshot.totalHabitsCount} Done`,
+      statusLabel: `${snapshot.habitStreakDays}-Day Streak`,
+      progressPct: Math.min(100, Math.round((snapshot.completedHabitsCount / snapshot.totalHabitsCount) * 100)),
+    },
+    {
+      key: 'social',
+      name: 'Social Wellbeing',
+      shortDesc: 'Make space for intentional human connection',
+      iconName: 'Users',
+      color: '#ec4899',
+      primaryMetric: `${snapshot.connectionsThisWeek}/${snapshot.connectionWeeklyTarget} Weekly`,
+      statusLabel: 'Intentional',
+      progressPct: Math.min(100, Math.round((snapshot.connectionsThisWeek / snapshot.connectionWeeklyTarget) * 100)),
+    },
+  ];
 }
 
 export function logWater(deltaMl: number): LifestyleSnapshot {
   const current = getLifestyleSnapshot();
   const nextWater = Math.max(0, current.waterMl + deltaMl);
-  const updated: LifestyleSnapshot = {
-    ...current,
-    waterMl: nextWater,
-    balanceScore: calculateBalance(current.sleepHours, current.steps, nextWater, current.mindfulnessMins, current.proteinGrams),
-  };
+  const updated: LifestyleSnapshot = { ...current, waterMl: nextWater };
   saveLifestyleSnapshot(updated);
   return updated;
 }
@@ -220,11 +340,7 @@ export function logWater(deltaMl: number): LifestyleSnapshot {
 export function logSteps(deltaSteps: number): LifestyleSnapshot {
   const current = getLifestyleSnapshot();
   const nextSteps = Math.max(0, current.steps + deltaSteps);
-  const updated: LifestyleSnapshot = {
-    ...current,
-    steps: nextSteps,
-    balanceScore: calculateBalance(current.sleepHours, nextSteps, current.waterMl, current.mindfulnessMins, current.proteinGrams),
-  };
+  const updated: LifestyleSnapshot = { ...current, steps: nextSteps };
   saveLifestyleSnapshot(updated);
   return updated;
 }
@@ -232,10 +348,53 @@ export function logSteps(deltaSteps: number): LifestyleSnapshot {
 export function logProtein(deltaGrams: number): LifestyleSnapshot {
   const current = getLifestyleSnapshot();
   const nextProtein = Math.max(0, current.proteinGrams + deltaGrams);
+  const updated: LifestyleSnapshot = { ...current, proteinGrams: nextProtein };
+  saveLifestyleSnapshot(updated);
+  return updated;
+}
+
+export function logMeal(): LifestyleSnapshot {
+  const current = getLifestyleSnapshot();
+  const nextMeals = Math.min(current.mealsTarget, current.mealsLogged + 1);
+  const updated: LifestyleSnapshot = { ...current, mealsLogged: nextMeals };
+  saveLifestyleSnapshot(updated);
+  return updated;
+}
+
+export function logWorkout(durationMinutes = 40): LifestyleSnapshot {
+  const current = getLifestyleSnapshot();
   const updated: LifestyleSnapshot = {
     ...current,
-    proteinGrams: nextProtein,
-    balanceScore: calculateBalance(current.sleepHours, current.steps, current.waterMl, current.mindfulnessMins, nextProtein),
+    activeMinutes: current.activeMinutes + durationMinutes,
+    workoutsThisWeek: Math.min(current.workoutsWeeklyTarget, current.workoutsThisWeek + 1),
+  };
+  saveLifestyleSnapshot(updated);
+  return updated;
+}
+
+export function logDigitalBreak(): LifestyleSnapshot {
+  const current = getLifestyleSnapshot();
+  const updated: LifestyleSnapshot = {
+    ...current,
+    digitalBreaksCount: current.digitalBreaksCount + 1,
+  };
+  saveLifestyleSnapshot(updated);
+  return updated;
+}
+
+export function logMoodCheckIn(mood: LifestyleSnapshot['currentMood']): LifestyleSnapshot {
+  const current = getLifestyleSnapshot();
+  const updated: LifestyleSnapshot = { ...current, currentMood: mood };
+  saveLifestyleSnapshot(updated);
+  return updated;
+}
+
+export function logSocialConnection(): LifestyleSnapshot {
+  const current = getLifestyleSnapshot();
+  const updated: LifestyleSnapshot = {
+    ...current,
+    connectionsThisWeek: Math.min(current.connectionWeeklyTarget, current.connectionsThisWeek + 1),
+    lastSocialCheckIn: 'Logged today',
   };
   saveLifestyleSnapshot(updated);
   return updated;
@@ -257,7 +416,7 @@ export function toggleLifestyleGoal(goalId: string): LifestyleGoal[] {
   return updated;
 }
 
-export function addLifestyleGoal(title: string, category: LifestyleGoal['category'], target?: string): LifestyleGoal[] {
+export function addLifestyleGoal(title: string, category: LifestyleCategoryKey, target?: string): LifestyleGoal[] {
   const goals = getLifestyleGoals();
   const newGoal: LifestyleGoal = {
     id: 'goal-' + Date.now(),
@@ -267,13 +426,6 @@ export function addLifestyleGoal(title: string, category: LifestyleGoal['categor
     target: target || 'Daily',
   };
   const updated = [newGoal, ...goals];
-  storage.set(GOALS_KEY, JSON.stringify(updated));
-  return updated;
-}
-
-export function deleteLifestyleGoal(goalId: string): LifestyleGoal[] {
-  const goals = getLifestyleGoals();
-  const updated = goals.filter((g) => g.id !== goalId);
   storage.set(GOALS_KEY, JSON.stringify(updated));
   return updated;
 }
@@ -317,21 +469,6 @@ export function toggleLifestyleHabit(habitId: string, targetDateStr?: string): L
     return { ...h, completedDates: newDates };
   });
 
-  storage.set(HABITS_KEY, JSON.stringify(updated));
-  return updated;
-}
-
-export function addCustomHabit(label: string, detail: string, category: LifestyleHabit['category']): LifestyleHabit[] {
-  const habits = getLifestyleHabits();
-  const newHabit: LifestyleHabit = {
-    id: 'habit-' + Date.now(),
-    label,
-    detail,
-    category,
-    iconName: category === 'sleep' ? 'Moon' : category === 'movement' ? 'Activity' : category === 'hydration' ? 'Droplets' : 'Leaf',
-    completedDates: [getTodayStr()],
-  };
-  const updated = [...habits, newHabit];
   storage.set(HABITS_KEY, JSON.stringify(updated));
   return updated;
 }
@@ -395,16 +532,18 @@ export function getWeeklyTrendPoints(): DayTrendPoint[] {
     const stepsBase = 5800 + ((i * 700 + 350) % 3800);
     const waterBase = 1.6 + ((i * 3 + 2) % 10) / 10;
     const proteinBase = 85 + ((i * 8 + 5) % 45);
+    const screenBase = 220 + ((i * 18 + 10) % 70);
     const habitsPct = 60 + ((i * 7) % 35);
 
     points.push({
       dayLabel: dayName,
       dateStr,
-      balanceScore: i === 0 ? 86 : scoreBase,
+      balanceScore: i === 0 ? 84 : scoreBase,
       sleepHours: i === 0 ? 7.4 : sleepBase,
       steps: i === 0 ? 6482 : stepsBase,
       waterLiters: i === 0 ? 1.8 : waterBase,
       proteinGrams: i === 0 ? 95 : proteinBase,
+      screenMinutes: i === 0 ? 252 : screenBase,
       habitCompletionPct: i === 0 ? 80 : habitsPct,
     });
   }

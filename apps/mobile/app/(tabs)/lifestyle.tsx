@@ -26,6 +26,9 @@ import {
   Heart,
   Compass,
   Flame,
+  Smartphone,
+  CheckCircle2,
+  Users,
 } from 'lucide-react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useProfile } from '../../src/context/ProfileContext';
@@ -34,9 +37,15 @@ import { TSOM_TYPES } from '../../src/lib/ethiopianCalendar';
 // Storage Engine
 import {
   getLifestyleSnapshot,
+  getCategoriesOverview,
   logWater,
   logSteps,
   logProtein,
+  logMeal,
+  logWorkout,
+  logDigitalBreak,
+  logMoodCheckIn,
+  logSocialConnection,
   getLifestyleGoals,
   toggleLifestyleGoal,
   addLifestyleGoal,
@@ -51,23 +60,31 @@ import {
   LifestyleHabit,
   RoutineData,
   DayTrendPoint,
+  LifestyleCategoryKey,
 } from '../../src/storage/lifestyleStorage';
 
 // Lifestyle Components
 import LifestyleHeader from '../../src/components/lifestyle/LifestyleHeader';
 import LifestyleWelcomeCard from '../../src/components/lifestyle/LifestyleWelcomeCard';
 import LifestyleOverviewCard from '../../src/components/lifestyle/LifestyleOverviewCard';
-import DailySnapshotGrid from '../../src/components/lifestyle/DailySnapshotGrid';
+import LifestyleCategoriesGrid from '../../src/components/lifestyle/LifestyleCategoriesGrid';
+import TodaysPrioritiesSection from '../../src/components/lifestyle/TodaysPrioritiesSection';
+import WeeklySummaryRadar from '../../src/components/lifestyle/WeeklySummaryRadar';
 import TodaysGoalsSection from '../../src/components/lifestyle/TodaysGoalsSection';
 import WeeklyTrendsSection from '../../src/components/lifestyle/WeeklyTrendsSection';
 import RoutinesTimelineSection from '../../src/components/lifestyle/RoutinesTimelineSection';
 import HabitTrackerGrid from '../../src/components/lifestyle/HabitTrackerGrid';
-import CategoryDetailModal from '../../src/components/lifestyle/CategoryDetailModal';
+
+// Detail View
+import CategoryDetailView from '../../src/components/lifestyle/detail/CategoryDetailView';
 
 export default function LifestyleScreen() {
   const router = useRouter();
   const { theme, isDark } = useTheme();
   const { profile } = useProfile();
+
+  // Active Category View state: null = Lifestyle Home, string = Category Detail
+  const [activeCategory, setActiveCategory] = useState<LifestyleCategoryKey | null>(null);
 
   // Selected Date state
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -78,9 +95,6 @@ export default function LifestyleScreen() {
   const [habits, setHabits] = useState<LifestyleHabit[]>(getLifestyleHabits());
   const [routines, setRoutines] = useState<{ morning: RoutineData; evening: RoutineData }>(getRoutines());
   const [trendPoints, setTrendPoints] = useState<DayTrendPoint[]>(getWeeklyTrendPoints());
-
-  // Category Detail Modal
-  const [activeCategoryModal, setActiveCategoryModal] = useState<'recovery' | 'movement' | 'nourishment' | 'mindfulness' | 'gymNutrition' | null>(null);
 
   // Interactive 4-7-8 Breathwork
   const [breathingActive, setBreathingActive] = useState(false);
@@ -151,12 +165,37 @@ export default function LifestyleScreen() {
     setSnapshot(updated);
   };
 
+  const handleLogMeal = () => {
+    const updated = logMeal();
+    setSnapshot(updated);
+  };
+
+  const handleLogWorkout = () => {
+    const updated = logWorkout(40);
+    setSnapshot(updated);
+  };
+
+  const handleLogDigitalBreak = () => {
+    const updated = logDigitalBreak();
+    setSnapshot(updated);
+  };
+
+  const handleLogMood = (mood: any) => {
+    const updated = logMoodCheckIn(mood);
+    setSnapshot(updated);
+  };
+
+  const handleLogSocial = () => {
+    const updated = logSocialConnection();
+    setSnapshot(updated);
+  };
+
   const handleToggleGoal = (id: string) => {
     const updated = toggleLifestyleGoal(id);
     setGoals(updated);
   };
 
-  const handleAddGoal = (title: string, category: LifestyleGoal['category'], target?: string) => {
+  const handleAddGoal = (title: string, category: LifestyleCategoryKey, target?: string) => {
     const updated = addLifestyleGoal(title, category, target);
     setGoals(updated);
   };
@@ -176,7 +215,32 @@ export default function LifestyleScreen() {
     setRoutines(updated);
   };
 
-  const isFasting = profile?.fastingMode && profile.fastingMode !== TSOM_TYPES.NONE;
+  // IF CATEGORY DETAIL IS SELECTED, RENDER DETAIL EXPERIENCE
+  if (activeCategory) {
+    return (
+      <CategoryDetailView
+        categoryKey={activeCategory}
+        snapshot={snapshot}
+        goals={goals}
+        trendPoints={trendPoints}
+        onBack={() => setActiveCategory(null)}
+        onLogMeal={handleLogMeal}
+        onLogWorkout={handleLogWorkout}
+        onLogWater={handleLogWater}
+        onLogDigitalBreak={handleLogDigitalBreak}
+        onLogMood={handleLogMood}
+        onLogSocial={handleLogSocial}
+        onToggleGoal={handleToggleGoal}
+        onOpenBreathwork={() => {
+          setActiveCategory(null);
+          setBreathingActive(true);
+        }}
+      />
+    );
+  }
+
+  // DEFAULT: LIFESTYLE HOME / HUB
+  const categoriesList = getCategoriesOverview(snapshot);
 
   return (
     <View style={[styles.outerContainer, { backgroundColor: theme.background }]}>
@@ -195,132 +259,51 @@ export default function LifestyleScreen() {
         {/* 2. Welcome Picture Hero Banner */}
         <LifestyleWelcomeCard
           balanceScore={snapshot.balanceScore}
-          streakDays={5}
+          streakDays={snapshot.habitStreakDays}
           onLogWater={handleLogWater}
           onLogProtein={handleLogProtein}
           onOpenBreathwork={() => setBreathingActive(true)}
-          onOpenGymNutrition={() => setActiveCategoryModal('gymNutrition')}
+          onOpenGymNutrition={() => setActiveCategory('fitness')}
         />
 
         {/* 3. Today's Lifestyle Overview Card */}
         <LifestyleOverviewCard snapshot={snapshot} />
 
-        {/* 4. Daily Snapshot Grid (including Gym Nutrition & Protein) */}
-        <DailySnapshotGrid
-          snapshot={snapshot}
-          onLogWater={handleLogWater}
-          onLogSteps={handleLogSteps}
-          onLogProtein={handleLogProtein}
-          onOpenBreathwork={() => setBreathingActive(true)}
-          onOpenCategory={(cat) => setActiveCategoryModal(cat)}
+        {/* 4. 8 Primary Lifestyle Categories Grid */}
+        <LifestyleCategoriesGrid
+          categories={categoriesList}
+          onSelectCategory={(key) => setActiveCategory(key)}
         />
 
-        {/* 5. Today's Goals Section */}
+        {/* 5. Today's Priorities (2-4 high-impact actions) */}
+        <TodaysPrioritiesSection
+          onOpenBreathwork={() => setBreathingActive(true)}
+          onLogWater={handleLogWater}
+          onOpenCategory={(key) => setActiveCategory(key)}
+        />
+
+        {/* 6. Weekly Progress Summary across 8 categories */}
+        <WeeklySummaryRadar snapshot={snapshot} />
+
+        {/* 7. Today's Unified Active Goals */}
         <TodaysGoalsSection
           goals={goals}
           onToggleGoal={handleToggleGoal}
           onAddGoal={handleAddGoal}
         />
 
-        {/* 6. Weekly Trends ("Your Week") */}
-        <WeeklyTrendsSection trendPoints={trendPoints} />
-
-        {/* 7. Weekly Habit Consistency Matrix */}
-        <HabitTrackerGrid
-          habits={habits}
-          onToggleHabit={handleToggleHabit}
-        />
-
-        {/* 8. Daily Routines Timeline (Morning / Evening) */}
+        {/* 8. Routines Timeline (Morning / Evening) */}
         <RoutinesTimelineSection
           routines={routines}
           onToggleStep={handleToggleRoutineStep}
           onResetRoutine={handleResetRoutine}
         />
 
-        {/* 9. Lifestyle Categories & Evidence Protocols */}
-        <View style={styles.categoriesSection}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Lifestyle Protocols</Text>
-          <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
-            Evidence-based biological rhythms, gym nutrition & integrative medicine
-          </Text>
-
-          <View style={styles.protocolCardsList}>
-            {/* Gym & Athletic Nutrition */}
-            <TouchableOpacity
-              style={[styles.protocolCard, { backgroundColor: theme.surface, borderColor: theme.border }]}
-              onPress={() => setActiveCategoryModal('gymNutrition')}
-              activeOpacity={0.8}
-            >
-              <View style={[styles.protocolIconWrap, { backgroundColor: 'rgba(234, 88, 12, 0.12)' }]}>
-                <Flame size={18} color="#ea580c" />
-              </View>
-              <View style={styles.protocolTextWrap}>
-                <Text style={[styles.protocolTitle, { color: theme.textPrimary }]}>Gym Nutrition & Muscle Recovery</Text>
-                <Text style={[styles.protocolSnippet, { color: theme.textSecondary }]}>
-                  Pre-workout complex carbs, intra-set electrolytes & 30g post-workout teff protein timing.
-                </Text>
-              </View>
-              <ChevronRight size={18} color={theme.textTertiary} />
-            </TouchableOpacity>
-
-            {/* Rest & Recovery */}
-            <TouchableOpacity
-              style={[styles.protocolCard, { backgroundColor: theme.surface, borderColor: theme.border }]}
-              onPress={() => setActiveCategoryModal('recovery')}
-              activeOpacity={0.8}
-            >
-              <View style={[styles.protocolIconWrap, { backgroundColor: 'rgba(99, 102, 241, 0.12)' }]}>
-                <Moon size={18} color="#6366f1" />
-              </View>
-              <View style={styles.protocolTextWrap}>
-                <Text style={[styles.protocolTitle, { color: theme.textPrimary }]}>Circadian Synchronization</Text>
-                <Text style={[styles.protocolSnippet, { color: theme.textSecondary }]}>
-                  Stabilize heart rate variability (HRV) and optimize slow-wave cellular repair.
-                </Text>
-              </View>
-              <ChevronRight size={18} color={theme.textTertiary} />
-            </TouchableOpacity>
-
-            {/* Movement & Mobility */}
-            <TouchableOpacity
-              style={[styles.protocolCard, { backgroundColor: theme.surface, borderColor: theme.border }]}
-              onPress={() => setActiveCategoryModal('movement')}
-              activeOpacity={0.8}
-            >
-              <View style={[styles.protocolIconWrap, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
-                <Activity size={18} color="#10b981" />
-              </View>
-              <View style={styles.protocolTextWrap}>
-                <Text style={[styles.protocolTitle, { color: theme.textPrimary }]}>Eskista Scapular Reset</Text>
-                <Text style={[styles.protocolSnippet, { color: theme.textSecondary }]}>
-                  Traditional rhythmic thoracic pulses to release desk posture tension.
-                </Text>
-              </View>
-              <ChevronRight size={18} color={theme.textTertiary} />
-            </TouchableOpacity>
-
-            {/* Nourishment & Fasting */}
-            <TouchableOpacity
-              style={[styles.protocolCard, { backgroundColor: theme.surface, borderColor: theme.border }]}
-              onPress={() => setActiveCategoryModal('nourishment')}
-              activeOpacity={0.8}
-            >
-              <View style={[styles.protocolIconWrap, { backgroundColor: 'rgba(22, 163, 74, 0.12)' }]}>
-                <Utensils size={18} color="#16a34a" />
-              </View>
-              <View style={styles.protocolTextWrap}>
-                <Text style={[styles.protocolTitle, { color: theme.textPrimary }]}>
-                  Prebiotic Whole Teff & Telba {isFasting ? '(Fasting Active)' : ''}
-                </Text>
-                <Text style={[styles.protocolSnippet, { color: theme.textSecondary }]}>
-                  Microbiome nourishment with resistant starch and anti-inflammatory flaxseed omega.
-                </Text>
-              </View>
-              <ChevronRight size={18} color={theme.textTertiary} />
-            </TouchableOpacity>
-          </View>
-        </View>
+        {/* 9. Weekly Habit Consistency Matrix */}
+        <HabitTrackerGrid
+          habits={habits}
+          onToggleHabit={handleToggleHabit}
+        />
 
         {/* 10. Interactive 4-7-8 Autonomic Breathwork Module */}
         <View style={[styles.breathworkContainer, { backgroundColor: theme.surface, borderColor: theme.border }]}>
@@ -380,20 +363,13 @@ export default function LifestyleScreen() {
             <Sparkles size={16} color={theme.accent} />
           </View>
           <View style={styles.recTextWrap}>
-            <Text style={[styles.recTitle, { color: theme.textPrimary }]}>Gym Nutrition & Sleep Synergy</Text>
+            <Text style={[styles.recTitle, { color: theme.textPrimary }]}>Grounded Lifestyle Recommendation</Text>
             <Text style={[styles.recBody, { color: theme.textSecondary }]}>
-              Consuming your post-workout protein with toasted telba omega-3 accelerates muscle repair, allowing deeper slow-wave sleep recovery tonight.
+              Your morning routines and hydration have been consistent. Try setting a gentle 20-20-20 ocular pause during afternoon screen time to protect your evening melatonin synthesis.
             </Text>
           </View>
         </View>
       </ScrollView>
-
-      {/* Category Detail Modal */}
-      <CategoryDetailModal
-        visible={!!activeCategoryModal}
-        category={activeCategoryModal}
-        onClose={() => setActiveCategoryModal(null)}
-      />
 
       {/* Permanent Floating Chat FAB */}
       <TouchableOpacity
@@ -418,50 +394,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingBottom: 95,
-  },
-  categoriesSection: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: -0.2,
-  },
-  sectionSubtitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 1,
-    marginBottom: 12,
-  },
-  protocolCardsList: {
-    gap: 10,
-  },
-  protocolCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    gap: 12,
-  },
-  protocolIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  protocolTextWrap: {
-    flex: 1,
-  },
-  protocolTitle: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  protocolSnippet: {
-    fontSize: 11.5,
-    lineHeight: 16,
   },
   breathworkContainer: {
     borderRadius: 20,
