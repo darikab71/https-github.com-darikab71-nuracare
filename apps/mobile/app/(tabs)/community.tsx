@@ -329,6 +329,14 @@ export default function CommunityCenterScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Top 4-Tab Navigation Bar (Discovery | Challenges | Community | Inbox) */}
+      <CommunityNavBar
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        unreadCount={totalUnreadCount}
+        hasActiveChallenge={hasActiveChallenges}
+      />
+
       {/* Main Hub Content Area */}
       <View style={styles.hubContent}>
         {activeTab === 'discovery' && (
@@ -384,14 +392,6 @@ export default function CommunityCenterScreen() {
           />
         )}
       </View>
-
-      {/* Bottom 4-Tab Navigation Bar */}
-      <CommunityNavBar
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
-        unreadCount={totalUnreadCount}
-        hasActiveChallenge={hasActiveChallenges}
-      />
 
       {/* ======================================================== */}
       {/* DISCUSSION THREAD MODAL                                  */}

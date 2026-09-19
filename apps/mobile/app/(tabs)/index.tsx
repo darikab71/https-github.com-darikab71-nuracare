@@ -46,6 +46,7 @@ import { computeDigitalBalanceScore } from '../../src/lib/digitalWellnessEngine'
 import { checkForAppUpdates } from '../../src/services/versionCheck';
 import CompanionAvatar3D from '../../src/components/avatar/CompanionAvatar3D';
 import AvatarLocomotionOverlay from '../../src/components/avatar/AvatarLocomotionOverlay';
+import VoiceCallSimulationModal from '../../src/components/chat/VoiceCallSimulationModal';
 
 /**
  * Compact circular info teller component for Wellness & Burnout
@@ -87,9 +88,10 @@ export default function AdaptiveHomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [discoveryTab, setDiscoveryTab] = useState<'all' | 'herbs' | 'foods' | 'tips'>('all');
   const [selectedDiscovery, setSelectedDiscovery] = useState<DiscoveryItem | null>(null);
+  const [showVoiceCallModal, setShowVoiceCallModal] = useState(false);
   const [locomotionActive, setLocomotionActive] = useState(false);
-  const handleChatWithNura = () => setLocomotionActive(true);
-  const handleLocomotionComplete = () => { setLocomotionActive(false); router.push('/(tabs)/chat'); };
+  const handleChatWithNura = () => router.push('/chat');
+  const handleLocomotionComplete = () => { setLocomotionActive(false); router.push('/chat'); };
 
   const filteredDiscovery = useMemo(() => {
     if (discoveryTab === 'all') return DISCOVERY_ITEMS;
@@ -256,14 +258,7 @@ export default function AdaptiveHomeScreen() {
   ];
 
   const handleCallNura = () => {
-    Alert.alert(
-      "Call Nura Voice Companion",
-      "Would you like to initiate a real-time conversational voice session with Nura?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Start Voice", onPress: () => router.push('/chat') }
-      ]
-    );
+    setShowVoiceCallModal(true);
   };
 
   return (
@@ -579,6 +574,15 @@ export default function AdaptiveHomeScreen() {
         </Modal>
       )}
       <AvatarLocomotionOverlay visible={locomotionActive} character="nura" onComplete={handleLocomotionComplete} />
+      <VoiceCallSimulationModal
+        visible={showVoiceCallModal}
+        onClose={() => setShowVoiceCallModal(false)}
+        onOpenChat={() => {
+          setShowVoiceCallModal(false);
+          router.push('/chat');
+        }}
+        characterName="Nura"
+      />
     </View>
   );
 }
