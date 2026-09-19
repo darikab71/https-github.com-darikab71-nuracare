@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import ThreeAvatarCanvas from './ThreeAvatarCanvas';
 
 interface CompanionAvatar3DProps {
   onStartChatTransition?: () => void;
@@ -201,40 +202,45 @@ export default function CompanionAvatar3D({
       )}
 
       {/* 3D Character Stage */}
-      <TouchableOpacity
-        onPress={handleTapAvatar}
-        activeOpacity={0.92}
-        style={styles.avatarTouchStage}
-      >
-        <Animated.View
-          style={[
-            styles.avatarRenderBox,
-            {
-              transform: [
-                { translateY: Animated.add(breathingTranslateY, bounceY) },
-                { scaleX: squashStretchX },
-                { scaleY: Animated.multiply(squashStretchY, breathingScaleY) },
-                { rotateZ: swayRotateZ },
-                { perspective: 800 },
-                { rotateY: swayRotateY },
-              ],
-            },
-          ]}
+      {Platform.OS === 'web' ? (
+        <View style={styles.avatarTouchStage}>
+          <ThreeAvatarCanvas character={character} onTap={handleTapAvatar} />
+        </View>
+      ) : (
+        <TouchableOpacity
+          onPress={handleTapAvatar}
+          activeOpacity={0.92}
+          style={styles.avatarTouchStage}
         >
-          {/* Avatar Image Source (Cut at waist) */}
-          <View style={styles.avatarImageWrapper}>
-            <Image
-              source={
-                character === 'nura'
-                  ? require('../../../assets/avatars/nura_avatar.jpg')
-                  : require('../../../assets/avatars/nuri_avatar.jpg')
-              }
-              style={styles.avatarImage}
-              resizeMode="cover"
-            />
-          </View>
-        </Animated.View>
-      </TouchableOpacity>
+          <Animated.View
+            style={[
+              styles.avatarRenderBox,
+              {
+                transform: [
+                  { translateY: Animated.add(breathingTranslateY, bounceY) },
+                  { scaleX: squashStretchX },
+                  { scaleY: Animated.multiply(squashStretchY, breathingScaleY) },
+                  { rotateZ: swayRotateZ },
+                  { perspective: 800 },
+                  { rotateY: swayRotateY },
+                ],
+              },
+            ]}
+          >
+            <View style={styles.avatarImageWrapper}>
+              <Image
+                source={
+                  character === 'nura'
+                    ? require('../../../assets/avatars/nura_avatar.jpg')
+                    : require('../../../assets/avatars/nuri_avatar.jpg')
+                }
+                style={styles.avatarImage}
+                resizeMode="cover"
+              />
+            </View>
+          </Animated.View>
+        </TouchableOpacity>
+      )}
 
       {/* Companion Switcher Pill (Discreet, Elegant Toggle) */}
       <View style={styles.companionSelectorRow}>
