@@ -32,6 +32,7 @@ import {
 } from 'lucide-react-native';
 import { useWellnessStore } from '../../src/store';
 import { useProfile } from '../../src/context/ProfileContext';
+import { useTheme } from '../../src/context/ThemeContext';
 import { TSOM_TYPES } from '../../src/lib/ethiopianCalendar';
 
 // 4 Professional Lifestyle Pillars
@@ -44,6 +45,7 @@ const LIFESTYLE_PILLARS = [
 
 export default function LifestyleScreen() {
   const router = useRouter();
+  const { theme, isDark } = useTheme();
   const { profile } = useProfile();
   const { wellnessScore } = useWellnessStore();
 
@@ -106,12 +108,12 @@ export default function LifestyleScreen() {
   const isFasting = profile?.fastingMode && profile.fastingMode !== TSOM_TYPES.NONE;
 
   return (
-    <View style={styles.outerContainer}>
+    <View style={[styles.outerContainer, { backgroundColor: theme.background }]}>
       {/* Top Header */}
-      <View style={styles.topHeader}>
+      <View style={[styles.topHeader, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
         <View style={styles.topHeaderContent}>
-          <Text style={styles.topHeaderTitle}>Lifestyle Medicine</Text>
-          <Text style={styles.topHeaderSubtitle}>Evidence-based protocols for daily vitality</Text>
+          <Text style={[styles.topHeaderTitle, { color: theme.textPrimary }]}>Lifestyle Medicine</Text>
+          <Text style={[styles.topHeaderSubtitle, { color: theme.textSecondary }]}>Evidence-based protocols for daily vitality</Text>
         </View>
       </View>
 
@@ -128,12 +130,22 @@ export default function LifestyleScreen() {
             return (
               <TouchableOpacity
                 key={p.id}
-                style={[styles.pillarPill, isSelected && styles.pillarPillActive]}
+                style={[
+                  styles.pillarPill,
+                  { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle },
+                  isSelected && { backgroundColor: theme.accentDeep, borderColor: theme.accent },
+                ]}
                 onPress={() => setActivePillar(p.id as any)}
                 activeOpacity={0.75}
               >
-                <Icon size={16} color={isSelected ? '#ffffff' : '#15803d'} />
-                <Text style={[styles.pillarPillText, isSelected && styles.pillarPillTextActive]}>
+                <Icon size={16} color={isSelected ? theme.accent : theme.textSecondary} />
+                <Text
+                  style={[
+                    styles.pillarPillText,
+                    { color: theme.textSecondary },
+                    isSelected && { color: theme.accent, fontWeight: '700' },
+                  ]}
+                >
                   {p.label}
                 </Text>
               </TouchableOpacity>
@@ -145,7 +157,7 @@ export default function LifestyleScreen() {
         {activePillar === 'recovery' && (
           <View style={styles.pillarContent}>
             {/* Overview Card */}
-            <View style={styles.heroOverviewCard}>
+            <View style={[styles.heroOverviewCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.heroBadgeRow}>
                 <View style={styles.greenBadge}>
                   <Moon size={13} color="#16a34a" />
@@ -153,56 +165,56 @@ export default function LifestyleScreen() {
                 </View>
                 <Text style={styles.heroTargetText}>Target: 7.5 - 8.0 hrs</Text>
               </View>
-              <Text style={styles.heroCardHeading}>Circadian Synchronization</Text>
-              <Text style={styles.heroCardDescription}>
+              <Text style={[styles.heroCardHeading, { color: theme.textPrimary }]}>Circadian Synchronization</Text>
+              <Text style={[styles.heroCardDescription, { color: theme.textSecondary }]}>
                 Aligning your sleep schedule with natural dark-light cycles stabilizes heart rate variability (HRV) and optimizes deep stage cellular repair.
               </Text>
             </View>
 
             {/* Protocols List */}
-            <Text style={styles.subheading}>Daily Wind-Down Ritual</Text>
+            <Text style={[styles.subheading, { color: theme.textPrimary }]}>Daily Wind-Down Ritual</Text>
             
             <TouchableOpacity
-              style={styles.habitCard}
+              style={[styles.habitCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}
               onPress={() => toggleHabit('digital_sunset')}
               activeOpacity={0.8}
             >
-              <View style={[styles.habitCheckbox, completedHabits.includes('digital_sunset') && styles.habitCheckboxDone]}>
+              <View style={[styles.habitCheckbox, completedHabits.includes('digital_sunset') && [styles.habitCheckboxDone, { backgroundColor: theme.accent, borderColor: theme.accent }]]}>
                 {completedHabits.includes('digital_sunset') && <Check size={14} color="#ffffff" />}
               </View>
               <View style={styles.habitTextWrap}>
-                <Text style={styles.habitTitle}>Digital Sunset (60 min prior)</Text>
-                <Text style={styles.habitDetail}>Block blue-light photons to prompt natural melatonin synthesis.</Text>
+                <Text style={[styles.habitTitle, { color: theme.textPrimary }]}>Digital Sunset (60 min prior)</Text>
+                <Text style={[styles.habitDetail, { color: theme.textSecondary }]}>Block blue-light photons to prompt natural melatonin synthesis.</Text>
               </View>
               <Clock size={16} color="#94a3b8" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.habitCard}
+              style={[styles.habitCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}
               onPress={() => toggleHabit('thermal_cool')}
               activeOpacity={0.8}
             >
-              <View style={[styles.habitCheckbox, completedHabits.includes('thermal_cool') && styles.habitCheckboxDone]}>
+              <View style={[styles.habitCheckbox, completedHabits.includes('thermal_cool') && [styles.habitCheckboxDone, { backgroundColor: theme.accent, borderColor: theme.accent }]]}>
                 {completedHabits.includes('thermal_cool') && <Check size={14} color="#ffffff" />}
               </View>
               <View style={styles.habitTextWrap}>
-                <Text style={styles.habitTitle}>Cool Bedroom Temperature</Text>
-                <Text style={styles.habitDetail}>Maintain ambient room temperature between 18°C – 20°C for deep slow-wave sleep.</Text>
+                <Text style={[styles.habitTitle, { color: theme.textPrimary }]}>Cool Bedroom Temperature</Text>
+                <Text style={[styles.habitDetail, { color: theme.textSecondary }]}>Maintain ambient room temperature between 18°C – 20°C for deep slow-wave sleep.</Text>
               </View>
               <ShieldCheck size={16} color="#94a3b8" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.habitCard}
+              style={[styles.habitCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}
               onPress={() => toggleHabit('magnesium_intake')}
               activeOpacity={0.8}
             >
-              <View style={[styles.habitCheckbox, completedHabits.includes('magnesium_intake') && styles.habitCheckboxDone]}>
+              <View style={[styles.habitCheckbox, completedHabits.includes('magnesium_intake') && [styles.habitCheckboxDone, { backgroundColor: theme.accent, borderColor: theme.accent }]]}>
                 {completedHabits.includes('magnesium_intake') && <Check size={14} color="#ffffff" />}
               </View>
               <View style={styles.habitTextWrap}>
-                <Text style={styles.habitTitle}>Magnesium & Chamomile Wind-Down</Text>
-                <Text style={styles.habitDetail}>Gentle nervous system relaxation without morning grogginess.</Text>
+                <Text style={[styles.habitTitle, { color: theme.textPrimary }]}>Magnesium & Chamomile Wind-Down</Text>
+                <Text style={[styles.habitDetail, { color: theme.textSecondary }]}>Gentle nervous system relaxation without morning grogginess.</Text>
               </View>
               <Leaf size={16} color="#94a3b8" />
             </TouchableOpacity>
@@ -213,7 +225,7 @@ export default function LifestyleScreen() {
         {activePillar === 'movement' && (
           <View style={styles.pillarContent}>
             {/* Overview Card */}
-            <View style={styles.heroOverviewCard}>
+            <View style={[styles.heroOverviewCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.heroBadgeRow}>
                 <View style={styles.greenBadge}>
                   <Activity size={13} color="#16a34a" />
@@ -221,21 +233,21 @@ export default function LifestyleScreen() {
                 </View>
                 <Text style={styles.heroTargetText}>Daily: 8,500 Steps</Text>
               </View>
-              <Text style={styles.heroCardHeading}>Functional Daily Mobility</Text>
-              <Text style={styles.heroCardDescription}>
+              <Text style={[styles.heroCardHeading, { color: theme.textPrimary }]}>Functional Daily Mobility</Text>
+              <Text style={[styles.heroCardDescription, { color: theme.textSecondary }]}>
                 Short, regular movement intervals reduce insulin spikes by 34% compared to prolonged sitting followed by intense evening workouts.
               </Text>
             </View>
 
-            <Text style={styles.subheading}>Targeted Mobility Protocols</Text>
+            <Text style={[styles.subheading, { color: theme.textPrimary }]}>Targeted Mobility Protocols</Text>
 
-            <View style={styles.protocolCard}>
+            <View style={[styles.protocolCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
               <View style={styles.protocolIconWrap}>
                 <Zap size={20} color="#16a34a" />
               </View>
               <View style={styles.protocolTextWrap}>
-                <Text style={styles.protocolTitle}>Eskista Shoulder & Thoracic Reset</Text>
-                <Text style={styles.protocolDesc}>
+                <Text style={[styles.protocolTitle, { color: theme.textPrimary }]}>Eskista Shoulder & Thoracic Reset</Text>
+                <Text style={[styles.protocolDesc, { color: theme.textSecondary }]}>
                   Traditional rhythmic scapular release that relieves desk tension, improves posture, and stimulates lymphatic drainage.
                 </Text>
                 <View style={styles.protocolFooter}>
@@ -244,13 +256,13 @@ export default function LifestyleScreen() {
               </View>
             </View>
 
-            <View style={styles.protocolCard}>
+            <View style={[styles.protocolCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
               <View style={styles.protocolIconWrap}>
                 <Compass size={20} color="#0284c7" />
               </View>
               <View style={styles.protocolTextWrap}>
-                <Text style={styles.protocolTitle}>Post-Meal Glucose Walk</Text>
-                <Text style={styles.protocolDesc}>
+                <Text style={[styles.protocolTitle, { color: theme.textPrimary }]}>Post-Meal Glucose Walk</Text>
+                <Text style={[styles.protocolDesc, { color: theme.textSecondary }]}>
                   A moderate 10-15 minute walk within 30 minutes of eating significantly flattens postprandial glucose curves.
                 </Text>
                 <View style={styles.protocolFooter}>
@@ -259,13 +271,13 @@ export default function LifestyleScreen() {
               </View>
             </View>
 
-            <View style={styles.protocolCard}>
+            <View style={[styles.protocolCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
               <View style={styles.protocolIconWrap}>
                 <Heart size={20} color="#e11d48" />
               </View>
               <View style={styles.protocolTextWrap}>
-                <Text style={styles.protocolTitle}>Zone 2 Aerobic Foundation</Text>
-                <Text style={styles.protocolDesc}>
+                <Text style={[styles.protocolTitle, { color: theme.textPrimary }]}>Zone 2 Aerobic Foundation</Text>
+                <Text style={[styles.protocolDesc, { color: theme.textSecondary }]}>
                   Steady conversational pace cycling or brisk walking to stimulate mitochondrial density and longevity enzymes.
                 </Text>
                 <View style={styles.protocolFooter}>
@@ -280,7 +292,7 @@ export default function LifestyleScreen() {
         {activePillar === 'nourishment' && (
           <View style={styles.pillarContent}>
             {/* Overview Card */}
-            <View style={styles.heroOverviewCard}>
+            <View style={[styles.heroOverviewCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.heroBadgeRow}>
                 <View style={styles.greenBadge}>
                   <Utensils size={13} color="#16a34a" />
@@ -290,50 +302,50 @@ export default function LifestyleScreen() {
                   {isFasting ? 'Fasting Active' : 'Standard Window'}
                 </Text>
               </View>
-              <Text style={styles.heroCardHeading}>Integrative Nutrition</Text>
-              <Text style={styles.heroCardDescription}>
+              <Text style={[styles.heroCardHeading, { color: theme.textPrimary }]}>Integrative Nutrition</Text>
+              <Text style={[styles.heroCardDescription, { color: theme.textSecondary }]}>
                 Nourishing your microbiome with fermented prebiotic whole grains and polyphenol-dense botanicals supports sustained metabolic energy.
               </Text>
             </View>
 
-            <Text style={styles.subheading}>Superfood Focus</Text>
+            <Text style={[styles.subheading, { color: theme.textPrimary }]}>Superfood Focus</Text>
 
-            <View style={styles.nutritionCard}>
+            <View style={[styles.nutritionCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
               <View style={styles.nutritionRow}>
                 <View style={styles.nutritionBullet}>
                   <Leaf size={16} color="#16a34a" />
                 </View>
                 <View style={styles.nutritionInfo}>
-                  <Text style={styles.nutritionTitle}>100% Teff Injera (Prebiotic Grain)</Text>
-                  <Text style={styles.nutritionDetail}>
+                  <Text style={[styles.nutritionTitle, { color: theme.textPrimary }]}>100% Teff Injera (Prebiotic Grain)</Text>
+                  <Text style={[styles.nutritionDetail, { color: theme.textSecondary }]}>
                     Fermented for 3 days; rich in iron, resistant starch, and low glycemic carbohydrates that feed beneficial Bifidobacteria.
                   </Text>
                 </View>
               </View>
             </View>
 
-            <View style={styles.nutritionCard}>
+            <View style={[styles.nutritionCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
               <View style={styles.nutritionRow}>
                 <View style={styles.nutritionBullet}>
                   <Droplets size={16} color="#0284c7" />
                 </View>
                 <View style={styles.nutritionInfo}>
-                  <Text style={styles.nutritionTitle}>Telba (Flaxseed) Omega Infusion</Text>
-                  <Text style={styles.nutritionDetail}>
+                  <Text style={[styles.nutritionTitle, { color: theme.textPrimary }]}>Telba (Flaxseed) Omega Infusion</Text>
+                  <Text style={[styles.nutritionDetail, { color: theme.textSecondary }]}>
                     Toasted ground flaxseed steeped in lukewarm water. Rich in Alpha-Linolenic Acid (ALA) for vascular elasticity and gentle digestion.
                   </Text>
                 </View>
               </View>
             </View>
 
-            <View style={styles.nutritionCard}>
+            <View style={[styles.nutritionCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
               <View style={styles.nutritionRow}>
                 <View style={styles.nutritionBullet}>
                   <Sparkles size={16} color="#f59e0b" />
                 </View>
                 <View style={styles.nutritionInfo}>
-                  <Text style={styles.nutritionTitle}>Moringa (Shiferaw) Vitality Greens</Text>
-                  <Text style={styles.nutritionDetail}>
+                  <Text style={[styles.nutritionTitle, { color: theme.textPrimary }]}>Moringa (Shiferaw) Vitality Greens</Text>
+                  <Text style={[styles.nutritionDetail, { color: theme.textSecondary }]}>
                     Micro-nutrient powerhouse packed with vitamin C, plant calcium, and bioactive quercetin to combat oxidative stress.
                   </Text>
                 </View>
@@ -346,30 +358,30 @@ export default function LifestyleScreen() {
         {activePillar === 'mindfulness' && (
           <View style={styles.pillarContent}>
             {/* Interactive 4-7-8 Breathwork Module */}
-            <View style={styles.breathworkContainer}>
+            <View style={[styles.breathworkContainer, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.breathBadge}>
                 <Wind size={14} color="#16a34a" />
                 <Text style={styles.breathBadgeText}>Parasympathetic Reset</Text>
               </View>
-              <Text style={styles.breathHeading}>4-7-8 Autonomic Breathwork</Text>
-              <Text style={styles.breathDescription}>
+              <Text style={[styles.breathHeading, { color: theme.textPrimary }]}>4-7-8 Autonomic Breathwork</Text>
+              <Text style={[styles.breathDescription, { color: theme.textSecondary }]}>
                 Scientific pranayama technique proven to down-regulate sympathetic fight-or-flight within 2 minutes.
               </Text>
 
               {/* Pulsing Visual Circle */}
               <View style={styles.breathVisualRingWrap}>
-                <View style={[styles.breathRingGlow, breathingActive && styles.breathRingGlowActive]} />
-                <View style={[styles.breathCenterCircle, breathingActive && styles.breathCenterCircleActive]}>
-                  <Text style={styles.breathPhaseText}>{breathPhase}</Text>
+                <View style={[styles.breathRingGlow, breathingActive && [styles.breathRingGlowActive, { backgroundColor: theme.accentGlow }]]} />
+                <View style={[styles.breathCenterCircle, breathingActive && [styles.breathCenterCircleActive, { backgroundColor: theme.surfaceElevated, borderColor: theme.accent }]]}>
+                  <Text style={[styles.breathPhaseText, { color: theme.accent }]}>{breathPhase}</Text>
                   {breathingActive && (
-                    <Text style={styles.breathCountdownText}>{breathSecondsLeft}s</Text>
+                    <Text style={[styles.breathCountdownText, { color: theme.textPrimary }]}>{breathSecondsLeft}s</Text>
                   )}
                 </View>
               </View>
 
               {/* Controls */}
               <TouchableOpacity
-                style={[styles.breathActionBtn, breathingActive && styles.breathActionBtnStop]}
+                style={[styles.breathActionBtn, { backgroundColor: theme.accent }, breathingActive && [styles.breathActionBtnStop, { backgroundColor: theme.error }]]}
                 onPress={() => setBreathingActive(!breathingActive)}
                 activeOpacity={0.85}
               >
@@ -388,34 +400,34 @@ export default function LifestyleScreen() {
             </View>
 
             {/* Mental Clarity Habits */}
-            <Text style={styles.subheading}>Daily Mental Hygiene</Text>
+            <Text style={[styles.subheading, { color: theme.textPrimary }]}>Daily Mental Hygiene</Text>
 
             <TouchableOpacity
-              style={styles.habitCard}
+              style={[styles.habitCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}
               onPress={() => toggleHabit('morning_sunlight')}
               activeOpacity={0.8}
             >
-              <View style={[styles.habitCheckbox, completedHabits.includes('morning_sunlight') && styles.habitCheckboxDone]}>
+              <View style={[styles.habitCheckbox, completedHabits.includes('morning_sunlight') && [styles.habitCheckboxDone, { backgroundColor: theme.accent, borderColor: theme.accent }]]}>
                 {completedHabits.includes('morning_sunlight') && <Check size={14} color="#ffffff" />}
               </View>
               <View style={styles.habitTextWrap}>
-                <Text style={styles.habitTitle}>Morning Sunlight (10-15 min)</Text>
-                <Text style={styles.habitDetail}>Anchor your suprachiasmatic nucleus within an hour of waking for elevated daytime focus.</Text>
+                <Text style={[styles.habitTitle, { color: theme.textPrimary }]}>Morning Sunlight (10-15 min)</Text>
+                <Text style={[styles.habitDetail, { color: theme.textSecondary }]}>Anchor your suprachiasmatic nucleus within an hour of waking for elevated daytime focus.</Text>
               </View>
               <Sun size={16} color="#f59e0b" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.habitCard}
+              style={[styles.habitCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}
               onPress={() => toggleHabit('micro_pauses')}
               activeOpacity={0.8}
             >
-              <View style={[styles.habitCheckbox, completedHabits.includes('micro_pauses') && styles.habitCheckboxDone]}>
+              <View style={[styles.habitCheckbox, completedHabits.includes('micro_pauses') && [styles.habitCheckboxDone, { backgroundColor: theme.accent, borderColor: theme.accent }]]}>
                 {completedHabits.includes('micro_pauses') && <Check size={14} color="#ffffff" />}
               </View>
               <View style={styles.habitTextWrap}>
-                <Text style={styles.habitTitle}>Hourly Micro-Pauses</Text>
-                <Text style={styles.habitDetail}>Look 20 feet away for 20 seconds to release ocular ciliary muscle strain.</Text>
+                <Text style={[styles.habitTitle, { color: theme.textPrimary }]}>Hourly Micro-Pauses</Text>
+                <Text style={[styles.habitDetail, { color: theme.textSecondary }]}>Look 20 feet away for 20 seconds to release ocular ciliary muscle strain.</Text>
               </View>
               <Compass size={16} color="#0284c7" />
             </TouchableOpacity>

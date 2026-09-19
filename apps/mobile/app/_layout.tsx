@@ -103,14 +103,17 @@ function InnerLayout() {
 }
 
 import FloatingNatureBackground from '../src/components/ambient/FloatingNatureBackground';
+import { ThemeProvider } from '../src/context/ThemeContext';
 
 export default function RootLayout() {
   return (
     <AuthProvider>
       <ProfileProvider>
-        <FloatingNatureBackground showSoundToggle={true}>
-          <InnerLayout />
-        </FloatingNatureBackground>
+        <ThemeProvider>
+          <FloatingNatureBackground showSoundToggle={true}>
+            <InnerLayout />
+          </FloatingNatureBackground>
+        </ThemeProvider>
       </ProfileProvider>
     </AuthProvider>
   );

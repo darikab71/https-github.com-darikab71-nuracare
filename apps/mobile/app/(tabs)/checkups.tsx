@@ -44,6 +44,7 @@ import {
 import { useWellnessStore } from '../../src/store';
 import { saveCheckin, getCheckins } from '../../src/storage/checkinStorage';
 import { getCheckups, saveCheckup, deleteCheckup } from '../../src/storage/checkupsStorage';
+import { useTheme } from '../../src/context/ThemeContext';
 
 const MODERN_MOODS = [
   { id: 'radiant', label: 'Radiant', sub: 'High vitality', icon: Sun, val: 5, color: '#16a34a' },
@@ -223,25 +224,25 @@ export default function CheckupsScreen() {
       </View>
 
       {/* Segmented Control */}
-      <View style={styles.segmentedControl}>
+      <View style={[styles.segmentedControl, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
         <TouchableOpacity
-          style={[styles.segmentBtn, section === 'daily' && styles.segmentBtnActive]}
+          style={[styles.segmentBtn, section === 'daily' && [styles.segmentBtnActive, { backgroundColor: theme.surface }]]}
           onPress={() => setSection('daily')}
           activeOpacity={0.7}
         >
           <Smile size={16} color={section === 'daily' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.segmentText, section === 'daily' && styles.segmentTextActive]}>
+          <Text style={[styles.segmentText, { color: theme.textSecondary }, section === 'daily' && { color: theme.accent, fontWeight: '700' }]}>
             Daily Self-Ritual
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.segmentBtn, section === 'clinical' && styles.segmentBtnActive]}
+          style={[styles.segmentBtn, section === 'clinical' && [styles.segmentBtnActive, { backgroundColor: theme.surface }]]}
           onPress={() => setSection('clinical')}
           activeOpacity={0.7}
         >
           <CalendarCheck size={16} color={section === 'clinical' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.segmentText, section === 'clinical' && styles.segmentTextActive]}>
+          <Text style={[styles.segmentText, { color: theme.textSecondary }, section === 'clinical' && { color: theme.accent, fontWeight: '700' }]}>
             Clinical Planner ({clinicalCheckups.length})
           </Text>
         </TouchableOpacity>
@@ -255,7 +256,7 @@ export default function CheckupsScreen() {
         {section === 'daily' ? (
           <View>
             {/* Gamified Hero Card: Streak & XP (Pure Modern Icons) */}
-            <View style={styles.streakHeroCard}>
+            <View style={[styles.streakHeroCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.streakTopRow}>
                 <View style={styles.streakBadge}>
                   <Flame size={15} color="#ef4444" />
@@ -266,8 +267,8 @@ export default function CheckupsScreen() {
                   <Text style={styles.xpBadgeText}>Level 3 Vitality</Text>
                 </View>
               </View>
-              <Text style={styles.streakHeroTitle}>Natural Biological Rhythm</Text>
-              <Text style={styles.streakHeroSub}>
+              <Text style={[styles.streakHeroTitle, { color: theme.textPrimary }]}>Natural Biological Rhythm</Text>
+              <Text style={[styles.streakHeroSub, { color: theme.textSecondary }]}>
                 Tune into your physiological cues today to earn +25 Vitality XP.
               </Text>
             </View>
@@ -281,13 +282,13 @@ export default function CheckupsScreen() {
             )}
 
             {/* 1. Modern Mood Avatars (No Emojis) */}
-            <View style={styles.funCard}>
+            <View style={[styles.funCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
                   <View style={styles.sectionIconBubble}>
                     <Smile size={18} color="#16a34a" />
                   </View>
-                  <Text style={styles.cardTitle}>Emotional & Mental State</Text>
+                  <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Emotional & Mental State</Text>
                 </View>
                 <Text style={styles.hintBadge}>Select active state</Text>
               </View>
@@ -332,13 +333,13 @@ export default function CheckupsScreen() {
             </View>
 
             {/* 2. Visual Energy Battery (No Emojis) */}
-            <View style={styles.funCard}>
+            <View style={[styles.funCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
                   <View style={styles.sectionIconBubble}>
                     <Zap size={18} color="#16a34a" />
                   </View>
-                  <Text style={styles.cardTitle}>Physical Energy Capacity</Text>
+                  <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Physical Energy Capacity</Text>
                 </View>
                 <Text style={styles.selectedLevelText}>
                   {ENERGY_LEVELS.find(e => e.val === energy)?.pct} Capacity
@@ -373,13 +374,13 @@ export default function CheckupsScreen() {
             </View>
 
             {/* 3. Sleep Journey (No Emojis) */}
-            <View style={styles.funCard}>
+            <View style={[styles.funCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
                   <View style={styles.sectionIconBubble}>
                     <Moon size={18} color="#16a34a" />
                   </View>
-                  <Text style={styles.cardTitle}>Sleep Duration & Rest</Text>
+                  <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Sleep Duration & Rest</Text>
                 </View>
               </View>
 
@@ -409,13 +410,13 @@ export default function CheckupsScreen() {
             </View>
 
             {/* 4. Interactive Stress Barometer (No Emojis) */}
-            <View style={styles.funCard}>
+            <View style={[styles.funCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
                   <View style={styles.sectionIconBubble}>
                     <Activity size={18} color="#16a34a" />
                   </View>
-                  <Text style={styles.cardTitle}>Nervous System Load</Text>
+                  <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Nervous System Load</Text>
                 </View>
               </View>
 
@@ -451,13 +452,13 @@ export default function CheckupsScreen() {
             </View>
 
             {/* 5. Hydration Water Tracker (No Emojis) */}
-            <View style={styles.funCard}>
+            <View style={[styles.funCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
                   <View style={styles.sectionIconBubble}>
                     <Droplets size={18} color="#0284c7" />
                   </View>
-                  <Text style={styles.cardTitle}>Hydration Pace</Text>
+                  <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Hydration Pace</Text>
                 </View>
                 <Text style={styles.waterCountBadge}>{waterCups} / 8 Glasses</Text>
               </View>
@@ -486,13 +487,13 @@ export default function CheckupsScreen() {
             </View>
 
             {/* 6. Body Comfort (No Emojis) */}
-            <View style={styles.funCard}>
+            <View style={[styles.funCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
                   <View style={styles.sectionIconBubble}>
                     <Heart size={18} color="#16a34a" />
                   </View>
-                  <Text style={styles.cardTitle}>Musculoskeletal Comfort</Text>
+                  <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Musculoskeletal Comfort</Text>
                 </View>
               </View>
 

@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { Volume2, VolumeX } from 'lucide-react-native';
+import { useTheme } from '../../context/ThemeContext';
 import Svg, {
   Path,
   Defs,
@@ -153,6 +154,7 @@ export default function FloatingNatureBackground({
   children,
   showSoundToggle = true,
 }: FloatingNatureBackgroundProps) {
+  const { theme, isDark } = useTheme();
   const [isPlayingSound, setIsPlayingSound] = useState(true);
 
   // Elements configuration matching web FloatingLeaves
@@ -357,7 +359,7 @@ export default function FloatingNatureBackground({
   return (
     <View style={styles.container}>
       {/* Background Calm Base */}
-      <View style={styles.calmBase} />
+      <View style={[styles.calmBase, { backgroundColor: theme.background }]} />
 
       {/* Gentle Air / Breeze Stream 1 */}
       <Animated.View
@@ -462,17 +464,29 @@ export default function FloatingNatureBackground({
       {/* Interactive Floating Sound Pill */}
       {showSoundToggle && (
         <TouchableOpacity
-          style={styles.soundPill}
+          style={[
+            styles.soundPill,
+            isDark && {
+              backgroundColor: theme.surfaceElevated,
+              borderColor: theme.border,
+              shadowColor: '#000000',
+            },
+          ]}
           onPress={toggleSound}
           activeOpacity={0.8}
           accessibilityLabel="Toggle Nature Ambience"
         >
           {isPlayingSound ? (
-            <Volume2 size={15} color="#16a34a" />
+            <Volume2 size={15} color={theme.accent} />
           ) : (
-            <VolumeX size={15} color="#94a3b8" />
+            <VolumeX size={15} color={theme.textTertiary} />
           )}
-          <Text style={[styles.soundPillText, { color: isPlayingSound ? '#16a34a' : '#64748b' }]}>
+          <Text
+            style={[
+              styles.soundPillText,
+              { color: isPlayingSound ? theme.accent : theme.textSecondary },
+            ]}
+          >
             {isPlayingSound ? 'Ambience ON' : 'Ambience OFF'}
           </Text>
         </TouchableOpacity>

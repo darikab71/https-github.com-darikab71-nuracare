@@ -62,6 +62,7 @@ export default function DiscoveryHub({
   onToggleSupportDiscussion,
   onReportItem,
 }: DiscoveryHubProps) {
+  const { theme, isDark } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<SearchCategory>('All');
   const [followingMap, setFollowingMap] = useState<Record<string, boolean>>({
@@ -143,20 +144,20 @@ export default function DiscoveryHub({
           <Compass size={13} color="#16a34a" />
           <Text style={styles.headerBadgeText}>Exploration Hub</Text>
         </View>
-        <Text style={styles.title}>Discover</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: theme.textPrimary }]}>Discover</Text>
+        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
           Explore communities, challenges, conversations, and people.
         </Text>
       </View>
 
       {/* 2. Global Search System */}
       <View style={styles.searchSection}>
-        <View style={styles.searchBar}>
+        <View style={[styles.searchBar, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder }]}>
           <Search size={18} color="#94a3b8" />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: theme.inputText }]}
             placeholder="Search groups, challenges, topics..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={theme.placeholderText}
             value={searchQuery}
             onChangeText={setSearchQuery}
             returnKeyType="search"
@@ -179,14 +180,19 @@ export default function DiscoveryHub({
             return (
               <TouchableOpacity
                 key={cat}
-                style={[styles.categoryChip, isSelected && styles.categoryChipSelected]}
+                style={[
+                  styles.categoryChip,
+                  { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle },
+                  isSelected && { backgroundColor: theme.accentDeep, borderColor: theme.accent },
+                ]}
                 onPress={() => setSelectedCategory(cat)}
                 activeOpacity={0.8}
               >
                 <Text
                   style={[
                     styles.categoryChipText,
-                    isSelected && styles.categoryChipTextSelected,
+                    { color: theme.textSecondary },
+                    isSelected && { color: theme.accent, fontWeight: '700' },
                   ]}
                 >
                   {cat}
@@ -351,8 +357,8 @@ export default function DiscoveryHub({
           <View style={styles.sectionWrap}>
             <View style={styles.sectionHeader}>
               <View>
-                <Text style={styles.sectionTitle}>Recommended For You</Text>
-                <Text style={styles.sectionSubtitle}>
+                <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Recommended For You</Text>
+                <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
                   Tailored based on your sleep, recovery & movement goals
                 </Text>
               </View>
@@ -372,10 +378,10 @@ export default function DiscoveryHub({
                       {ch.category}
                     </Text>
                   </View>
-                  <Text style={styles.recCardTitle} numberOfLines={2}>
+                  <Text style={[styles.recCardTitle, { color: theme.textPrimary }]} numberOfLines={2}>
                     {ch.title}
                   </Text>
-                  <Text style={styles.recCardMeta}>
+                  <Text style={[styles.recCardMeta, { color: theme.textSecondary }]}>
                     {ch.durationDays} Days • {ch.participantsCount} participants
                   </Text>
                   <View style={styles.recCardFooter}>
@@ -391,8 +397,8 @@ export default function DiscoveryHub({
           <View style={styles.sectionWrap}>
             <View style={styles.sectionHeader}>
               <View>
-                <Text style={styles.sectionTitle}>Trending Communities</Text>
-                <Text style={styles.sectionSubtitle}>
+                <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Trending Communities</Text>
+                <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
                   Active spaces where members connect and build healthy habits
                 </Text>
               </View>
@@ -446,8 +452,8 @@ export default function DiscoveryHub({
           <View style={styles.sectionWrap}>
             <View style={styles.sectionHeader}>
               <View>
-                <Text style={styles.sectionTitle}>Trending Discussions</Text>
-                <Text style={styles.sectionSubtitle}>
+                <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Trending Discussions</Text>
+                <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
                   Insightful conversations from community members
                 </Text>
               </View>
@@ -533,8 +539,8 @@ export default function DiscoveryHub({
           <View style={styles.sectionWrap}>
             <View style={styles.sectionHeader}>
               <View>
-                <Text style={styles.sectionTitle}>Suggested Contributors</Text>
-                <Text style={styles.sectionSubtitle}>
+                <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Suggested Contributors</Text>
+                <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
                   Certified wellness guides and active community leaders
                 </Text>
               </View>

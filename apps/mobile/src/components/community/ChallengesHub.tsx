@@ -31,6 +31,7 @@ import {
   ChallengeDifficulty,
 } from '../../types/communityTypes';
 import CommunityMascot from './CommunityMascot';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ChallengesHubProps {
   challenges: CommunityChallenge[];
@@ -47,6 +48,7 @@ export default function ChallengesHub({
   onCompleteDay,
   onCreateChallenge,
 }: ChallengesHubProps) {
+  const { theme, isDark } = useTheme();
   const [activeFilter, setActiveFilter] = useState<ChallengeFilter>('Featured');
   const [selectedChallenge, setSelectedChallenge] = useState<CommunityChallenge | null>(null);
 
@@ -171,7 +173,7 @@ export default function ChallengesHub({
             <Text style={styles.headerBadgeText}>Action & Progress</Text>
           </View>
           <Text style={styles.title}>Challenges</Text>
-          <Text style={styles.subtitle}>Small steps. Shared progress.</Text>
+          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Small steps. Shared progress.</Text>
         </View>
 
         <TouchableOpacity
@@ -195,7 +197,7 @@ export default function ChallengesHub({
           return (
             <TouchableOpacity
               key={tab}
-              style={[styles.filterPill, isActive && styles.filterPillActive]}
+              style={[styles.filterPill, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }, isActive && { backgroundColor: theme.accentDeep, borderColor: theme.accent }]}
               onPress={() => setActiveFilter(tab)}
               activeOpacity={0.8}
             >

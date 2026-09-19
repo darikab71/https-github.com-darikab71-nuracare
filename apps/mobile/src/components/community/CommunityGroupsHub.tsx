@@ -33,6 +33,7 @@ import {
   CommunityChallenge,
 } from '../../types/communityTypes';
 import CommunityMascot from './CommunityMascot';
+import { useTheme } from '../../context/ThemeContext';
 
 interface CommunityGroupsHubProps {
   groups: CommunityGroup[];
@@ -61,6 +62,7 @@ export default function CommunityGroupsHub({
   onReportItem,
   initialSelectedGroup = null,
 }: CommunityGroupsHubProps) {
+  const { theme, isDark } = useTheme();
   const [selectedGroup, setSelectedGroup] = useState<CommunityGroup | null>(initialSelectedGroup);
   const [groupDetailTab, setGroupDetailTab] = useState<GroupDetailTab>('Discussions');
 
@@ -137,7 +139,7 @@ export default function CommunityGroupsHub({
             <Text style={styles.headerBadgeText}>Belong & Participate</Text>
           </View>
           <Text style={styles.title}>Community</Text>
-          <Text style={styles.subtitle}>Find your people and grow together.</Text>
+          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Find your people and grow together.</Text>
         </View>
 
         <TouchableOpacity
@@ -207,7 +209,7 @@ export default function CommunityGroupsHub({
                   <Users size={20} color="#16a34a" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.groupCardName}>{grp.name}</Text>
+                  <Text style={[styles.groupCardName, { color: theme.textPrimary }]}>{grp.name}</Text>
                   <Text style={styles.groupCardMeta}>
                     {grp.membersCount} members • {grp.privacy}
                   </Text>
@@ -223,7 +225,7 @@ export default function CommunityGroupsHub({
                   <Text style={styles.joinBtnText}>Join</Text>
                 </TouchableOpacity>
               </View>
-              <Text style={styles.groupCardDesc} numberOfLines={2}>
+              <Text style={[styles.groupCardDesc, { color: theme.textSecondary }]} numberOfLines={2}>
                 {grp.description}
               </Text>
             </TouchableOpacity>

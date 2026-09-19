@@ -24,6 +24,7 @@ import {
 } from 'lucide-react-native';
 import { DirectThread, DirectMessage } from '../../types/communityTypes';
 import CommunityMascot from './CommunityMascot';
+import { useTheme } from '../../context/ThemeContext';
 
 interface InboxHubProps {
   threads: DirectThread[];
@@ -42,6 +43,7 @@ export default function InboxHub({
   onIgnoreRequest,
   onReportUser,
 }: InboxHubProps) {
+  const { theme, isDark } = useTheme();
   const [activeFilter, setActiveFilter] = useState<InboxFilter>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeChatThread, setActiveChatThread] = useState<DirectThread | null>(null);
@@ -105,12 +107,12 @@ export default function InboxHub({
 
       {/* 2. Search & Sub-Tabs */}
       <View style={styles.searchWrap}>
-        <View style={styles.searchBar}>
+        <View style={[styles.searchBar, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder }]}>
           <Search size={16} color="#94a3b8" />
           <TextInput
             style={styles.searchInput}
             placeholder="Search conversations..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={theme.placeholderText}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -134,10 +136,10 @@ export default function InboxHub({
             return (
               <TouchableOpacity
                 key={tab}
-                style={[styles.filterTab, isActive && styles.filterTabActive]}
+                style={[styles.filterTab, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }, isActive && { backgroundColor: theme.accentDeep, borderColor: theme.accent }]}
                 onPress={() => setActiveFilter(tab)}
               >
-                <Text style={[styles.filterTabText, isActive && styles.filterTabTextActive]}>
+                <Text style={[styles.filterTabText, { color: theme.textSecondary }, isActive && { color: theme.accent, fontWeight: '700' }]}>
                   {tab}
                 </Text>
                 {badge > 0 && (
@@ -245,9 +247,9 @@ export default function InboxHub({
           animationType="slide"
           onRequestClose={() => setActiveChatThread(null)}
         >
-          <View style={styles.chatModalContainer}>
+          <View style={[styles.chatModalContainer, { backgroundColor: theme.surfaceModal, borderColor: theme.border }]}>
             {/* Chat Modal Header */}
-            <View style={styles.chatModalHeader}>
+            <View style={[styles.chatModalHeader, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
               <TouchableOpacity
                 onPress={() => setActiveChatThread(null)}
                 style={styles.chatBackBtn}
@@ -324,7 +326,7 @@ export default function InboxHub({
               <TextInput
                 style={styles.chatComposerInput}
                 placeholder={`Message ${activeChatThread.senderName.split(' ')[0]}...`}
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={theme.placeholderText}
                 value={inputMessage}
                 onChangeText={setInputMessage}
                 multiline

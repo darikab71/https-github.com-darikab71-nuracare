@@ -34,6 +34,7 @@ export default function VoiceCallSimulationModal({
   onOpenChat,
   characterName = 'Nura',
 }: VoiceCallSimulationModalProps) {
+  const { theme, isDark } = useTheme();
   const [callStatus, setCallStatus] = useState<'ringing' | 'connected' | 'ended'>('ringing');
   const [seconds, setSeconds] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
@@ -169,9 +170,9 @@ export default function VoiceCallSimulationModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleEndCall}>
       <View style={styles.backdrop}>
-        <View style={styles.callCard}>
+        <View style={[styles.callCard, { backgroundColor: theme.surfaceModal, borderColor: theme.border, borderWidth: 1 }]}>
           {/* Top Security Pill */}
-          <View style={styles.securityPill}>
+          <View style={[styles.securityPill, { backgroundColor: theme.accentGlow, borderColor: theme.accentSecondary + '40' }]}>
             <ShieldCheck size={13} color="#16a34a" />
             <Text style={styles.securityPillText}>Private AI Health Companion Session</Text>
           </View>
@@ -207,8 +208,8 @@ export default function VoiceCallSimulationModal({
           </View>
 
           {/* Caller Details */}
-          <Text style={styles.callerName}>{characterName}</Text>
-          <Text style={styles.callStatusText}>
+          <Text style={[styles.callerName, { color: theme.textPrimary }]}>{characterName}</Text>
+          <Text style={[styles.callStatusText, { color: theme.textSecondary }]}>
             {callStatus === 'ringing'
               ? 'Connecting voice channel...'
               : callStatus === 'ended'
@@ -238,9 +239,9 @@ export default function VoiceCallSimulationModal({
 
           {/* Subtitle Caption */}
           {callStatus === 'connected' && (
-            <View style={styles.captionBox}>
-              <Sparkles size={14} color="#16a34a" />
-              <Text style={styles.captionText}>{captions[captionIndex]}</Text>
+            <View style={[styles.captionBox, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
+              <Sparkles size={14} color={theme.accent} />
+              <Text style={[styles.captionText, { color: theme.textPrimary }]}>{captions[captionIndex]}</Text>
             </View>
           )}
 
@@ -248,12 +249,12 @@ export default function VoiceCallSimulationModal({
           <View style={styles.controlsRow}>
             {/* Mute Mic */}
             <TouchableOpacity
-              style={[styles.controlBtn, isMuted && styles.controlBtnActive]}
+              style={[styles.controlBtn, { backgroundColor: theme.surfaceElevated }, isMuted && { backgroundColor: theme.errorBackground, borderColor: theme.error, borderWidth: 1 }]}
               onPress={() => setIsMuted(!isMuted)}
               activeOpacity={0.8}
             >
-              {isMuted ? <MicOff size={20} color="#dc2626" /> : <Mic size={20} color="#0f172a" />}
-              <Text style={styles.controlBtnLabel}>{isMuted ? 'Muted' : 'Mute'}</Text>
+              {isMuted ? <MicOff size={20} color="#dc2626" /> : <Mic size={20} color={theme.textPrimary} />}
+              <Text style={[styles.controlBtnLabel, { color: theme.textSecondary }]}>{isMuted ? 'Muted' : 'Mute'}</Text>
             </TouchableOpacity>
 
             {/* End Call (Primary Red Action) */}
@@ -267,12 +268,12 @@ export default function VoiceCallSimulationModal({
 
             {/* Speaker Toggle */}
             <TouchableOpacity
-              style={[styles.controlBtn, isSpeaker && styles.controlBtnActive]}
+              style={[styles.controlBtn, { backgroundColor: theme.surfaceElevated }, isSpeaker && { backgroundColor: theme.accentDeep, borderColor: theme.accent, borderWidth: 1 }]}
               onPress={() => setIsSpeaker(!isSpeaker)}
               activeOpacity={0.8}
             >
-              {isSpeaker ? <Volume2 size={20} color="#16a34a" /> : <VolumeX size={20} color="#64748b" />}
-              <Text style={styles.controlBtnLabel}>{isSpeaker ? 'Speaker' : 'Earpiece'}</Text>
+              {isSpeaker ? <Volume2 size={20} color={theme.accent} /> : <VolumeX size={20} color={theme.textTertiary} />}
+              <Text style={[styles.controlBtnLabel, { color: theme.textSecondary }]}>{isSpeaker ? 'Speaker' : 'Earpiece'}</Text>
             </TouchableOpacity>
           </View>
 
@@ -285,8 +286,8 @@ export default function VoiceCallSimulationModal({
             }}
             activeOpacity={0.85}
           >
-            <MessageSquare size={16} color="#16a34a" />
-            <Text style={styles.switchToChatText}>Switch to Text Chat</Text>
+            <MessageSquare size={16} color={theme.accent} />
+            <Text style={[styles.switchToChatText, { color: theme.accent }]}>Switch to Text Chat</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -391,7 +392,7 @@ const styles = StyleSheet.create({
   waveBar: {
     width: 4,
     borderRadius: 2,
-    backgroundColor: '#16a34a',
+    backgroundColor: theme.accent,
   },
   captionBox: {
     flexDirection: 'row',

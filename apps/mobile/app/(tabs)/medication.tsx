@@ -12,6 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../../src/context/ThemeContext';
 import {
   Pill,
   CheckCircle2,
@@ -42,6 +43,7 @@ import {
 
 export default function MedicationScreen() {
   const router = useRouter();
+  const { theme, isDark } = useTheme();
   const [schedule, setSchedule] = useState<ScheduledDose[]>([]);
   const [allMeds, setAllMeds] = useState<MedicationItem[]>([]);
   const [stats, setStats] = useState({ percentage: 100, taken: 0, total: 0, streak: 0 });
@@ -145,12 +147,12 @@ export default function MedicationScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
         <View>
-          <Text style={styles.title}>Medication & Care</Text>
-          <Text style={styles.subtitle}>Daily schedule & adherence tracking</Text>
+          <Text style={[styles.title, { color: theme.textPrimary }]}>Medication & Care</Text>
+          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Daily schedule & adherence tracking</Text>
         </View>
         <TouchableOpacity
           style={styles.addHeaderBtn}
@@ -163,22 +165,22 @@ export default function MedicationScreen() {
       </View>
 
       {/* Sub navigation segmented buttons */}
-      <View style={styles.segmentedControl}>
+      <View style={[styles.segmentedControl, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
         <TouchableOpacity
-          style={[styles.segmentBtn, activeTab === 'today' && styles.segmentBtnActive]}
+          style={[styles.segmentBtn, activeTab === 'today' && [styles.segmentBtnActive, { backgroundColor: theme.surface }]]}
           onPress={() => setActiveTab('today')}
         >
           <Clock size={16} color={activeTab === 'today' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.segmentText, activeTab === 'today' && styles.segmentTextActive]}>
+          <Text style={[styles.segmentText, { color: theme.textSecondary }, activeTab === 'today' && { color: theme.accent, fontWeight: '700' }]}>
             Today's Doses ({schedule.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.segmentBtn, activeTab === 'manage' && styles.segmentBtnActive]}
+          style={[styles.segmentBtn, activeTab === 'manage' && [styles.segmentBtnActive, { backgroundColor: theme.surface }]]}
           onPress={() => setActiveTab('manage')}
         >
           <Pill size={16} color={activeTab === 'manage' ? '#16a34a' : '#64748b'} />
-          <Text style={[styles.segmentText, activeTab === 'manage' && styles.segmentTextActive]}>
+          <Text style={[styles.segmentText, { color: theme.textSecondary }, activeTab === 'manage' && { color: theme.accent, fontWeight: '700' }]}>
             Cabinet ({allMeds.length})
           </Text>
         </TouchableOpacity>
@@ -186,11 +188,11 @@ export default function MedicationScreen() {
 
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Adherence Score Summary Card */}
-        <View style={styles.adherenceCard}>
+        <View style={[styles.adherenceCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.adherenceLeft}>
             <Text style={styles.adherenceLabel}>7-DAY ADHERENCE</Text>
-            <Text style={styles.adherenceScore}>{stats.percentage}%</Text>
-            <Text style={styles.adherenceSub}>
+            <Text style={[styles.adherenceScore, { color: theme.accent }]}>{stats.percentage}%</Text>
+            <Text style={[styles.adherenceSub, { color: theme.textSecondary }]}>
               {stats.taken} of {stats.total} doses taken • {stats.streak} day streak
             </Text>
           </View>
@@ -204,13 +206,13 @@ export default function MedicationScreen() {
 
         {/* AI Contextual Assistant Chip */}
         <TouchableOpacity
-          style={styles.aiChip}
-          onPress={() => router.push('/(tabs)/chat')}
+          style={[styles.aiChip, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}
+          onPress={() => router.push('/chat')}
         >
           <Bot size={20} color="#16a34a" />
           <View style={{ flex: 1, marginHorizontal: 8 }}>
-            <Text style={styles.aiChipTitle}>Medication & Fasting Consultation</Text>
-            <Text style={styles.aiChipSubtitle}>Ask Nura AI how your doses align with Tsom fasting</Text>
+            <Text style={[styles.aiChipTitle, { color: theme.textPrimary }]}>Medication & Fasting Consultation</Text>
+            <Text style={[styles.aiChipSubtitle, { color: theme.textSecondary }]}>Ask Nura AI how your doses align with Tsom fasting</Text>
           </View>
           <ChevronRight size={18} color="#94a3b8" />
         </TouchableOpacity>
@@ -225,7 +227,7 @@ export default function MedicationScreen() {
 
         {activeTab === 'today' ? (
           <View>
-            <Text style={styles.sectionHeading}>Today's Schedule</Text>
+            <Text style={[styles.sectionHeading, { color: theme.textPrimary }]}>Today's Schedule</Text>
 
             {schedule.length === 0 ? (
               <View style={styles.emptyState}>
@@ -246,6 +248,7 @@ export default function MedicationScreen() {
                 <View
                   key={dose.doseId}
                   style={[
+                    { backgroundColor: theme.surface, borderColor: theme.border },
                     styles.doseCard,
                     dose.status === 'taken' && styles.doseCardTaken,
                     dose.status === 'skipped' && styles.doseCardSkipped,
@@ -348,7 +351,7 @@ export default function MedicationScreen() {
           </View>
         ) : (
           <View>
-            <Text style={styles.sectionHeading}>Active Medications ({allMeds.length})</Text>
+            <Text style={[styles.sectionHeading, { color: theme.textPrimary }]}>Active Medications ({allMeds.length})</Text>
 
             {allMeds.length === 0 ? (
               <View style={styles.emptyState}>
@@ -382,7 +385,7 @@ export default function MedicationScreen() {
       {/* Add Medication Modal */}
       <Modal visible={showAddModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+          <View style={[styles.modalCard, { backgroundColor: theme.surfaceModal, borderColor: theme.border, borderWidth: 1 }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Add Medication / Supplement</Text>
               <TouchableOpacity onPress={() => setShowAddModal(false)}>

@@ -41,6 +41,7 @@ import {
 } from '../../src/data/communityData';
 
 import CommunityNavBar from '../../src/components/community/CommunityNavBar';
+import { useTheme } from '../../src/context/ThemeContext';
 import DiscoveryHub from '../../src/components/community/DiscoveryHub';
 import ChallengesHub from '../../src/components/community/ChallengesHub';
 import CommunityGroupsHub from '../../src/components/community/CommunityGroupsHub';
@@ -311,21 +312,21 @@ export default function CommunityCenterScreen() {
   };
 
   return (
-    <View style={styles.screenContainer}>
+    <View style={[styles.screenContainer, { backgroundColor: theme.background }]}>
       {/* Top Header Bar with Privacy Action */}
-      <View style={styles.topAppBar}>
+      <View style={[styles.topAppBar, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
         <View style={styles.brandTitleRow}>
-          <Text style={styles.brandTitle}>NuraCare Community</Text>
+          <Text style={[styles.brandTitle, { color: theme.textPrimary }]}>NuraCare Community</Text>
         </View>
 
         <TouchableOpacity
-          style={styles.privacyButton}
+          style={[styles.privacyButton, { backgroundColor: theme.accentGlow, borderColor: theme.accentSecondary + '40' }]}
           onPress={() => setShowPrivacyModal(true)}
           activeOpacity={0.8}
           accessibilityLabel="Privacy and Safety Settings"
         >
-          <Lock size={14} color="#16a34a" />
-          <Text style={styles.privacyButtonText}>Privacy</Text>
+          <Lock size={14} color={theme.accent} />
+          <Text style={[styles.privacyButtonText, { color: theme.accent }]}>Privacy</Text>
         </TouchableOpacity>
       </View>
 
@@ -402,15 +403,15 @@ export default function CommunityCenterScreen() {
           animationType="slide"
           onRequestClose={() => setSelectedDiscussion(null)}
         >
-          <View style={styles.discussionModalContainer}>
-            <View style={styles.discussionModalHeader}>
+          <View style={[styles.discussionModalContainer, { backgroundColor: theme.surfaceModal, borderColor: theme.border }]}>
+            <View style={[styles.discussionModalHeader, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
               <TouchableOpacity
                 onPress={() => setSelectedDiscussion(null)}
                 style={styles.discBackBtn}
               >
-                <X size={20} color="#0f172a" />
+                <X size={20} color={theme.textPrimary} />
               </TouchableOpacity>
-              <Text style={styles.discModalHeaderTitle}>Discussion</Text>
+              <Text style={[styles.discModalHeaderTitle, { color: theme.textPrimary }]}>Discussion</Text>
               <TouchableOpacity
                 onPress={() =>
                   handleOpenReport('discussion', selectedDiscussion.title)
@@ -427,16 +428,16 @@ export default function CommunityCenterScreen() {
                   <Text style={styles.avatarInitial}>{selectedDiscussion.author[0]}</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.discAuthorName}>{selectedDiscussion.author}</Text>
-                  <Text style={styles.discAuthorSub}>
+                  <Text style={[styles.discAuthorName, { color: theme.textPrimary }]}>{selectedDiscussion.author}</Text>
+                  <Text style={[styles.discAuthorSub, { color: theme.textSecondary }]}>
                     in {selectedDiscussion.groupName || 'General Community'} • {selectedDiscussion.timeAgo}
                   </Text>
                 </View>
               </View>
 
               {/* Topic Content */}
-              <Text style={styles.discFullTitle}>{selectedDiscussion.title}</Text>
-              <Text style={styles.discFullContent}>{selectedDiscussion.content}</Text>
+              <Text style={[styles.discFullTitle, { color: theme.textPrimary }]}>{selectedDiscussion.title}</Text>
+              <Text style={[styles.discFullContent, { color: theme.textSecondary }]}>{selectedDiscussion.content}</Text>
 
               {/* Topic Support Reaction */}
               <View style={styles.discActionRow}>
@@ -472,20 +473,20 @@ export default function CommunityCenterScreen() {
 
               {/* Replies Section */}
               <View style={styles.repliesList}>
-                <Text style={styles.repliesHeading}>Community Replies</Text>
+                <Text style={[styles.repliesHeading, { color: theme.textPrimary }]}>Community Replies</Text>
                 {selectedDiscussion.replies.length > 0 ? (
                   selectedDiscussion.replies.map((rep) => (
-                    <View key={rep.id} style={styles.replyCard}>
+                    <View key={rep.id} style={[styles.replyCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
                       <View style={styles.replyHeader}>
                         <View style={[styles.avatarCircleSmall, { backgroundColor: rep.avatarColor }]}>
                           <Text style={styles.avatarInitialSmall}>{rep.author[0]}</Text>
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.replyAuthor}>{rep.author}</Text>
+                          <Text style={[styles.replyAuthor, { color: theme.textPrimary }]}>{rep.author}</Text>
                           <Text style={styles.replyTime}>{rep.timestamp}</Text>
                         </View>
                       </View>
-                      <Text style={styles.replyContent}>{rep.content}</Text>
+                      <Text style={[styles.replyContent, { color: theme.textSecondary }]}>{rep.content}</Text>
                     </View>
                   ))
                 ) : (
@@ -497,11 +498,11 @@ export default function CommunityCenterScreen() {
             </ScrollView>
 
             {/* Reply Input Bar */}
-            <View style={styles.replyComposerBar}>
+            <View style={[styles.replyComposerBar, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
               <TextInput
-                style={styles.replyInput}
+                style={[styles.replyInput, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder, color: theme.inputText }]}
                 placeholder="Write a supportive reply..."
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={theme.placeholderText}
                 value={replyInputText}
                 onChangeText={setReplyInputText}
                 multiline
@@ -531,16 +532,16 @@ export default function CommunityCenterScreen() {
         onRequestClose={() => setShowPrivacyModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.privacyModalCard}>
+          <View style={[styles.privacyModalCard, { backgroundColor: theme.surfaceModal, borderColor: theme.border, borderWidth: 1 }]}>
             <View style={styles.privacyHeader}>
               <ShieldCheck size={20} color="#16a34a" />
-              <Text style={styles.privacyTitle}>Community Privacy & Safety</Text>
+              <Text style={[styles.privacyTitle, { color: theme.textPrimary }]}>Community Privacy & Safety</Text>
               <TouchableOpacity onPress={() => setShowPrivacyModal(false)}>
                 <X size={18} color="#64748b" />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.privacySectionHeading}>Who Can Message You</Text>
+            <Text style={[styles.privacySectionHeading, { color: theme.textPrimary }]}>Who Can Message You</Text>
             {(['Everyone', 'Group Members', 'Nobody'] as const).map((opt) => (
               <TouchableOpacity
                 key={opt}

@@ -47,6 +47,7 @@ import { checkForAppUpdates } from '../../src/services/versionCheck';
 import CompanionAvatar3D from '../../src/components/avatar/CompanionAvatar3D';
 import AvatarLocomotionOverlay from '../../src/components/avatar/AvatarLocomotionOverlay';
 import VoiceCallSimulationModal from '../../src/components/chat/VoiceCallSimulationModal';
+import { useTheme } from '../../src/context/ThemeContext';
 
 /**
  * Compact circular info teller component for Wellness & Burnout
@@ -57,26 +58,31 @@ function CircleInfoTeller({
   subtext,
   color,
   bgColor,
+  textColor,
+  subColor,
 }: {
   label: string;
   value: string | number;
   subtext: string;
   color: string;
   bgColor: string;
+  textColor?: string;
+  subColor?: string;
 }) {
   return (
     <View style={styles.circleTellerWrap}>
       <View style={[styles.circleRing, { borderColor: color, backgroundColor: bgColor }]}>
         <Text style={[styles.circleVal, { color }]}>{value}</Text>
       </View>
-      <Text style={styles.circleLabel}>{label}</Text>
-      <Text style={styles.circleSub}>{subtext}</Text>
+      <Text style={[styles.circleLabel, textColor ? { color: textColor } : null]}>{label}</Text>
+      <Text style={[styles.circleSub, subColor ? { color: subColor } : null]}>{subtext}</Text>
     </View>
   );
 }
 
 export default function AdaptiveHomeScreen() {
   const router = useRouter();
+  const { theme, isDark } = useTheme();
   const { profile } = useProfile();
   const { checkIns } = useWellnessStore();
   
@@ -279,22 +285,22 @@ export default function AdaptiveHomeScreen() {
         {/* Top Header */}
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.greetingText}>
+            <Text style={[styles.greetingText, { color: theme.textPrimary }]}>
               {greeting}{profile?.name ? `, ${profile.name.split(' ')[0]}` : ''}
             </Text>
-            <Text style={styles.subtitleText}>Your holistic health & vitality</Text>
+            <Text style={[styles.subtitleText, { color: theme.textSecondary }]}>Your holistic health & vitality</Text>
           </View>
         </View>
 
         {/* 1. TOP: 2-Line Today's Insight Banner */}
-        <View style={styles.insightCardSlim}>
+        <View style={[styles.insightCardSlim, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.insightSlimLeft}>
-            <View style={styles.insightSlimPill}>
+            <View style={[styles.insightSlimPill, { backgroundColor: theme.accentGlow }]}>
               <Sparkles size={12} color="#16a34a" />
-              <Text style={styles.insightSlimPillText}>INSIGHT</Text>
+              <Text style={[styles.insightSlimPillText, { color: theme.accent }]}>INSIGHT</Text>
             </View>
-            <Text style={styles.insightSlimTitle} numberOfLines={2}>
-              {todayInsight.title}: <Text style={styles.insightSlimDesc}>{todayInsight.desc}</Text>
+            <Text style={[styles.insightSlimTitle, { color: theme.textPrimary }]} numberOfLines={2}>
+              {todayInsight.title}: <Text style={[styles.insightSlimDesc, { color: theme.textSecondary }]}>{todayInsight.desc}</Text>
             </Text>
           </View>
           <View style={[styles.stateDotSlim, { backgroundColor: todayInsight.badgeColor }]} />
@@ -302,6 +308,20 @@ export default function AdaptiveHomeScreen() {
 
         {/* 2. WIDE OPEN 3D ANIMATION BALANCE SPACE (No card, pure wide open canvas) */}
         <View style={styles.stage3DWideSpace}>
+          {isDark && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 20,
+                alignSelf: 'center',
+                width: 220,
+                height: 120,
+                borderRadius: 60,
+                backgroundColor: theme.accentGlow,
+                opacity: 0.8,
+              }}
+            />
+          )}
           <View style={styles.canvas3DOpenArea}>
             <CompanionAvatar3D />
           </View>
@@ -312,22 +332,28 @@ export default function AdaptiveHomeScreen() {
               label="Wellness"
               value={biometrics.recoveryScore}
               subtext="Optimal"
-              color="#16a34a"
-              bgColor="#f0fdf4"
+              color={theme.accent}
+              bgColor={isDark ? theme.surfaceElevated : '#f0fdf4'}
+              textColor={theme.textPrimary}
+              subColor={theme.textSecondary}
             />
             <CircleInfoTeller
               label="Burnout"
               value={burnoutAssessment.state.split(' ')[0]}
               subtext={burnoutAssessment.state.split(' ')[1] || 'State'}
               color={burnoutAssessment.stateColor}
-              bgColor={`${burnoutAssessment.stateColor}15`}
+              bgColor={isDark ? theme.surfaceElevated : `${burnoutAssessment.stateColor}15`}
+              textColor={theme.textPrimary}
+              subColor={theme.textSecondary}
             />
             <CircleInfoTeller
               label="Digital"
               value={digitalScore.score}
               subtext="Balanced"
-              color="#4f46e5"
-              bgColor="#eef2ff"
+              color={theme.info}
+              bgColor={isDark ? theme.surfaceElevated : '#eef2ff'}
+              textColor={theme.textPrimary}
+              subColor={theme.textSecondary}
             />
           </View>
         </View>
@@ -335,7 +361,7 @@ export default function AdaptiveHomeScreen() {
         {/* 3. UNDER THE ANIMATION: CHAT WITH NURA OR CALL HER */}
         <View style={styles.actionRow}>
           <TouchableOpacity 
-            style={styles.chatNuraBtn}
+            style={[styles.chatNuraBtn, { backgroundColor: theme.accent }]}
             onPress={handleChatWithNura}
             activeOpacity={0.85}
           >
@@ -350,22 +376,22 @@ export default function AdaptiveHomeScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.callNuraBtn}
+            style={[styles.callNuraBtn, { backgroundColor: theme.surfaceElevated, borderColor: theme.border }]}
             onPress={handleCallNura}
             activeOpacity={0.85}
           >
-            <View style={styles.callIconWrap}>
-              <PhoneCall size={18} color="#16a34a" />
+            <View style={[styles.callIconWrap, { backgroundColor: theme.accentGlow }]}>
+              <PhoneCall size={18} color={theme.accent} />
             </View>
-            <Text style={styles.callNuraText}>Call Nura</Text>
+            <Text style={[styles.callNuraText, { color: theme.textPrimary }]}>Call Nura</Text>
           </TouchableOpacity>
         </View>
 
         {/* 4. QUICK ACTION CARDS: HORIZONTAL DISPLAY WITH IMAGE & HOVERING TEXT */}
         <View style={styles.quickSection}>
           <View style={styles.quickHeader}>
-            <Text style={styles.quickSectionTitle}>Quick Actions</Text>
-            <Text style={styles.quickSectionHint}>Swipe to explore</Text>
+            <Text style={[styles.quickSectionTitle, { color: theme.textPrimary }]}>Quick Actions</Text>
+            <Text style={[styles.quickSectionHint, { color: theme.textSecondary }]}>Swipe to explore</Text>
           </View>
 
           <ScrollView
@@ -417,10 +443,10 @@ export default function AdaptiveHomeScreen() {
           <View style={styles.discoveryHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Sparkles size={16} color="#16a34a" />
-              <Text style={styles.discoverySectionTitle}>Natural Discovery</Text>
+              <Text style={[styles.discoverySectionTitle, { color: theme.textPrimary }]}>Natural Discovery</Text>
             </View>
             <TouchableOpacity onPress={() => router.push('/discovery')} activeOpacity={0.7}>
-              <Text style={styles.discoverySectionHint}>View All →</Text>
+              <Text style={[styles.discoverySectionHint, { color: theme.accent }]}>View All →</Text>
             </TouchableOpacity>
           </View>
 
@@ -440,7 +466,8 @@ export default function AdaptiveHomeScreen() {
                 key={tab.id}
                 style={[
                   styles.filterPill,
-                  discoveryTab === tab.id && styles.filterPillActive,
+                  { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle },
+                  discoveryTab === tab.id && { backgroundColor: theme.accentDeep, borderColor: theme.accent },
                 ]}
                 onPress={() => setDiscoveryTab(tab.id as any)}
                 activeOpacity={0.7}
@@ -448,7 +475,8 @@ export default function AdaptiveHomeScreen() {
                 <Text
                   style={[
                     styles.filterPillText,
-                    discoveryTab === tab.id && styles.filterPillTextActive,
+                    { color: theme.textSecondary },
+                    discoveryTab === tab.id && { color: theme.accent, fontWeight: '700' },
                   ]}
                 >
                   {tab.label}
@@ -503,18 +531,18 @@ export default function AdaptiveHomeScreen() {
 
         {/* Discover More Button */}
         <TouchableOpacity 
-          style={styles.discoverMoreBtn}
+          style={[styles.discoverMoreBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
           onPress={() => router.push('/discovery')}
           activeOpacity={0.8}
         >
-          <View style={styles.discoverMoreIconCircle}>
+          <View style={[styles.discoverMoreIconCircle, { backgroundColor: theme.accent }]}>
             <Compass size={18} color="#ffffff" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.discoverMoreBtnTitle}>Discover More</Text>
-            <Text style={styles.discoverMoreBtnSubtitle}>Explore Ethiopian remedies, superfoods & daily habits</Text>
+            <Text style={[styles.discoverMoreBtnTitle, { color: theme.textPrimary }]}>Discover More</Text>
+            <Text style={[styles.discoverMoreBtnSubtitle, { color: theme.textSecondary }]}>Explore Ethiopian remedies, superfoods & daily habits</Text>
           </View>
-          <ChevronRight size={18} color="#16a34a" />
+          <ChevronRight size={18} color={theme.accent} />
         </TouchableOpacity>
       </ScrollView>
 
@@ -531,13 +559,13 @@ export default function AdaptiveHomeScreen() {
             activeOpacity={1}
             onPress={() => setSelectedDiscovery(null)}
           >
-            <View style={styles.modalCard} onStartShouldSetResponder={() => true}>
+            <View style={[styles.modalCard, { backgroundColor: theme.surfaceModal, borderColor: theme.border }]} onStartShouldSetResponder={() => true}>
               <View style={styles.modalHeader}>
                 <View style={[styles.modalIconWrap, { backgroundColor: `${selectedDiscovery.badgeColor}15` }]}>
                   {renderDiscoveryIcon(selectedDiscovery.iconName, selectedDiscovery.badgeColor)}
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={styles.modalTitle}>{selectedDiscovery.name}</Text>
+                  <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>{selectedDiscovery.name}</Text>
                   <Text style={[styles.modalCategory, { color: selectedDiscovery.badgeColor }]}>
                     {selectedDiscovery.categoryLabel}
                   </Text>
@@ -547,18 +575,18 @@ export default function AdaptiveHomeScreen() {
                 </TouchableOpacity>
               </View>
 
-              <Text style={styles.modalBenefitText}>{selectedDiscovery.benefit}</Text>
+              <Text style={[styles.modalBenefitText, { color: theme.textSecondary }]}>{selectedDiscovery.benefit}</Text>
 
               <View style={styles.modalTagsRow}>
                 {selectedDiscovery.tags.map((tag) => (
-                  <View key={tag} style={styles.modalTagChip}>
-                    <Text style={styles.modalTagText}>#{tag}</Text>
+                  <View key={tag} style={[styles.modalTagChip, { backgroundColor: theme.surfaceElevated }]}>
+                    <Text style={[styles.modalTagText, { color: theme.accent }]}>#{tag}</Text>
                   </View>
                 ))}
               </View>
 
               <TouchableOpacity
-                style={styles.modalChatBtn}
+                style={[styles.modalChatBtn, { backgroundColor: theme.accent }]}
                 onPress={() => {
                   const remedyName = selectedDiscovery.name;
                   setSelectedDiscovery(null);

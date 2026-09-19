@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Compass, Trophy, Users, MessageSquare } from 'lucide-react-native';
 import { CommunityPrimaryTab } from '../../types/communityTypes';
+import { useTheme } from '../../context/ThemeContext';
 
 interface CommunityNavBarProps {
   activeTab: CommunityPrimaryTab;
@@ -16,6 +17,7 @@ export default function CommunityNavBar({
   unreadCount = 0,
   hasActiveChallenge = false,
 }: CommunityNavBarProps) {
+  const { theme, isDark } = useTheme();
   const tabs = [
     {
       key: 'discovery' as const,
@@ -42,7 +44,7 @@ export default function CommunityNavBar({
   ];
 
   return (
-    <View style={styles.navContainer}>
+    <View style={[styles.navContainer, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
       <View style={styles.navContent}>
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -58,10 +60,10 @@ export default function CommunityNavBar({
               accessibilityState={{ selected: isActive }}
               accessibilityLabel={`${tab.label} Tab`}
             >
-              <View style={[styles.iconWrapper, isActive && styles.iconWrapperActive]}>
+              <View style={[styles.iconWrapper, isActive && { backgroundColor: theme.accentDeep }]}>
                 <Icon
                   size={20}
-                  color={isActive ? '#16a34a' : '#64748b'}
+                  color={isActive ? theme.accent : theme.textSecondary}
                   strokeWidth={isActive ? 2.3 : 1.8}
                 />
 
@@ -80,12 +82,12 @@ export default function CommunityNavBar({
                 ) : null}
               </View>
 
-              <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
+              <Text style={[styles.navLabel, { color: theme.textSecondary }, isActive && { color: theme.accent, fontWeight: '700' }]}>
                 {tab.label}
               </Text>
 
               {/* Active Indicator Bar */}
-              {isActive && <View style={styles.activePill} />}
+              {isActive && <View style={[styles.activePill, { backgroundColor: theme.accent }]} />}
             </TouchableOpacity>
           );
         })}

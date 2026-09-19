@@ -2,11 +2,14 @@ import { Tabs, useRouter, useSegments } from 'expo-router';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Home, CalendarCheck, Pill, Heart, Users, MessageCircle, User } from 'lucide-react-native';
 import { useProfile } from '../../src/context/ProfileContext';
+import { useTheme } from '../../src/context/ThemeContext';
+import ThemeToggleButton from '../../src/components/theme/ThemeToggleButton';
 
 export default function TabLayout() {
   const router = useRouter();
   const segments = useSegments();
   const { profile } = useProfile();
+  const { theme, isDark } = useTheme();
 
   // Show floating chat button permanently on all tabs EXCEPT index (Home)
   const activeTabRoute = segments[1] || 'index';
@@ -22,7 +25,7 @@ export default function TabLayout() {
         activeOpacity={0.8}
         accessibilityLabel="Open Profile"
       >
-        <View style={styles.headerAvatarCircle}>
+        <View style={[styles.headerAvatarCircle, { backgroundColor: theme.accent }]}>
           <Text style={styles.headerAvatarText}>
             {initial}
           </Text>
@@ -32,14 +35,14 @@ export default function TabLayout() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: '#16a34a',
-          tabBarInactiveTintColor: '#64748b',
+          tabBarActiveTintColor: theme.navActive,
+          tabBarInactiveTintColor: theme.navInactive,
           tabBarStyle: {
-            backgroundColor: '#ffffff',
-            borderTopColor: '#e2e8f0',
+            backgroundColor: theme.navBackground,
+            borderTopColor: theme.navBorder,
             height: 62,
             paddingBottom: 8,
             paddingTop: 6,
@@ -50,18 +53,22 @@ export default function TabLayout() {
           },
           headerShown: true,
           headerTitleAlign: 'center', // Centered title on all 5 tabs
-          headerLeft: () => <View style={{ width: 48 }} />,
+          headerLeft: () => (
+            <View style={{ paddingLeft: 16 }}>
+              <ThemeToggleButton size={18} />
+            </View>
+          ),
           headerStyle: {
-            backgroundColor: '#ffffff',
-            elevation: 1,
+            backgroundColor: theme.navBackground,
+            elevation: isDark ? 0 : 1,
             shadowColor: '#000',
-            shadowOpacity: 0.03,
+            shadowOpacity: isDark ? 0 : 0.03,
             shadowRadius: 4,
-            borderBottomColor: '#f1f5f9',
+            borderBottomColor: theme.navBorder,
             borderBottomWidth: 1,
           },
           headerTitleStyle: {
-            color: '#0f172a',
+            color: theme.textPrimary,
             fontWeight: '800',
             fontSize: 17,
           },
@@ -120,7 +127,7 @@ export default function TabLayout() {
       {/* Persistent Floating Chat Launcher on the 4 tabs except Home */}
       {showFloatingChat && (
         <TouchableOpacity
-          style={styles.floatingChatBtn}
+          style={[styles.floatingChatBtn, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
           onPress={() => router.push('/chat')}
           activeOpacity={0.88}
           accessibilityLabel="Open Nura Chat"

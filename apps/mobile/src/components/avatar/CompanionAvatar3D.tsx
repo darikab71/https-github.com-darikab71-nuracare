@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import ThreeAvatarCanvas from './ThreeAvatarCanvas';
+import { useTheme } from '../../context/ThemeContext';
 
 interface CompanionAvatar3DProps {
   onStartChatTransition?: () => void;
@@ -22,6 +23,7 @@ export default function CompanionAvatar3D({
   isTransitioning = false,
 }: CompanionAvatar3DProps) {
   const router = useRouter();
+  const { theme, isDark } = useTheme();
 
   // Selected companion: 'nura' (female) or 'nuri' (male)
   const [character, setCharacter] = useState<'nura' | 'nuri'>('nura');
@@ -190,13 +192,13 @@ export default function CompanionAvatar3D({
   return (
     <View style={styles.container}>
       {/* Dynamic 3D Atmospheric Aura */}
-      <View style={styles.atmosphericGlowOuter} />
+      <View style={[styles.atmosphericGlowOuter, { backgroundColor: theme.accentGlow }]} />
       <View style={styles.atmosphericGlowInner} />
 
       {/* Speech Bubble on Tap */}
       {speechText && (
-        <View style={styles.speechBubble}>
-          <Text style={styles.speechBubbleText}>{speechText}</Text>
+        <View style={[styles.speechBubble, { backgroundColor: theme.surfaceModal, borderColor: theme.border }]}>
+          <Text style={[styles.speechBubbleText, { color: theme.textPrimary }]}>{speechText}</Text>
           <View style={styles.speechBubblePointer} />
         </View>
       )}
@@ -247,7 +249,8 @@ export default function CompanionAvatar3D({
         <TouchableOpacity
           style={[
             styles.companionPill,
-            character === 'nura' && styles.companionPillActive,
+            { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle },
+            character === 'nura' && { backgroundColor: theme.accentDeep, borderColor: theme.accent },
           ]}
           onPress={() => setCharacter('nura')}
           activeOpacity={0.8}
@@ -255,7 +258,8 @@ export default function CompanionAvatar3D({
           <Text
             style={[
               styles.companionPillText,
-              character === 'nura' && styles.companionPillTextActive,
+              { color: theme.textSecondary },
+              character === 'nura' && { color: theme.accent, fontWeight: '700' },
             ]}
           >
             NURA
@@ -265,7 +269,8 @@ export default function CompanionAvatar3D({
         <TouchableOpacity
           style={[
             styles.companionPill,
-            character === 'nuri' && styles.companionPillActive,
+            { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle },
+            character === 'nuri' && { backgroundColor: theme.accentDeep, borderColor: theme.accent },
           ]}
           onPress={() => setCharacter('nuri')}
           activeOpacity={0.8}
@@ -273,7 +278,8 @@ export default function CompanionAvatar3D({
           <Text
             style={[
               styles.companionPillText,
-              character === 'nuri' && styles.companionPillTextActive,
+              { color: theme.textSecondary },
+              character === 'nuri' && { color: theme.accent, fontWeight: '700' },
             ]}
           >
             NURI

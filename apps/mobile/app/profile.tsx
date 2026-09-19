@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuthStore, useWellnessStore } from '../src/store';
 import { useProfile } from '../src/context/ProfileContext';
+import { useTheme } from '../src/context/ThemeContext';
 import {
   User,
   ClipboardList,
@@ -30,16 +31,25 @@ import {
   Sparkles,
   Calendar,
   Lock,
+  Moon,
+  Sun,
+  Eye,
+  Smartphone,
+  Sliders,
 } from 'lucide-react-native';
 import { TSOM_TYPES } from '../src/lib/ethiopianCalendar';
+import ThemeSelectorModal from '../src/components/theme/ThemeSelectorModal';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, setUser } = useAuthStore();
   const { setScore } = useWellnessStore();
   const { profile, setProfile, clearProfile } = useProfile();
+  const { theme, isDark, themeMode, setThemeMode, activeTheme } = useTheme();
   
-  // Safe active profile with fallback to ensure screen NEVER renders blank
+  const [showThemeModal, setShowThemeModal] = useState(false);
+
+  // Safe active profile with fallback
   const activeProfile = profile || {
     name: user?.name || 'Nura Explorer',
     age: 28,
@@ -98,9 +108,9 @@ export default function ProfileScreen() {
 
   const addCondition = async () => {
     if (newCondition.trim()) {
-      const current = activeProfile.conditions || [];
-      if (!current.includes(newCondition.trim())) {
-        await setProfile({ conditions: [...current, newCondition.trim()] });
+      const conds = activeProfile.conditions || [];
+      if (!conds.includes(newCondition.trim())) {
+        await setProfile({ conditions: [...conds, newCondition.trim()] });
       }
       setNewCondition('');
       setShowAddCondition(false);
@@ -108,83 +118,165 @@ export default function ProfileScreen() {
   };
 
   const removeCondition = async (cond: string) => {
-    const current = activeProfile.conditions || [];
-    const updated = current.filter((c: string) => c !== cond);
-    await setProfile({ conditions: updated });
+    const conds = activeProfile.conditions || [];
+    await setProfile({ conditions: conds.filter((c: string) => c !== cond) });
   };
 
-  const setFastingMode = async (mode: string) => {
+  const handleFastingChange = async (mode: string) => {
     await setProfile({ fastingMode: mode });
   };
 
-  const medsList = Array.isArray(activeProfile.medications)
-    ? activeProfile.medications
-    : (activeProfile.medications || '').split(',').map((s: string) => s.trim()).filter(Boolean);
+  const rawMeds = activeProfile.medications || '';
+  const medsList = Array.isArray(rawMeds)
+    ? rawMeds
+    : rawMeds.split(',').map((s: string) => s.trim()).filter(Boolean);
 
   const conditionsList = activeProfile.conditions || [];
-
   const displayName = activeProfile.name || user?.name || 'Nura Explorer';
-  const displayAge = activeProfile.age ? `${activeProfile.age} yrs old` : 'Active Member';
-  const initialLetter = (displayName[0] || 'N').toUpperCase();
+  const displayAge = activeProfile.age ? `${activeProfile.age} yrs` : 'Adult';
+  const initialLetter = displayName ? displayName[0].toUpperCase() : 'N';
+
+  const themePills = [
+    { id: 'system', label: 'System', icon: Smartphone },
+    { id: 'dark', label: 'Dark', icon: Moon },
+    { id: 'night', label: 'Night Vision', icon: Eye },
+    { id: 'deep_night', label: 'Deep Midnight', icon: Sparkles },
+    { id: 'light', label: 'Light', icon: Sun },
+  ];
 
   return (
-    <View style={styles.outer}>
-      {/* Top Bar Header */}
-      <View style={styles.topNav}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <ArrowLeft size={20} color="#0f172a" />
+    <View style={[styles.outer, { backgroundColor: theme.background }]}>
+      {/* Top Custom Navigation Header */}
+      <View style={[styles.topNav, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <TouchableOpacity
+          style={[styles.backBtn, { backgroundColor: theme.surfaceElevated }]}
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+        >
+          <ArrowLeft size={20} color={theme.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.topNavTitle}>My Health Profile</Text>
-        <View style={{ width: 40 }} />
+        <Text style={[styles.topNavTitle, { color: theme.textPrimary }]}>My Health Profile</Text>
+        <TouchableOpacity
+          style={[styles.backBtn, { backgroundColor: theme.surfaceElevated }]}
+          onPress={() => setShowThemeModal(true)}
+          activeOpacity={0.7}
+        >
+          <Sliders size={18} color={theme.accent} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
         {/* Profile Hero Card */}
-        <View style={styles.profileHeroCard}>
+        <View style={[styles.profileHeroCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.heroRow}>
-            <View style={styles.avatarWrap}>
+            <View style={[styles.avatarWrap, { backgroundColor: theme.accent }]}>
               <Text style={styles.avatarText}>{initialLetter}</Text>
             </View>
             <View style={styles.heroInfo}>
               <View style={styles.nameBadgeRow}>
-                <Text style={styles.userName}>{displayName}</Text>
-                <View style={styles.verifiedBadge}>
-                  <ShieldCheck size={13} color="#16a34a" />
-                  <Text style={styles.verifiedText}>Verified</Text>
+                <Text style={[styles.userName, { color: theme.textPrimary }]}>{displayName}</Text>
+                <View style={[styles.verifiedBadge, { backgroundColor: theme.accentGlow }]}>
+                  <ShieldCheck size={13} color={theme.accent} />
+                  <Text style={[styles.verifiedText, { color: theme.accent }]}>Verified</Text>
                 </View>
               </View>
-              <Text style={styles.userSubtitle}>{displayAge} • Confidential Health Vault</Text>
+              <Text style={[styles.userSubtitle, { color: theme.textSecondary }]}>{displayAge} • Confidential Health Vault</Text>
             </View>
           </View>
         </View>
 
-        {/* Health Conditions Section */}
-        <View style={styles.sectionCard}>
+        {/* Appearance & Night Vision Section */}
+        <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.sectionHeaderRow}>
             <View style={styles.sectionTitleWithIcon}>
-              <Activity size={18} color="#16a34a" />
-              <Text style={styles.sectionTitle}>Focus Conditions</Text>
+              <Moon size={18} color={theme.accent} />
+              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Appearance & Night Vision</Text>
             </View>
             <TouchableOpacity 
-              style={styles.addSmallBtn} 
+              style={[styles.addSmallBtn, { backgroundColor: theme.accentGlow, borderColor: theme.accentSecondary + '40' }]}
+              onPress={() => setShowThemeModal(true)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.addSmallBtnText, { color: theme.accent }]}>Customize</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
+            Circadian-friendly dark and night themes reduce blue emission and eye strain.
+          </Text>
+
+          {/* Theme Mode Quick Switcher Pills */}
+          <View style={styles.pillsRow}>
+            {themePills.map((opt) => {
+              const active = themeMode === opt.id;
+              const IconComp = opt.icon;
+              return (
+                <TouchableOpacity
+                  key={opt.id}
+                  style={[
+                    styles.themePill,
+                    {
+                      backgroundColor: active ? theme.accentDeep : theme.surfaceElevated,
+                      borderColor: active ? theme.accent : theme.borderSubtle,
+                    },
+                  ]}
+                  onPress={() => setThemeMode(opt.id as any)}
+                  activeOpacity={0.8}
+                >
+                  <IconComp size={14} color={active ? theme.accent : theme.textSecondary} />
+                  <Text
+                    style={[
+                      styles.themePillText,
+                      {
+                        color: active ? theme.accent : theme.textPrimary,
+                        fontWeight: active ? '700' : '600',
+                      },
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Health Conditions Section */}
+        <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.sectionHeaderRow}>
+            <View style={styles.sectionTitleWithIcon}>
+              <Activity size={18} color={theme.accent} />
+              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Focus Conditions</Text>
+            </View>
+            <TouchableOpacity 
+              style={[styles.addSmallBtn, { backgroundColor: theme.accentGlow, borderColor: theme.accentSecondary + '40' }]} 
               onPress={() => setShowAddCondition(!showAddCondition)}
               activeOpacity={0.7}
             >
-              <Plus size={14} color="#16a34a" />
-              <Text style={styles.addSmallBtnText}>Add</Text>
+              <Plus size={14} color={theme.accent} />
+              <Text style={[styles.addSmallBtnText, { color: theme.accent }]}>Add</Text>
             </TouchableOpacity>
           </View>
 
           {showAddCondition && (
             <View style={styles.inputInlineRow}>
               <TextInput
-                style={styles.inlineInput}
+                style={[
+                  styles.inlineInput,
+                  {
+                    backgroundColor: theme.inputBackground,
+                    borderColor: theme.inputBorder,
+                    color: theme.inputText,
+                  },
+                ]}
                 placeholder="e.g. Asthma, High Cholesterol..."
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={theme.placeholderText}
                 value={newCondition}
                 onChangeText={setNewCondition}
               />
-              <TouchableOpacity style={styles.inlineActionBtn} onPress={addCondition}>
+              <TouchableOpacity
+                style={[styles.inlineActionBtn, { backgroundColor: theme.accent }]}
+                onPress={addCondition}
+              >
                 <Text style={styles.inlineActionBtnText}>Save</Text>
               </TouchableOpacity>
             </View>
@@ -193,179 +285,176 @@ export default function ProfileScreen() {
           <View style={styles.tagsContainer}>
             {conditionsList.length > 0 ? (
               conditionsList.map((cond: string) => (
-                <View key={cond} style={styles.conditionTag}>
-                  <Text style={styles.conditionTagText}>{cond}</Text>
+                <View
+                  key={cond}
+                  style={[
+                    styles.conditionTag,
+                    {
+                      backgroundColor: theme.accentDeep,
+                      borderColor: theme.accentSecondary + '50',
+                    },
+                  ]}
+                >
+                  <Text style={[styles.conditionTagText, { color: theme.textPrimary }]}>{cond}</Text>
                   <TouchableOpacity onPress={() => removeCondition(cond)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                    <X size={13} color="#15803d" />
+                    <X size={13} color={theme.accent} />
                   </TouchableOpacity>
                 </View>
               ))
             ) : (
-              <Text style={styles.emptyStateText}>No specific conditions reported.</Text>
+              <Text style={[styles.emptyStateText, { color: theme.textTertiary }]}>No specific conditions reported.</Text>
             )}
           </View>
         </View>
 
         {/* Health Records Vault Link */}
-        <View style={styles.sectionCard}>
+        <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.sectionTitleWithIcon}>
-            <ClipboardList size={18} color="#16a34a" />
-            <Text style={styles.sectionTitle}>Health Records</Text>
+            <ClipboardList size={18} color={theme.accent} />
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Health Records</Text>
           </View>
           <TouchableOpacity 
-            style={styles.clickableCardRow} 
+            style={[styles.clickableCardRow, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]} 
             onPress={() => router.push('/records')}
             activeOpacity={0.7}
           >
-            <View style={styles.cardIconBox}>
-              <FileText size={20} color="#16a34a" />
+            <View style={[styles.cardIconBox, { backgroundColor: theme.accentGlow }]}>
+              <FileText size={20} color={theme.accent} />
             </View>
             <View style={styles.cardRowContent}>
-              <Text style={styles.cardRowTitle}>Your Historical Vault</Text>
-              <Text style={styles.cardRowSub}>Access clinical uploads, labs, and symptom logs</Text>
+              <Text style={[styles.cardRowTitle, { color: theme.textPrimary }]}>Your Historical Vault</Text>
+              <Text style={[styles.cardRowSub, { color: theme.textSecondary }]}>Access clinical uploads, labs, and symptom logs</Text>
             </View>
-            <ChevronRight size={18} color="#94a3b8" />
+            <ChevronRight size={18} color={theme.textTertiary} />
           </TouchableOpacity>
         </View>
 
         {/* Medications Management */}
-        <View style={styles.sectionCard}>
+        <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.sectionHeaderRow}>
             <View style={styles.sectionTitleWithIcon}>
-              <Heart size={18} color="#16a34a" />
-              <Text style={styles.sectionTitle}>Active Medications & Supplements</Text>
+              <Heart size={18} color={theme.accent} />
+              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Active Medications & Supplements</Text>
             </View>
           </View>
 
           <View style={styles.inputInlineRow}>
             <TextInput
-              style={styles.inlineInput}
+              style={[
+                styles.inlineInput,
+                {
+                  backgroundColor: theme.inputBackground,
+                  borderColor: theme.inputBorder,
+                  color: theme.inputText,
+                },
+              ]}
               placeholder="e.g. Metformin 500mg, Omega-3..."
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={theme.placeholderText}
               value={newMed}
               onChangeText={setNewMed}
             />
-            <TouchableOpacity style={styles.inlineActionBtn} onPress={addMed} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={[styles.inlineActionBtn, { backgroundColor: theme.accent }]}
+              onPress={addMed}
+              activeOpacity={0.8}
+            >
               <Plus size={16} color="#ffffff" />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.tagsContainer}>
+          <View style={styles.medsList}>
             {medsList.length > 0 ? (
-              medsList.map((m: string) => (
-                <View key={m} style={styles.medicationTag}>
-                  <Text style={styles.medicationTagText}>{m}</Text>
-                  <TouchableOpacity onPress={() => removeMed(m)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                    <X size={14} color="#64748b" />
+              medsList.map((med: string) => (
+                <View
+                  key={med}
+                  style={[
+                    styles.medItemRow,
+                    {
+                      backgroundColor: theme.surfaceElevated,
+                      borderColor: theme.borderSubtle,
+                    },
+                  ]}
+                >
+                  <View style={styles.medLeft}>
+                    <View style={[styles.medDot, { backgroundColor: theme.accent }]} />
+                    <Text style={[styles.medText, { color: theme.textPrimary }]}>{med}</Text>
+                  </View>
+                  <TouchableOpacity onPress={() => removeMed(med)} style={styles.medRemoveBtn}>
+                    <X size={15} color={theme.textTertiary} />
                   </TouchableOpacity>
                 </View>
               ))
             ) : (
-              <Text style={styles.emptyStateText}>No active medications added.</Text>
+              <Text style={[styles.emptyStateText, { color: theme.textTertiary }]}>No active medications tracked.</Text>
             )}
           </View>
         </View>
 
-        {/* Connected Wearables & Health Apps */}
-        <View style={styles.sectionCard}>
+        {/* Circadian & Cultural Fasting Mode */}
+        <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.sectionTitleWithIcon}>
-            <Watch size={18} color="#16a34a" />
-            <Text style={styles.sectionTitle}>Connected Devices</Text>
+            <Calendar size={18} color={theme.accent} />
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Cultural & Metabolic Fasting Mode</Text>
           </View>
-          <TouchableOpacity 
-            style={styles.clickableCardRow} 
-            onPress={() => router.push('/devices')}
-            activeOpacity={0.7}
-          >
-            <View style={styles.cardIconBox}>
-              <Watch size={20} color="#16a34a" />
-            </View>
-            <View style={styles.cardRowContent}>
-              <Text style={styles.cardRowTitle}>Wearables & Sensor Sync</Text>
-              <Text style={styles.cardRowSub}>Sync Apple Health, Google Fit, Fitbit, Garmin</Text>
-            </View>
-            <ChevronRight size={18} color="#94a3b8" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Dietary & Fasting Preferences */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionTitleWithIcon}>
-            <Calendar size={18} color="#16a34a" />
-            <Text style={styles.sectionTitle}>Diet & Fasting Rhythm</Text>
-          </View>
-          <Text style={styles.sectionSubtitle}>
-            Nura adjusts personalized nutrition and activity tracking to respect your physiological fasting windows.
+          <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
+            Aligns Nura's meal timing, hydration prompts, and nutritional suggestions with your tradition.
           </Text>
 
-          <View style={styles.radioList}>
+          <View style={styles.radioGroup}>
             <TouchableOpacity
               style={[
-                styles.radioItem,
-                activeProfile.fastingMode === TSOM_TYPES.NONE && styles.radioItemActive,
+                styles.radioOption,
+                {
+                  backgroundColor: activeProfile.fastingMode === TSOM_TYPES.ORTHODOX ? theme.accentDeep : theme.surfaceElevated,
+                  borderColor: activeProfile.fastingMode === TSOM_TYPES.ORTHODOX ? theme.accent : theme.borderSubtle,
+                },
               ]}
-              onPress={() => setFastingMode(TSOM_TYPES.NONE)}
-              activeOpacity={0.75}
-            >
-              {activeProfile.fastingMode === TSOM_TYPES.NONE ? (
-                <CheckCircle2 size={20} color="#16a34a" />
-              ) : (
-                <Circle size={20} color="#cbd5e1" />
-              )}
-              <View style={styles.radioTextWrap}>
-                <Text style={styles.radioTitle}>Standard Diet</Text>
-                <Text style={styles.radioSub}>Regular daily meal schedule without fasting cycle</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.radioItem,
-                activeProfile.fastingMode === TSOM_TYPES.ORTHODOX && styles.radioItemActive,
-              ]}
-              onPress={() => setFastingMode(TSOM_TYPES.ORTHODOX)}
-              activeOpacity={0.75}
+              onPress={() => handleFastingChange(TSOM_TYPES.ORTHODOX)}
+              activeOpacity={0.8}
             >
               {activeProfile.fastingMode === TSOM_TYPES.ORTHODOX ? (
-                <CheckCircle2 size={20} color="#16a34a" />
+                <CheckCircle2 size={20} color={theme.accent} />
               ) : (
-                <Circle size={20} color="#cbd5e1" />
+                <Circle size={20} color={theme.textTertiary} />
               )}
               <View style={styles.radioTextWrap}>
-                <Text style={styles.radioTitle}>Ethiopian Orthodox Fasting (Tsom)</Text>
-                <Text style={styles.radioSub}>Wednesday/Friday & seasonal fasts (pure plant-based)</Text>
+                <Text style={[styles.radioTitle, { color: theme.textPrimary }]}>Orthodox Christian (Tsom)</Text>
+                <Text style={[styles.radioSub, { color: theme.textSecondary }]}>Periodic plant-based periods & daytime fasting intervals</Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
-                styles.radioItem,
-                activeProfile.fastingMode === TSOM_TYPES.ISLAMIC && styles.radioItemActive,
+                styles.radioOption,
+                {
+                  backgroundColor: activeProfile.fastingMode === TSOM_TYPES.ISLAMIC ? theme.accentDeep : theme.surfaceElevated,
+                  borderColor: activeProfile.fastingMode === TSOM_TYPES.ISLAMIC ? theme.accent : theme.borderSubtle,
+                },
               ]}
-              onPress={() => setFastingMode(TSOM_TYPES.ISLAMIC)}
-              activeOpacity={0.75}
+              onPress={() => handleFastingChange(TSOM_TYPES.ISLAMIC)}
+              activeOpacity={0.8}
             >
               {activeProfile.fastingMode === TSOM_TYPES.ISLAMIC ? (
-                <CheckCircle2 size={20} color="#16a34a" />
+                <CheckCircle2 size={20} color={theme.accent} />
               ) : (
-                <Circle size={20} color="#cbd5e1" />
+                <Circle size={20} color={theme.textTertiary} />
               )}
               <View style={styles.radioTextWrap}>
-                <Text style={styles.radioTitle}>Islamic Fasting (Ramadan / Sunnah)</Text>
-                <Text style={styles.radioSub}>Dawn-to-dusk intermittent hydration & meal windows</Text>
+                <Text style={[styles.radioTitle, { color: theme.textPrimary }]}>Islamic Fasting (Ramadan / Sunnah)</Text>
+                <Text style={[styles.radioSub, { color: theme.textSecondary }]}>Dawn-to-dusk intermittent hydration & meal windows</Text>
               </View>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Clinical Notes & AI Context */}
-        <View style={styles.sectionCard}>
+        <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.sectionTitleWithIcon}>
-            <Sparkles size={18} color="#16a34a" />
-            <Text style={styles.sectionTitle}>Clinical & AI Context</Text>
+            <Sparkles size={18} color={theme.accent} />
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Clinical & AI Context</Text>
           </View>
-          <View style={styles.notesBox}>
-            <Text style={styles.notesText}>
+          <View style={[styles.notesBox, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
+            <Text style={[styles.notesText, { color: theme.textSecondary }]}>
               {activeProfile.medicalNotes ||
                 'No additional medical documents attached. Upload PDFs or lab summaries via the web portal or records vault.'}
             </Text>
@@ -373,24 +462,34 @@ export default function ProfileScreen() {
         </View>
 
         {/* Sovereign Privacy Vault Info */}
-        <View style={styles.privacyCard}>
-          <View style={styles.privacyIconWrap}>
-            <Lock size={18} color="#16a34a" />
+        <View style={[styles.privacyCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
+          <View style={[styles.privacyIconWrap, { backgroundColor: theme.accentGlow }]}>
+            <Lock size={18} color={theme.accent} />
           </View>
           <View style={styles.privacyTextWrap}>
-            <Text style={styles.privacyTitle}>Sovereign Data Protection</Text>
-            <Text style={styles.privacyDesc}>
+            <Text style={[styles.privacyTitle, { color: theme.textPrimary }]}>Sovereign Data Protection</Text>
+            <Text style={[styles.privacyDesc, { color: theme.textSecondary }]}>
               Your health telemetry is locally encrypted and never shared with third-party advertisers or insurers.
             </Text>
           </View>
         </View>
 
         {/* Sign Out Button */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
-          <LogOut size={18} color="#ef4444" />
-          <Text style={styles.logoutBtnText}>Sign Out of NuraCare</Text>
+        <TouchableOpacity
+          style={[styles.logoutBtn, { backgroundColor: theme.errorBackground, borderColor: theme.error + '40' }]}
+          onPress={handleLogout}
+          activeOpacity={0.8}
+        >
+          <LogOut size={18} color={theme.error} />
+          <Text style={[styles.logoutBtnText, { color: theme.error }]}>Sign Out of NuraCare</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Theme Selector Modal */}
+      <ThemeSelectorModal
+        visible={showThemeModal}
+        onClose={() => setShowThemeModal(false)}
+      />
     </View>
   );
 }
@@ -398,7 +497,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   outer: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   topNav: {
     flexDirection: 'row',
@@ -407,22 +505,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 54 : 42,
     paddingBottom: 14,
-    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderColor: '#e2e8f0',
   },
   backBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#f1f5f9',
     alignItems: 'center',
     justifyContent: 'center',
   },
   topNavTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#0f172a',
     letterSpacing: -0.2,
   },
   container: {
@@ -435,17 +529,10 @@ const styles = StyleSheet.create({
 
   // Hero Card
   profileHeroCard: {
-    backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
-    borderWidth: 1.2,
-    borderColor: '#e2e8f0',
-    shadowColor: '#16a34a',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
+    borderWidth: 1,
   },
   heroRow: {
     flexDirection: 'row',
@@ -456,14 +543,8 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#16a34a',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#16a34a',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
   },
   avatarText: {
     fontSize: 26,
@@ -476,51 +557,38 @@ const styles = StyleSheet.create({
   nameBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
     gap: 8,
+    flexWrap: 'wrap',
   },
   userName: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#0f172a',
     letterSpacing: -0.3,
   },
   verifiedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#f0fdf4',
     paddingHorizontal: 8,
-    paddingVertical: 2.5,
+    paddingVertical: 2,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
   },
   verifiedText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#16a34a',
   },
   userSubtitle: {
     fontSize: 13,
-    color: '#64748b',
     marginTop: 4,
     fontWeight: '500',
   },
 
   // Section Cards
   sectionCard: {
-    backgroundColor: '#ffffff',
     borderRadius: 18,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -532,35 +600,47 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   sectionTitle: {
     fontSize: 15.5,
     fontWeight: '700',
-    color: '#0f172a',
     letterSpacing: -0.2,
   },
   sectionSubtitle: {
     fontSize: 13,
-    color: '#64748b',
     lineHeight: 18,
-    marginBottom: 14,
+    marginBottom: 12,
+  },
+  pillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  themePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1.5,
+  },
+  themePillText: {
+    fontSize: 12,
   },
   addSmallBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#f0fdf4',
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#bbf7d0',
   },
   addSmallBtnText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#16a34a',
   },
 
   // Inline Inputs
@@ -571,17 +651,13 @@ const styles = StyleSheet.create({
   },
   inlineInput: {
     flex: 1,
-    backgroundColor: '#f8fafc',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     paddingHorizontal: 12,
     paddingVertical: 9,
     fontSize: 13.5,
-    color: '#0f172a',
   },
   inlineActionBtn: {
-    backgroundColor: '#16a34a',
     paddingHorizontal: 14,
     borderRadius: 10,
     alignItems: 'center',
@@ -603,56 +679,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#f0fdf4',
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 6,
     borderRadius: 10,
+    borderWidth: 1,
   },
   conditionTagText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#16a34a',
-  },
-  medicationTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#f1f5f9',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 10,
-  },
-  medicationTagText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#1e293b',
   },
   emptyStateText: {
     fontSize: 13,
-    color: '#94a3b8',
     fontStyle: 'italic',
+    paddingVertical: 4,
   },
 
-  // Clickable Navigation Rows
+  // Vault Row
   clickableCardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8fafc',
-    borderRadius: 14,
     padding: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginTop: 4,
+    marginTop: 6,
   },
   cardIconBox: {
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: '#f0fdf4',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -663,78 +717,94 @@ const styles = StyleSheet.create({
   cardRowTitle: {
     fontSize: 14.5,
     fontWeight: '700',
-    color: '#0f172a',
   },
   cardRowSub: {
     fontSize: 12,
-    color: '#64748b',
     marginTop: 2,
   },
 
-  // Radios
-  radioList: {
+  // Meds
+  medsList: {
     gap: 8,
   },
-  radioItem: {
+  medItemRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1.2,
-    borderColor: '#f1f5f9',
-    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
   },
-  radioItemActive: {
-    borderColor: '#86efac',
-    backgroundColor: 'rgba(240, 253, 244, 0.65)',
+  medLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  medDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  medText: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    flex: 1,
+  },
+  medRemoveBtn: {
+    padding: 4,
+  },
+
+  // Fasting Radio
+  radioGroup: {
+    gap: 10,
+  },
+  radioOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    gap: 12,
   },
   radioTextWrap: {
     flex: 1,
   },
   radioTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#0f172a',
   },
   radioSub: {
-    fontSize: 11.5,
-    color: '#64748b',
+    fontSize: 12,
     marginTop: 2,
-    lineHeight: 16,
   },
 
-  // Notes Box
+  // Notes
   notesBox: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
     padding: 12,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
   notesText: {
     fontSize: 13,
-    color: '#475569',
     lineHeight: 19,
   },
 
-  // Privacy Info Card
+  // Privacy Card
   privacyCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#f0fdf4',
-    borderRadius: 14,
     padding: 14,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#bbf7d0',
+    gap: 12,
     marginBottom: 20,
   },
   privacyIconWrap: {
     width: 36,
     height: 36,
-    borderRadius: 10,
-    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -742,32 +812,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   privacyTitle: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '700',
-    color: '#15803d',
   },
   privacyDesc: {
     fontSize: 11.5,
-    color: '#166534',
-    marginTop: 2,
     lineHeight: 16,
+    marginTop: 2,
   },
 
-  // Logout Button
+  // Logout
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#ffffff',
     paddingVertical: 14,
     borderRadius: 14,
-    borderWidth: 1.2,
-    borderColor: '#fecaca',
+    borderWidth: 1,
+    marginBottom: 30,
   },
   logoutBtnText: {
-    fontSize: 14.5,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#ef4444',
   },
 });
