@@ -282,30 +282,27 @@ export default function LifestyleScreen() {
           onOpenCategory={(key) => setActiveCategory(key)}
         />
 
-        {/* 6. Weekly Progress Summary across 8 categories */}
-        <WeeklySummaryRadar snapshot={snapshot} />
-
-        {/* 7. Today's Unified Active Goals */}
+        {/* 6. Today's Unified Active Goals */}
         <TodaysGoalsSection
           goals={goals}
           onToggleGoal={handleToggleGoal}
           onAddGoal={handleAddGoal}
         />
 
-        {/* 8. Routines Timeline (Morning / Evening) */}
+        {/* 7. Routines Timeline (Morning / Evening) */}
         <RoutinesTimelineSection
           routines={routines}
           onToggleStep={handleToggleRoutineStep}
           onResetRoutine={handleResetRoutine}
         />
 
-        {/* 9. Weekly Habit Consistency Matrix */}
+        {/* 8. Weekly Habit Consistency Matrix */}
         <HabitTrackerGrid
           habits={habits}
           onToggleHabit={handleToggleHabit}
         />
 
-        {/* 10. Interactive 4-7-8 Autonomic Breathwork Module */}
+        {/* 9. Interactive 4-7-8 Autonomic Breathwork Module */}
         <View style={[styles.breathworkContainer, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={[styles.breathBadge, { backgroundColor: theme.accentGlow, borderColor: theme.accentSecondary + '40' }]}>
             <Wind size={13} color={theme.accent} />
@@ -357,13 +354,16 @@ export default function LifestyleScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* 11. Recommended for You (Contextual AI Insight) */}
+        {/* 10. Weekly Progress Summary Radar */}
+        <WeeklySummaryRadar snapshot={snapshot} />
+
+        {/* 11. Contextual Weekly AI Insight & Recommendation */}
         <View style={[styles.recCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
           <View style={[styles.recIconWrap, { backgroundColor: theme.accentGlow }]}>
             <Sparkles size={16} color={theme.accent} />
           </View>
           <View style={styles.recTextWrap}>
-            <Text style={[styles.recTitle, { color: theme.textPrimary }]}>Grounded Lifestyle Recommendation</Text>
+            <Text style={[styles.recTitle, { color: theme.textPrimary }]}>Weekly Lifestyle Recommendation</Text>
             <Text style={[styles.recBody, { color: theme.textSecondary }]}>
               Your morning routines and hydration have been consistent. Try setting a gentle 20-20-20 ocular pause during afternoon screen time to protect your evening melatonin synthesis.
             </Text>

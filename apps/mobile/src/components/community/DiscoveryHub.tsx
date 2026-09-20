@@ -70,6 +70,7 @@ export default function DiscoveryHub({
   onCreateDiscussion,
 }: DiscoveryHubProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showAllTrending, setShowAllTrending] = useState(false);
   const { theme, isDark } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<SearchCategory>('All');
@@ -369,47 +370,7 @@ export default function DiscoveryHub({
             }}
           />
 
-          {/* Section A: Recommended For You */}
-          <View style={styles.sectionWrap}>
-            <View style={styles.sectionHeader}>
-              <View>
-                <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Recommended For You</Text>
-                <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
-                  Tailored based on your sleep, recovery & movement goals
-                </Text>
-              </View>
-            </View>
-
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-              {challenges.slice(0, 3).map((ch) => (
-                <TouchableOpacity
-                  key={ch.id}
-                  style={styles.recommendedCard}
-                  onPress={() => onSelectChallenge(ch)}
-                  activeOpacity={0.88}
-                >
-                  <View style={[styles.recCardBadge, { backgroundColor: `${ch.coverColor}18` }]}>
-                    {getChallengeIcon(ch.iconName, ch.coverColor)}
-                    <Text style={[styles.recCardBadgeText, { color: ch.coverColor }]}>
-                      {ch.category}
-                    </Text>
-                  </View>
-                  <Text style={[styles.recCardTitle, { color: theme.textPrimary }]} numberOfLines={2}>
-                    {ch.title}
-                  </Text>
-                  <Text style={[styles.recCardMeta, { color: theme.textSecondary }]}>
-                    {ch.durationDays} Days • {ch.participantsCount} participants
-                  </Text>
-                  <View style={styles.recCardFooter}>
-                    <Text style={styles.recCardDifficulty}>{ch.difficulty}</Text>
-                    <Text style={styles.recCardCta}>View Challenge →</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          {/* Section B: Trending Communities */}
+          {/* Simplified Trending Communities (2 items default + See More) */}
           <View style={styles.sectionWrap}>
             <View style={styles.sectionHeader}>
               <View>
@@ -421,7 +382,7 @@ export default function DiscoveryHub({
             </View>
 
             <View style={styles.groupsList}>
-              {groups.map((grp) => (
+              {(showAllTrending ? groups : groups.slice(0, 2)).map((grp) => (
                 <TouchableOpacity
                   key={grp.id}
                   style={styles.communityCard}
@@ -462,6 +423,24 @@ export default function DiscoveryHub({
                 </TouchableOpacity>
               ))}
             </View>
+
+            {groups.length > 2 && (
+              <TouchableOpacity
+                style={[
+                  styles.seeMoreTrendingBtn,
+                  {
+                    backgroundColor: isDark ? theme.surfaceElevated : '#f1f5f9',
+                    borderColor: theme.borderSubtle,
+                  },
+                ]}
+                onPress={() => setShowAllTrending(!showAllTrending)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.seeMoreTrendingText, { color: theme.accent }]}>
+                  {showAllTrending ? 'Show Less ↑' : `See More Communities (${groups.length - 2} more) →`}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Section C: Trending Discussions */}
@@ -1206,6 +1185,20 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 10.5,
     fontWeight: '700',
+  },
+  seeMoreTrendingBtn: {
+    marginTop: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  seeMoreTrendingText: {
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: -0.2,
   },
   mediaCaption: {
     fontSize: 11,

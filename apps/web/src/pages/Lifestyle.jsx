@@ -327,44 +327,7 @@ export default function LifestyleCoach({ profile, t = (k)=>k }) {
         </div>
       )}
 
-      <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Icons.Sparkles size={20} color="var(--green-dark)" /> Personalized AI Insights
-      </div>
-      {analysis && (
-        <div className="dash-card card-large" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.9)', marginBottom: 32, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-            <div style={{ padding: 14, background: 'var(--green-light)', borderRadius: 16 }}>
-              {analysis.focus === 'calm' ? <Icons.Wind size={28} color="var(--green-dark)" /> :
-               analysis.focus === 'energy' ? <Icons.Zap size={28} color="var(--green-dark)" /> :
-               analysis.focus === 'sleep' ? <Icons.Moon size={28} color="var(--green-dark)" /> :
-               <Icons.HeartPulse size={28} color="var(--green-dark)" />}
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{analysis.title}</h3>
-              <p style={{ margin: '4px 0 0', fontSize: 14, color: 'var(--text-muted)', fontWeight: 500 }}>{analysis.desc}</p>
-            </div>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-            <div style={{ background: 'var(--bg)', padding: 20, borderRadius: 16, border: '1px solid var(--border)' }}>
-              <h4 style={{ margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, color: 'var(--text)' }}>
-                <Icons.Apple size={18} color="var(--green-dark)" /> Natural Nutrition
-              </h4>
-              <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, lineHeight: 1.6, color: 'var(--text-muted)' }}>
-                {analysis.foods.map((food, i) => <li key={i}>{food}</li>)}
-              </ul>
-            </div>
-            <div style={{ background: 'var(--bg)', padding: 20, borderRadius: 16, border: '1px solid var(--border)' }}>
-              <h4 style={{ margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, color: 'var(--text)' }}>
-                <Icons.Activity size={18} color="var(--green-dark)" /> Recommended Movement
-              </h4>
-              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--text-muted)' }}>
-                {analysis.exercise}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* SECTION TITLE */}
       <div className="section-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -1246,6 +1209,46 @@ export default function LifestyleCoach({ profile, t = (k)=>k }) {
 
         </div>
       </div>
+
+      {/* WEEKLY & PERSONALIZED AI INSIGHTS (BOTTOM SECTION) */}
+      <div className="section-title" style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Icons.Sparkles size={20} color="var(--green-dark)" /> Weekly & Personalized AI Insights
+      </div>
+      {analysis && (
+        <div className="dash-card card-large" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.9)', marginBottom: 28, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+            <div style={{ padding: 14, background: 'var(--green-light)', borderRadius: 16 }}>
+              {analysis.focus === 'calm' ? <Icons.Wind size={28} color="var(--green-dark)" /> :
+               analysis.focus === 'energy' ? <Icons.Zap size={28} color="var(--green-dark)" /> :
+               analysis.focus === 'sleep' ? <Icons.Moon size={28} color="var(--green-dark)" /> :
+               <Icons.HeartPulse size={28} color="var(--green-dark)" />}
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{analysis.title}</h3>
+              <p style={{ margin: '4px 0 0', fontSize: 14, color: 'var(--text-muted)', fontWeight: 500 }}>{analysis.desc}</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div style={{ background: 'var(--bg)', padding: 20, borderRadius: 16, border: '1px solid var(--border)' }}>
+              <h4 style={{ margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, color: 'var(--text)' }}>
+                <Icons.Apple size={18} color="var(--green-dark)" /> Natural Nutrition
+              </h4>
+              <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, lineHeight: 1.6, color: 'var(--text-muted)' }}>
+                {analysis.foods.map((food, i) => <li key={i}>{food}</li>)}
+              </ul>
+            </div>
+            <div style={{ background: 'var(--bg)', padding: 20, borderRadius: 16, border: '1px solid var(--border)' }}>
+              <h4 style={{ margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, color: 'var(--text)' }}>
+                <Icons.Activity size={18} color="var(--green-dark)" /> Recommended Movement
+              </h4>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--text-muted)' }}>
+                {analysis.exercise}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
