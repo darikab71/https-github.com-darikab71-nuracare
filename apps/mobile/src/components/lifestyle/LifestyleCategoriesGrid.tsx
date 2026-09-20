@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import {
   Utensils,
   Activity,
@@ -9,9 +9,7 @@ import {
   Wind,
   Users,
   ChevronRight,
-  Moon,
-  Droplets,
-  Flame,
+  Brain,
 } from 'lucide-react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { CategoryOverviewData, LifestyleCategoryKey } from '../../storage/lifestyleStorage';
@@ -35,8 +33,6 @@ export default function LifestyleCategoriesGrid({
   const mentalCat = getCat('mental');
   const socialCat = getCat('social');
   const habitsCat = getCat('habits');
-  const sleepCat = getCat('sleep');
-  const hydrationCat = getCat('hydration');
 
   const wellbeingScore = Math.round(
     ((digitalCat?.progressPct || 65) + (mentalCat?.progressPct || 80) + (socialCat?.progressPct || 68)) / 3
@@ -47,198 +43,256 @@ export default function LifestyleCategoriesGrid({
       <View style={styles.headerRow}>
         <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Lifestyle Pillars</Text>
         <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
-          Your daily nutrition, training, holistic wellbeing & habits
+          Tap any pillar to open tracker & specialized guides
         </Text>
       </View>
 
       <View style={styles.cardsList}>
-        {/* 1. NUTRITION HORIZONTAL CARD */}
+        {/* 1. NUTRITION QUICK ACTION CARD */}
         <TouchableOpacity
-          style={[styles.horizontalCard, { backgroundColor: theme.surface, borderColor: theme.border }]}
+          style={styles.actionCardShift}
           onPress={() => onSelectCategory('nutrition')}
           activeOpacity={0.84}
         >
-          <View style={styles.cardMainRow}>
-            <View style={[styles.iconWrap, { backgroundColor: 'rgba(22, 163, 74, 0.14)' }]}>
-              <Utensils size={20} color="#16a34a" />
-            </View>
+          <Image
+            source={{ uri: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&auto=format&fit=crop&q=80' }}
+            style={StyleSheet.absoluteFillObject}
+            resizeMode="cover"
+          />
+          <View style={styles.actionCardImageOverlay} />
 
-            <View style={styles.cardInfo}>
-              <View style={styles.titleRow}>
-                <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Nutrition</Text>
-                <View style={[styles.metricChip, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
-                  <Text style={[styles.metricChipText, { color: '#16a34a' }]}>
+          <View style={styles.actionCardContentHover}>
+            <View style={styles.actionCardTopRowHover}>
+              <View style={[styles.actionCardIconWrapHover, { backgroundColor: 'rgba(22, 163, 74, 0.88)' }]}>
+                <Utensils size={18} color="#ffffff" />
+              </View>
+              <View style={styles.topBadgesRow}>
+                <View style={styles.shiftBadgeHover}>
+                  <Text style={styles.shiftBadgeTextHover}>01</Text>
+                </View>
+                <View style={[styles.shiftBadgeHover, { backgroundColor: 'rgba(34, 197, 94, 0.35)', borderColor: 'rgba(134, 239, 172, 0.6)' }]}>
+                  <Text style={styles.shiftBadgeTextHover}>
                     {nutritionCat ? nutritionCat.primaryMetric : '3/3 Meals'}
                   </Text>
                 </View>
               </View>
+            </View>
 
-              <Text style={[styles.cardDesc, { color: theme.textSecondary }]}>
-                Metabolic fuel, eating patterns & athletic superfoods
+            <View style={styles.actionTextHoverWrap}>
+              <View style={styles.titleRow}>
+                <Text style={styles.actionCardTitleHover}>Nutrition</Text>
+                <ChevronRight size={16} color="#86efac" />
+              </View>
+              <Text style={styles.actionCardDescHover} numberOfLines={2}>
+                Metabolic fuel, eating patterns, athletic macros & cultural superfoods
               </Text>
 
-              <View style={styles.statusRow}>
-                <Text style={[styles.statusHighlight, { color: theme.textSecondary }]}>
-                  {nutritionCat ? nutritionCat.statusLabel : '95g Protein'} • {nutritionCat ? nutritionCat.progressPct : 82}% Consistency
-                </Text>
-                <ChevronRight size={15} color={theme.textTertiary} />
+              <View style={styles.metricsRow}>
+                <View style={styles.metricPill}>
+                  <Text style={styles.metricPillText}>
+                    {nutritionCat ? nutritionCat.statusLabel : '95g Protein'}
+                  </Text>
+                </View>
+                <View style={styles.metricPill}>
+                  <Text style={styles.metricPillText}>
+                    {nutritionCat ? `${nutritionCat.progressPct}% Adherence` : '82% Adherence'}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
         </TouchableOpacity>
 
-        {/* 2. FITNESS & GYM HORIZONTAL CARD */}
+        {/* 2. FITNESS & GYM QUICK ACTION CARD */}
         <TouchableOpacity
-          style={[styles.horizontalCard, { backgroundColor: theme.surface, borderColor: theme.border }]}
+          style={[styles.actionCardShift, { borderColor: 'rgba(253, 186, 116, 0.85)' }]}
           onPress={() => onSelectCategory('fitness')}
           activeOpacity={0.84}
         >
-          <View style={styles.cardMainRow}>
-            <View style={[styles.iconWrap, { backgroundColor: 'rgba(234, 88, 12, 0.14)' }]}>
-              <Activity size={20} color="#ea580c" />
-            </View>
+          <Image
+            source={{ uri: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80' }}
+            style={StyleSheet.absoluteFillObject}
+            resizeMode="cover"
+          />
+          <View style={[styles.actionCardImageOverlay, { backgroundColor: 'rgba(15, 23, 42, 0.58)' }]} />
 
-            <View style={styles.cardInfo}>
-              <View style={styles.titleRow}>
-                <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Fitness & Gym</Text>
-                <View style={[styles.metricChip, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
-                  <Text style={[styles.metricChipText, { color: '#ea580c' }]}>
+          <View style={styles.actionCardContentHover}>
+            <View style={styles.actionCardTopRowHover}>
+              <View style={[styles.actionCardIconWrapHover, { backgroundColor: 'rgba(234, 88, 12, 0.88)' }]}>
+                <Activity size={18} color="#ffffff" />
+              </View>
+              <View style={styles.topBadgesRow}>
+                <View style={styles.shiftBadgeHover}>
+                  <Text style={styles.shiftBadgeTextHover}>02</Text>
+                </View>
+                <View style={[styles.shiftBadgeHover, { backgroundColor: 'rgba(234, 88, 12, 0.35)', borderColor: 'rgba(253, 186, 116, 0.6)' }]}>
+                  <Text style={styles.shiftBadgeTextHover}>
                     {fitnessCat ? fitnessCat.primaryMetric : '6,482 Steps'}
                   </Text>
                 </View>
               </View>
+            </View>
 
-              <Text style={[styles.cardDesc, { color: theme.textSecondary }]}>
-                Daily movement, training sessions & thoracic mobility
+            <View style={styles.actionTextHoverWrap}>
+              <View style={styles.titleRow}>
+                <Text style={styles.actionCardTitleHover}>Fitness & Gym</Text>
+                <ChevronRight size={16} color="#fed7aa" />
+              </View>
+              <Text style={styles.actionCardDescHover} numberOfLines={2}>
+                Strength tracking, hypertrophy splits, daily movement & gym nutrition
               </Text>
 
-              <View style={styles.statusRow}>
-                <Text style={[styles.statusHighlight, { color: theme.textSecondary }]}>
-                  {fitnessCat ? fitnessCat.statusLabel : '4/5 Workouts'} • {fitnessCat ? fitnessCat.progressPct : 72}% of Goal
-                </Text>
-                <ChevronRight size={15} color={theme.textTertiary} />
+              <View style={styles.metricsRow}>
+                <View style={styles.metricPill}>
+                  <Text style={styles.metricPillText}>
+                    {fitnessCat ? fitnessCat.statusLabel : '4/5 Workouts'}
+                  </Text>
+                </View>
+                <View style={styles.metricPill}>
+                  <Text style={styles.metricPillText}>
+                    {fitnessCat ? `${fitnessCat.progressPct}% of Goal` : '72% of Goal'}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
         </TouchableOpacity>
 
-        {/* 3. WELLBEING HORIZONTAL CARD (Grouping Digital, Mental & Social Wellbeing) */}
-        <View style={[styles.wellbeingCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <View style={styles.wellbeingHeaderRow}>
-            <View style={styles.wellbeingTitleWrap}>
-              <View style={[styles.iconWrap, { backgroundColor: 'rgba(99, 102, 241, 0.14)' }]}>
-                <Sparkles size={20} color="#6366f1" />
+        {/* 3. WELLBEING QUICK ACTION CARD (With Sub-Cards) */}
+        <View style={[styles.actionCardShift, styles.wellbeingCardWrapper]}>
+          <Image
+            source={{ uri: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&auto=format&fit=crop&q=80' }}
+            style={StyleSheet.absoluteFillObject}
+            resizeMode="cover"
+          />
+          <View style={[styles.actionCardImageOverlay, { backgroundColor: 'rgba(15, 23, 42, 0.68)' }]} />
+
+          <View style={styles.wellbeingCardContent}>
+            {/* Top Row */}
+            <View style={styles.actionCardTopRowHover}>
+              <View style={[styles.actionCardIconWrapHover, { backgroundColor: 'rgba(99, 102, 241, 0.88)' }]}>
+                <Sparkles size={18} color="#ffffff" />
               </View>
-              <View>
-                <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Wellbeing</Text>
-                <Text style={[styles.cardDesc, { color: theme.textSecondary }]}>
-                  Mind, digital balance & intentional social connection
-                </Text>
+              <View style={styles.topBadgesRow}>
+                <View style={styles.shiftBadgeHover}>
+                  <Text style={styles.shiftBadgeTextHover}>03</Text>
+                </View>
+                <View style={[styles.shiftBadgeHover, { backgroundColor: 'rgba(99, 102, 241, 0.35)', borderColor: 'rgba(199, 210, 254, 0.6)' }]}>
+                  <Text style={styles.shiftBadgeTextHover}>{wellbeingScore}% Balanced</Text>
+                </View>
               </View>
             </View>
 
-            <View style={[styles.metricChip, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
-              <Text style={[styles.metricChipText, { color: '#6366f1' }]}>{wellbeingScore}% Balanced</Text>
+            <View style={{ marginBottom: 12 }}>
+              <Text style={styles.actionCardTitleHover}>Wellbeing</Text>
+              <Text style={styles.actionCardDescHover}>
+                Mind, digital balance & intentional social connection
+              </Text>
             </View>
-          </View>
 
-          {/* Sub-Grid Pills for Digital, Mental & Social Wellbeing */}
-          <View style={styles.subGridContainer}>
-            {/* Digital Wellbeing Sub-Card */}
-            <TouchableOpacity
-              style={[styles.subCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}
-              onPress={() => onSelectCategory('digital')}
-              activeOpacity={0.78}
-            >
-              <View style={styles.subCardTop}>
-                <View style={[styles.subIconWrap, { backgroundColor: 'rgba(2, 132, 199, 0.15)' }]}>
-                  <Smartphone size={15} color="#0284c7" />
+            {/* Sub-Cards for Digital, Mental & Social */}
+            <View style={styles.subGridContainer}>
+              {/* Digital Wellbeing */}
+              <TouchableOpacity
+                style={styles.subCardGlass}
+                onPress={() => onSelectCategory('digital')}
+                activeOpacity={0.78}
+              >
+                <View style={styles.subCardTop}>
+                  <View style={[styles.subIconWrap, { backgroundColor: 'rgba(2, 132, 199, 0.35)' }]}>
+                    <Smartphone size={14} color="#7dd3fc" />
+                  </View>
+                  <ChevronRight size={13} color="#7dd3fc" />
                 </View>
-                <ChevronRight size={13} color={theme.textTertiary} />
-              </View>
-              <Text style={[styles.subTitle, { color: theme.textPrimary }]}>Digital Wellbeing</Text>
-              <Text style={[styles.subMetric, { color: '#0284c7' }]}>
-                {digitalCat ? digitalCat.primaryMetric : '4h 12m'}
-              </Text>
-              <Text style={[styles.subDetail, { color: theme.textSecondary }]}>
-                {digitalCat ? digitalCat.statusLabel : '3 Breaks Taken'}
-              </Text>
-            </TouchableOpacity>
+                <Text style={styles.subTitleLight}>Digital</Text>
+                <Text style={styles.subMetricLight}>{digitalCat?.primaryMetric || '2h 15m'}</Text>
+              </TouchableOpacity>
 
-            {/* Mental Wellbeing Sub-Card */}
-            <TouchableOpacity
-              style={[styles.subCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}
-              onPress={() => onSelectCategory('mental')}
-              activeOpacity={0.78}
-            >
-              <View style={styles.subCardTop}>
-                <View style={[styles.subIconWrap, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
-                  <Wind size={15} color="#f59e0b" />
+              {/* Mental Wellbeing */}
+              <TouchableOpacity
+                style={styles.subCardGlass}
+                onPress={() => onSelectCategory('mental')}
+                activeOpacity={0.78}
+              >
+                <View style={styles.subCardTop}>
+                  <View style={[styles.subIconWrap, { backgroundColor: 'rgba(147, 51, 234, 0.35)' }]}>
+                    <Brain size={14} color="#d8b4fe" />
+                  </View>
+                  <ChevronRight size={13} color="#d8b4fe" />
                 </View>
-                <ChevronRight size={13} color={theme.textTertiary} />
-              </View>
-              <Text style={[styles.subTitle, { color: theme.textPrimary }]}>Mental Wellbeing</Text>
-              <Text style={[styles.subMetric, { color: '#f59e0b' }]}>
-                {mentalCat ? mentalCat.primaryMetric : 'Good Mood'}
-              </Text>
-              <Text style={[styles.subDetail, { color: theme.textSecondary }]}>
-                {mentalCat ? mentalCat.statusLabel : 'Low Stress • Reset'}
-              </Text>
-            </TouchableOpacity>
+                <Text style={styles.subTitleLight}>Mental</Text>
+                <Text style={styles.subMetricLight}>{mentalCat?.primaryMetric || 'Calm'}</Text>
+              </TouchableOpacity>
 
-            {/* Social Wellbeing Sub-Card */}
-            <TouchableOpacity
-              style={[styles.subCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}
-              onPress={() => onSelectCategory('social')}
-              activeOpacity={0.78}
-            >
-              <View style={styles.subCardTop}>
-                <View style={[styles.subIconWrap, { backgroundColor: 'rgba(236, 72, 153, 0.15)' }]}>
-                  <Users size={15} color="#ec4899" />
+              {/* Social Wellbeing */}
+              <TouchableOpacity
+                style={styles.subCardGlass}
+                onPress={() => onSelectCategory('social')}
+                activeOpacity={0.78}
+              >
+                <View style={styles.subCardTop}>
+                  <View style={[styles.subIconWrap, { backgroundColor: 'rgba(236, 72, 153, 0.35)' }]}>
+                    <Users size={14} color="#fbcfe8" />
+                  </View>
+                  <ChevronRight size={13} color="#fbcfe8" />
                 </View>
-                <ChevronRight size={13} color={theme.textTertiary} />
-              </View>
-              <Text style={[styles.subTitle, { color: theme.textPrimary }]}>Social Wellbeing</Text>
-              <Text style={[styles.subMetric, { color: '#ec4899' }]}>
-                {socialCat ? socialCat.primaryMetric : '2/3 Goals'}
-              </Text>
-              <Text style={[styles.subDetail, { color: theme.textSecondary }]}>
-                {socialCat ? socialCat.statusLabel : 'Intentional'}
-              </Text>
-            </TouchableOpacity>
+                <Text style={styles.subTitleLight}>Social</Text>
+                <Text style={styles.subMetricLight}>{socialCat?.primaryMetric || '3 Conns'}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
-        {/* 4. HABITS & ROUTINES HORIZONTAL CARD */}
+        {/* 4. HABITS & ROUTINES QUICK ACTION CARD */}
         <TouchableOpacity
-          style={[styles.horizontalCard, { backgroundColor: theme.surface, borderColor: theme.border }]}
+          style={[styles.actionCardShift, { borderColor: 'rgba(153, 246, 228, 0.85)' }]}
           onPress={() => onSelectCategory('habits')}
           activeOpacity={0.84}
         >
-          <View style={styles.cardMainRow}>
-            <View style={[styles.iconWrap, { backgroundColor: 'rgba(16, 185, 129, 0.14)' }]}>
-              <CheckCircle2 size={20} color="#10b981" />
-            </View>
+          <Image
+            source={{ uri: 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=800&auto=format&fit=crop&q=80' }}
+            style={StyleSheet.absoluteFillObject}
+            resizeMode="cover"
+          />
+          <View style={[styles.actionCardImageOverlay, { backgroundColor: 'rgba(15, 23, 42, 0.58)' }]} />
 
-            <View style={styles.cardInfo}>
-              <View style={styles.titleRow}>
-                <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Habits & Routines</Text>
-                <View style={[styles.metricChip, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
-                  <Text style={[styles.metricChipText, { color: '#10b981' }]}>
-                    {habitsCat ? habitsCat.primaryMetric : '4/5 Done'}
+          <View style={styles.actionCardContentHover}>
+            <View style={styles.actionCardTopRowHover}>
+              <View style={[styles.actionCardIconWrapHover, { backgroundColor: 'rgba(13, 148, 136, 0.88)' }]}>
+                <CheckCircle2 size={18} color="#ffffff" />
+              </View>
+              <View style={styles.topBadgesRow}>
+                <View style={styles.shiftBadgeHover}>
+                  <Text style={styles.shiftBadgeTextHover}>04</Text>
+                </View>
+                <View style={[styles.shiftBadgeHover, { backgroundColor: 'rgba(13, 148, 136, 0.35)', borderColor: 'rgba(153, 246, 228, 0.6)' }]}>
+                  <Text style={styles.shiftBadgeTextHover}>
+                    {habitsCat ? habitsCat.primaryMetric : '5/6 Habits'}
                   </Text>
                 </View>
               </View>
+            </View>
 
-              <Text style={[styles.cardDesc, { color: theme.textSecondary }]}>
-                Circadian awakening, wind-down timelines & sleep anchors
+            <View style={styles.actionTextHoverWrap}>
+              <View style={styles.titleRow}>
+                <Text style={styles.actionCardTitleHover}>Habits & Routines</Text>
+                <ChevronRight size={16} color="#99f6e4" />
+              </View>
+              <Text style={styles.actionCardDescHover} numberOfLines={2}>
+                Morning circadian activation, hydration pacing & daily habit streaks
               </Text>
 
-              <View style={styles.statusRow}>
-                <Text style={[styles.statusHighlight, { color: theme.textSecondary }]}>
-                  {habitsCat ? habitsCat.statusLabel : '5-Day Streak'} • {sleepCat ? sleepCat.primaryMetric : '7.4h Sleep'} • {hydrationCat ? hydrationCat.primaryMetric : '1.8L'}
-                </Text>
-                <ChevronRight size={15} color={theme.textTertiary} />
+              <View style={styles.metricsRow}>
+                <View style={styles.metricPill}>
+                  <Text style={styles.metricPillText}>
+                    {habitsCat ? habitsCat.statusLabel : '🔥 12-day streak'}
+                  </Text>
+                </View>
+                <View style={styles.metricPill}>
+                  <Text style={styles.metricPillText}>
+                    {habitsCat ? `${habitsCat.progressPct}% consistency` : '83% consistency'}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
@@ -250,126 +304,150 @@ export default function LifestyleCategoriesGrid({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginVertical: 14,
   },
   headerRow: {
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '800',
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
+    marginBottom: 2,
   },
   sectionSubtitle: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '500',
-    marginTop: 1,
   },
   cardsList: {
-    gap: 12,
+    gap: 14,
   },
-  horizontalCard: {
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
+  actionCardShift: {
+    width: '100%',
+    minHeight: 160,
+    borderRadius: 20,
+    borderWidth: 1.2,
+    borderColor: 'rgba(187, 247, 208, 0.85)',
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
+    elevation: 4,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  cardMainRow: {
+  actionCardImageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(15, 23, 42, 0.55)',
+  },
+  actionCardContentHover: {
+    flex: 1,
+    justifyContent: 'space-between',
+    padding: 16,
+    zIndex: 2,
+  },
+  actionCardTopRowHover: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
-  iconWrap: {
-    width: 42,
-    height: 42,
+  actionCardIconWrapHover: {
+    width: 36,
+    height: 36,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
-  cardInfo: {
-    flex: 1,
-  },
-  titleRow: {
+  topBadgesRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 2,
+    gap: 6,
   },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    letterSpacing: -0.2,
-  },
-  cardDesc: {
-    fontSize: 11.5,
-    lineHeight: 16,
-    marginTop: 2,
-    marginBottom: 8,
-  },
-  metricChip: {
+  shiftBadgeHover: {
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 0.8,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
-  metricChipText: {
+  shiftBadgeTextHover: {
+    color: '#ffffff',
     fontSize: 11,
     fontWeight: '800',
   },
-  statusRow: {
+  actionTextHoverWrap: {
+    marginTop: 'auto',
+  },
+  titleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 6,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(150, 150, 150, 0.15)',
-  },
-  statusHighlight: {
-    fontSize: 11.5,
-    fontWeight: '600',
-  },
-  wellbeingCard: {
-    borderRadius: 18,
-    padding: 14,
-    borderWidth: 1,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
-    gap: 12,
-  },
-  wellbeingHeaderRow: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
   },
-  wellbeingTitleWrap: {
+  actionCardTitleHover: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#ffffff',
+    textShadowColor: 'rgba(0, 0, 0, 0.45)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+    marginBottom: 2,
+  },
+  actionCardDescHover: {
+    fontSize: 12,
+    color: 'rgba(240, 253, 244, 0.95)',
+    fontWeight: '500',
+    textShadowColor: 'rgba(0, 0, 0, 0.35)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+    marginBottom: 8,
+    lineHeight: 16,
+  },
+  metricsRow: {
     flexDirection: 'row',
-    gap: 12,
-    flex: 1,
-    paddingRight: 8,
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  metricPill: {
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 0.8,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  metricPillText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  wellbeingCardWrapper: {
+    borderColor: 'rgba(199, 210, 254, 0.85)',
+    minHeight: 210,
+  },
+  wellbeingCardContent: {
+    padding: 16,
+    zIndex: 2,
   },
   subGridContainer: {
     flexDirection: 'row',
     gap: 8,
   },
-  subCard: {
+  subCardGlass: {
     flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
     borderRadius: 12,
-    padding: 10,
     borderWidth: 1,
-    justifyContent: 'space-between',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    padding: 10,
   },
   subCardTop: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 6,
   },
   subIconWrap: {
@@ -379,19 +457,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  subTitle: {
-    fontSize: 11,
+  subTitleLight: {
+    fontSize: 12,
     fontWeight: '700',
-    lineHeight: 14,
-    marginBottom: 3,
-  },
-  subMetric: {
-    fontSize: 11.5,
-    fontWeight: '800',
+    color: '#ffffff',
     marginBottom: 2,
   },
-  subDetail: {
-    fontSize: 9.5,
-    lineHeight: 12,
+  subMetricLight: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.85)',
   },
 });

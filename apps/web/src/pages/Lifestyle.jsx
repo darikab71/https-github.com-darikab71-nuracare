@@ -376,422 +376,724 @@ export default function LifestyleCoach({ profile, t = (k)=>k }) {
         </span>
       </div>
 
-      {/* 4 HORIZONTAL PILLAR CARDS GRID */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
+      {/* 4 QUICK ACTION PILLAR CARDS GRID (HOME PAGE STYLE) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginBottom: 32 }}>
 
-        {/* 1. NUTRITION HORIZONTAL CARD */}
+        {/* 1. NUTRITION QUICK ACTION CARD */}
         <div 
           onClick={() => setActiveSection('nutrition')}
-          className="dash-card"
           style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '20px 24px',
-            borderRadius: 20,
-            background: 'rgba(255, 255, 255, 0.88)',
-            border: '1px solid rgba(22, 163, 74, 0.25)',
-            boxShadow: '0 4px 18px rgba(22, 163, 74, 0.06)',
+            position: 'relative',
+            borderRadius: 22,
+            overflow: 'hidden',
+            minHeight: 180,
+            border: '1.2px solid rgba(187, 247, 208, 0.85)',
+            boxShadow: '0 8px 26px rgba(22, 163, 74, 0.16)',
             cursor: 'pointer',
-            transition: 'all 0.25s ease',
-            gap: 20
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(22, 163, 74, 0.24)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 26px rgba(22, 163, 74, 0.16)'; }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18, flex: 1 }}>
-            <div style={{
-              width: 54,
-              height: 54,
-              borderRadius: 16,
-              background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.15) 0%, rgba(34, 197, 94, 0.25) 100%)',
-              border: '1px solid rgba(22, 163, 74, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <Icons.Utensils size={26} color="#16a34a" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Nutrition</h3>
-                <span style={{
-                  background: 'rgba(22, 163, 74, 0.12)',
-                  color: '#15803d',
-                  padding: '2px 8px',
+          {/* Background Photography Image */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'url("https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=900&auto=format&fit=crop&q=80"), url("/natural remidies.jfif")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 40%',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Semi-transparent Dark & Emerald Overlay */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.58) 55%, rgba(6, 78, 59, 0.45) 100%)',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Content Hovering Cleanly Over Image */}
+          <div style={{ position: 'relative', zIndex: 2, padding: '22px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+            {/* Top Row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{
+                width: 42,
+                height: 42,
+                borderRadius: 14,
+                backgroundColor: 'rgba(22, 163, 74, 0.88)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)'
+              }}>
+                <Icons.Utensils size={22} color="#ffffff" />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '4px 10px',
                   borderRadius: 8,
+                  border: '0.8px solid rgba(255, 255, 255, 0.4)',
+                  color: '#ffffff',
                   fontSize: 11,
+                  fontWeight: 800
+                }}>
+                  01
+                </div>
+                <div style={{
+                  backgroundColor: 'rgba(34, 197, 94, 0.28)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '4px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(134, 239, 172, 0.5)',
+                  color: '#dcfce7',
+                  fontSize: 12,
                   fontWeight: 700
                 }}>
                   3/3 Meals Logged
-                </span>
-                <span style={{
-                  background: 'rgba(245, 158, 11, 0.12)',
-                  color: '#b45309',
-                  padding: '2px 8px',
-                  borderRadius: 8,
-                  fontSize: 11,
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Text & Metrics */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h3 style={{
+                  margin: '0 0 4px 0',
+                  fontSize: 21,
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  textShadow: '0 1px 4px rgba(0, 0, 0, 0.55)',
+                  letterSpacing: '-0.3px'
+                }}>
+                  Nutrition
+                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#86efac', fontSize: 13, fontWeight: 700 }}>
+                  <span>Open Nutrition</span>
+                  <Icons.ChevronRight size={17} color="#86efac" />
+                </div>
+              </div>
+
+              <p style={{
+                margin: '0 0 12px 0',
+                fontSize: 13.5,
+                color: 'rgba(240, 253, 244, 0.95)',
+                fontWeight: 500,
+                textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
+                lineHeight: 1.4,
+                maxWidth: 680
+              }}>
+                Metabolic fuel, eating patterns, athletic macros & cultural Ethiopian superfoods (Teff, Shiro, Beso).
+              </p>
+
+              {/* Glowing Metric Chips */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                <div style={{
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  backdropFilter: 'blur(8px)',
+                  padding: '5px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  fontSize: 12,
+                  color: '#ffffff',
+                  fontWeight: 600
+                }}>
+                  🍗 <strong>95g / 120g</strong> Protein
+                </div>
+                <div style={{
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  backdropFilter: 'blur(8px)',
+                  padding: '5px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  fontSize: 12,
+                  color: '#ffffff',
+                  fontWeight: 600
+                }}>
+                  🔥 <strong>1,840 kcal</strong> Target
+                </div>
+                <div style={{
+                  background: 'rgba(245, 158, 11, 0.3)',
+                  backdropFilter: 'blur(8px)',
+                  padding: '5px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(251, 191, 36, 0.4)',
+                  fontSize: 12,
+                  color: '#fef3c7',
                   fontWeight: 700
                 }}>
                   ⚡ Gym Nutrition Active
-                </span>
-              </div>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                Metabolic fuel, eating patterns, athletic macros & cultural Ethiopian superfoods (Teff, Shiro, Beso).
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-                <span><strong>95g / 120g</strong> Protein</span>
-                <span>•</span>
-                <span><strong>1,840 kcal</strong> Target</span>
-                <span>•</span>
-                <span style={{ color: '#16a34a', fontWeight: 600 }}>82% Macro Adherence</span>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--green-dark)' }}>Open Nutrition</span>
-            <Icons.ChevronRight size={18} color="var(--green-dark)" />
           </div>
         </div>
 
-        {/* 2. FITNESS & GYM HORIZONTAL CARD */}
+        {/* 2. FITNESS & GYM QUICK ACTION CARD */}
         <div 
           onClick={() => setActiveSection('gym')}
-          className="dash-card"
           style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '20px 24px',
-            borderRadius: 20,
-            background: 'rgba(255, 255, 255, 0.88)',
-            border: '1px solid rgba(234, 88, 12, 0.25)',
-            boxShadow: '0 4px 18px rgba(234, 88, 12, 0.06)',
+            position: 'relative',
+            borderRadius: 22,
+            overflow: 'hidden',
+            minHeight: 180,
+            border: '1.2px solid rgba(253, 186, 116, 0.85)',
+            boxShadow: '0 8px 26px rgba(234, 88, 12, 0.16)',
             cursor: 'pointer',
-            transition: 'all 0.25s ease',
-            gap: 20
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(234, 88, 12, 0.24)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 26px rgba(234, 88, 12, 0.16)'; }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18, flex: 1 }}>
-            <div style={{
-              width: 54,
-              height: 54,
-              borderRadius: 16,
-              background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(249, 115, 22, 0.25) 100%)',
-              border: '1px solid rgba(234, 88, 12, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <Icons.Dumbbell size={26} color="#ea580c" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Fitness & Gym</h3>
-                <span style={{
-                  background: 'rgba(234, 88, 12, 0.12)',
-                  color: '#c2410c',
-                  padding: '2px 8px',
+          {/* Background Photography Image */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=900&auto=format&fit=crop&q=80"), url("/healthy life style.jfif")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 35%',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Semi-transparent Dark & Amber Overlay */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.58) 55%, rgba(124, 45, 18, 0.45) 100%)',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Content Hovering Cleanly Over Image */}
+          <div style={{ position: 'relative', zIndex: 2, padding: '22px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+            {/* Top Row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{
+                width: 42,
+                height: 42,
+                borderRadius: 14,
+                backgroundColor: 'rgba(234, 88, 12, 0.88)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)'
+              }}>
+                <Icons.Dumbbell size={22} color="#ffffff" />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '4px 10px',
                   borderRadius: 8,
+                  border: '0.8px solid rgba(255, 255, 255, 0.4)',
+                  color: '#ffffff',
                   fontSize: 11,
+                  fontWeight: 800
+                }}>
+                  02
+                </div>
+                <div style={{
+                  backgroundColor: 'rgba(234, 88, 12, 0.32)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '4px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(253, 186, 116, 0.5)',
+                  color: '#ffedd5',
+                  fontSize: 12,
                   fontWeight: 700
                 }}>
                   4/5 Workouts Done
-                </span>
-                <span style={{
-                  background: 'rgba(59, 130, 246, 0.12)',
-                  color: '#1d4ed8',
-                  padding: '2px 8px',
-                  borderRadius: 8,
-                  fontSize: 11,
-                  fontWeight: 700
-                }}>
-                  Push / Pull / Legs
-                </span>
+                </div>
               </div>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+            </div>
+
+            {/* Bottom Text & Metrics */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h3 style={{
+                  margin: '0 0 4px 0',
+                  fontSize: 21,
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  textShadow: '0 1px 4px rgba(0, 0, 0, 0.55)',
+                  letterSpacing: '-0.3px'
+                }}>
+                  Fitness & Gym
+                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#fed7aa', fontSize: 13, fontWeight: 700 }}>
+                  <span>Open Gym</span>
+                  <Icons.ChevronRight size={17} color="#fed7aa" />
+                </div>
+              </div>
+
+              <p style={{
+                margin: '0 0 12px 0',
+                fontSize: 13.5,
+                color: 'rgba(255, 247, 237, 0.95)',
+                fontWeight: 500,
+                textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
+                lineHeight: 1.4,
+                maxWidth: 680
+              }}>
                 Strength tracking, hypertrophy splits, Bluetooth wearable workout sync, and live nearby gym finder.
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-                <span><strong>6,482</strong> Steps Today</span>
-                <span>•</span>
-                <span><strong>45 mins</strong> Active Session</span>
-                <span>•</span>
-                <span style={{ color: '#ea580c', fontWeight: 600 }}>72% Weekly Goal</span>
-              </div>
-            </div>
-          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#ea580c' }}>Open Gym</span>
-            <Icons.ChevronRight size={18} color="#ea580c" />
-          </div>
-        </div>
-
-        {/* 3. WELLBEING HORIZONTAL CARD (With Digital, Mental & Social Wellbeing Sub-Grid) */}
-        <div 
-          className="dash-card"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '22px 24px',
-            borderRadius: 20,
-            background: 'rgba(255, 255, 255, 0.92)',
-            border: '1px solid rgba(99, 102, 241, 0.25)',
-            boxShadow: '0 4px 20px rgba(99, 102, 241, 0.07)',
-            gap: 16
-          }}
-        >
-          {/* Header Row */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{
-                width: 48,
-                height: 48,
-                borderRadius: 14,
-                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(129, 140, 248, 0.25) 100%)',
-                border: '1px solid rgba(99, 102, 241, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Icons.Sparkles size={24} color="#6366f1" />
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Wellbeing</h3>
-                  <span style={{
-                    background: 'rgba(99, 102, 241, 0.12)',
-                    color: '#4f46e5',
-                    padding: '2px 8px',
-                    borderRadius: 8,
-                    fontSize: 11,
-                    fontWeight: 700
-                  }}>
-                    82% Mind & Body Balance
-                  </span>
-                </div>
-                <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--text-muted)' }}>
-                  Integrated harmony across your screen boundaries, nervous system recovery, and social bonds.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Dedicated Sub-Grid: Digital Wellbeing, Mental Wellbeing, Social Wellbeing */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: 12,
-            marginTop: 4
-          }}>
-            {/* 3A. DIGITAL WELLBEING */}
-            <div
-              onClick={() => setActiveSection('digital')}
-              style={{
-                background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.04) 0%, rgba(2, 132, 199, 0.08) 100%)',
-                border: '1px solid rgba(2, 132, 199, 0.22)',
-                borderRadius: 16,
-                padding: '16px 18px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                gap: 12
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#0284c7'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(2, 132, 199, 0.22)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+              {/* Glowing Metric Chips */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
                 <div style={{
-                  width: 38,
-                  height: 38,
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  backdropFilter: 'blur(8px)',
+                  padding: '5px 12px',
                   borderRadius: 10,
-                  background: 'rgba(2, 132, 199, 0.14)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  fontSize: 12,
+                  color: '#ffffff',
+                  fontWeight: 600
                 }}>
-                  <Icons.Smartphone size={18} color="#0284c7" />
+                  👟 <strong>6,482</strong> Steps Today
                 </div>
-                <Icons.ChevronRight size={16} color="#0284c7" />
-              </div>
-              <div>
-                <h4 style={{ margin: '0 0 4px 0', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Digital Wellbeing</h4>
-                <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                  Screen limits, focus blocks, bedtime pause & blue-light detox.
-                </p>
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#0284c7' }}>
-                ⏱ 2h 15m Screen Time Today
-              </div>
-            </div>
-
-            {/* 3B. MENTAL WELLBEING */}
-            <div
-              onClick={() => setActiveSection('recovery')}
-              style={{
-                background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.04) 0%, rgba(147, 51, 234, 0.08) 100%)',
-                border: '1px solid rgba(147, 51, 234, 0.22)',
-                borderRadius: 16,
-                padding: '16px 18px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                gap: 12
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#9333ea'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(147, 51, 234, 0.22)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div style={{
-                  width: 38,
-                  height: 38,
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  backdropFilter: 'blur(8px)',
+                  padding: '5px 12px',
                   borderRadius: 10,
-                  background: 'rgba(147, 51, 234, 0.14)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  fontSize: 12,
+                  color: '#ffffff',
+                  fontWeight: 600
                 }}>
-                  <Icons.Brain size={18} color="#9333ea" />
+                  ⏱ <strong>45 mins</strong> Active Session
                 </div>
-                <Icons.ChevronRight size={16} color="#9333ea" />
-              </div>
-              <div>
-                <h4 style={{ margin: '0 0 4px 0', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Mental Wellbeing</h4>
-                <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                  4-7-8 breathwork, parasympathetic down-regulation & 3-day reset.
-                </p>
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#9333ea' }}>
-                🧘 Low Tension • Score: 84/100
-              </div>
-            </div>
-
-            {/* 3C. SOCIAL WELLBEING */}
-            <div
-              onClick={() => setActiveSection('social')}
-              style={{
-                background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.04) 0%, rgba(236, 72, 153, 0.08) 100%)',
-                border: '1px solid rgba(236, 72, 153, 0.22)',
-                borderRadius: 16,
-                padding: '16px 18px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                gap: 12
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#ec4899'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(236, 72, 153, 0.22)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div style={{
-                  width: 38,
-                  height: 38,
+                  background: 'rgba(59, 130, 246, 0.3)',
+                  backdropFilter: 'blur(8px)',
+                  padding: '5px 12px',
                   borderRadius: 10,
-                  background: 'rgba(236, 72, 153, 0.14)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Icons.Users size={18} color="#ec4899" />
-                </div>
-                <Icons.ChevronRight size={16} color="#ec4899" />
-              </div>
-              <div>
-                <h4 style={{ margin: '0 0 4px 0', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Social Wellbeing</h4>
-                <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                  Support circles, accountability partners & group challenges.
-                </p>
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#ec4899' }}>
-                🌿 41.8K Community Members
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 4. HABITS & ROUTINES HORIZONTAL CARD */}
-        <div 
-          onClick={() => setActiveSection('habits')}
-          className="dash-card"
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '20px 24px',
-            borderRadius: 20,
-            background: 'rgba(255, 255, 255, 0.88)',
-            border: '1px solid rgba(13, 148, 136, 0.25)',
-            boxShadow: '0 4px 18px rgba(13, 148, 136, 0.06)',
-            cursor: 'pointer',
-            transition: 'all 0.25s ease',
-            gap: 20
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18, flex: 1 }}>
-            <div style={{
-              width: 54,
-              height: 54,
-              borderRadius: 16,
-              background: 'linear-gradient(135deg, rgba(13, 148, 136, 0.15) 0%, rgba(20, 184, 166, 0.25) 100%)',
-              border: '1px solid rgba(13, 148, 136, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <Icons.CheckCircle2 size={26} color="#0d9488" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Habits & Routines</h3>
-                <span style={{
-                  background: 'rgba(13, 148, 136, 0.12)',
-                  color: '#0f766e',
-                  padding: '2px 8px',
-                  borderRadius: 8,
-                  fontSize: 11,
+                  border: '1px solid rgba(147, 197, 253, 0.4)',
+                  fontSize: 12,
+                  color: '#dbeafe',
                   fontWeight: 700
                 }}>
-                  5/6 Completed Today
-                </span>
-                <span style={{
-                  background: 'rgba(245, 158, 11, 0.12)',
-                  color: '#b45309',
-                  padding: '2px 8px',
+                  🏋️ Push / Pull / Legs
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. WELLBEING QUICK ACTION CARD (Grouping Digital, Mental & Social Wellbeing) */}
+        <div 
+          style={{
+            position: 'relative',
+            borderRadius: 22,
+            overflow: 'hidden',
+            border: '1.2px solid rgba(199, 210, 254, 0.85)',
+            boxShadow: '0 8px 26px rgba(99, 102, 241, 0.16)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}
+        >
+          {/* Background Photography Image */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'url("https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=900&auto=format&fit=crop&q=80"), url("/be healthy.jfif")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 45%',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Semi-transparent Dark & Indigo Overlay */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.65) 50%, rgba(49, 46, 129, 0.45) 100%)',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Content Hovering Cleanly Over Image */}
+          <div style={{ position: 'relative', zIndex: 2, padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Top Row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{
+                width: 42,
+                height: 42,
+                borderRadius: 14,
+                backgroundColor: 'rgba(99, 102, 241, 0.88)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)'
+              }}>
+                <Icons.Sparkles size={22} color="#ffffff" />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '4px 10px',
                   borderRadius: 8,
+                  border: '0.8px solid rgba(255, 255, 255, 0.4)',
+                  color: '#ffffff',
                   fontSize: 11,
+                  fontWeight: 800
+                }}>
+                  03
+                </div>
+                <div style={{
+                  backgroundColor: 'rgba(99, 102, 241, 0.32)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '4px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(199, 210, 254, 0.5)',
+                  color: '#e0e7ff',
+                  fontSize: 12,
+                  fontWeight: 700
+                }}>
+                  82% Mind & Body Balance
+                </div>
+              </div>
+            </div>
+
+            {/* Title & Desc */}
+            <div>
+              <h3 style={{
+                margin: '0 0 4px 0',
+                fontSize: 21,
+                fontWeight: 800,
+                color: '#ffffff',
+                textShadow: '0 1px 4px rgba(0, 0, 0, 0.55)',
+                letterSpacing: '-0.3px'
+              }}>
+                Wellbeing
+              </h3>
+              <p style={{
+                margin: '0 0 14px 0',
+                fontSize: 13.5,
+                color: 'rgba(238, 242, 255, 0.95)',
+                fontWeight: 500,
+                textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
+                lineHeight: 1.4,
+                maxWidth: 680
+              }}>
+                Mind, digital balance & intentional social connection. Tap any area to explore:
+              </p>
+            </div>
+
+            {/* 3 SUB-WELLBEING CARDS: DIGITAL, MENTAL & SOCIAL */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: 12,
+            }}>
+              {/* 3A. DIGITAL WELLBEING */}
+              <div
+                onClick={() => setActiveSection('digital')}
+                style={{
+                  background: 'rgba(15, 23, 42, 0.65)',
+                  backdropFilter: 'blur(14px)',
+                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                  borderRadius: 16,
+                  padding: '16px 18px',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: 12
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#38bdf8'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(56, 189, 248, 0.4)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: 'rgba(2, 132, 199, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid rgba(56, 189, 248, 0.5)'
+                  }}>
+                    <Icons.Smartphone size={18} color="#7dd3fc" />
+                  </div>
+                  <Icons.ChevronRight size={16} color="#7dd3fc" />
+                </div>
+                <div>
+                  <h4 style={{ margin: '0 0 3px 0', fontSize: 15, fontWeight: 700, color: '#ffffff' }}>Digital Wellbeing</h4>
+                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(224, 242, 254, 0.85)', lineHeight: 1.4 }}>
+                    Screen limits, focus blocks & bedtime pause.
+                  </p>
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#38bdf8' }}>
+                  ⏱ 2h 15m Screen Time Today
+                </div>
+              </div>
+
+              {/* 3B. MENTAL WELLBEING */}
+              <div
+                onClick={() => setActiveSection('recovery')}
+                style={{
+                  background: 'rgba(15, 23, 42, 0.65)',
+                  backdropFilter: 'blur(14px)',
+                  border: '1px solid rgba(192, 132, 252, 0.4)',
+                  borderRadius: 16,
+                  padding: '16px 18px',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: 12
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#c084fc'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(192, 132, 252, 0.4)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: 'rgba(147, 51, 234, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid rgba(192, 132, 252, 0.5)'
+                  }}>
+                    <Icons.Brain size={18} color="#d8b4fe" />
+                  </div>
+                  <Icons.ChevronRight size={16} color="#d8b4fe" />
+                </div>
+                <div>
+                  <h4 style={{ margin: '0 0 3px 0', fontSize: 15, fontWeight: 700, color: '#ffffff' }}>Mental Wellbeing</h4>
+                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(243, 232, 255, 0.85)', lineHeight: 1.4 }}>
+                    4-7-8 breathwork, calm & 3-day reset.
+                  </p>
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#c084fc' }}>
+                  🧘 Low Tension • Score: 84/100
+                </div>
+              </div>
+
+              {/* 3C. SOCIAL WELLBEING */}
+              <div
+                onClick={() => setActiveSection('social')}
+                style={{
+                  background: 'rgba(15, 23, 42, 0.65)',
+                  backdropFilter: 'blur(14px)',
+                  border: '1px solid rgba(244, 114, 182, 0.4)',
+                  borderRadius: 16,
+                  padding: '16px 18px',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: 12
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#f472b6'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(244, 114, 182, 0.4)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: 'rgba(236, 72, 153, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid rgba(244, 114, 182, 0.5)'
+                  }}>
+                    <Icons.Users size={18} color="#fbcfe8" />
+                  </div>
+                  <Icons.ChevronRight size={16} color="#fbcfe8" />
+                </div>
+                <div>
+                  <h4 style={{ margin: '0 0 3px 0', fontSize: 15, fontWeight: 700, color: '#ffffff' }}>Social Wellbeing</h4>
+                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(253, 232, 244, 0.85)', lineHeight: 1.4 }}>
+                    Support circles & group challenges.
+                  </p>
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#f472b6' }}>
+                  🌿 41.8K Community Members
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. HABITS & ROUTINES QUICK ACTION CARD */}
+        <div 
+          onClick={() => setActiveSection('habits')}
+          style={{
+            position: 'relative',
+            borderRadius: 22,
+            overflow: 'hidden',
+            minHeight: 180,
+            border: '1.2px solid rgba(153, 246, 228, 0.85)',
+            boxShadow: '0 8px 26px rgba(13, 148, 136, 0.16)',
+            cursor: 'pointer',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(13, 148, 136, 0.24)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 26px rgba(13, 148, 136, 0.16)'; }}
+        >
+          {/* Background Photography Image */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'url("https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=900&auto=format&fit=crop&q=80"), url("/Chamomile.jfif")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 40%',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Semi-transparent Dark & Teal Overlay */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.58) 55%, rgba(17, 94, 89, 0.45) 100%)',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Content Hovering Cleanly Over Image */}
+          <div style={{ position: 'relative', zIndex: 2, padding: '22px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+            {/* Top Row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{
+                width: 42,
+                height: 42,
+                borderRadius: 14,
+                backgroundColor: 'rgba(13, 148, 136, 0.88)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)'
+              }}>
+                <Icons.CheckCircle2 size={22} color="#ffffff" />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '4px 10px',
+                  borderRadius: 8,
+                  border: '0.8px solid rgba(255, 255, 255, 0.4)',
+                  color: '#ffffff',
+                  fontSize: 11,
+                  fontWeight: 800
+                }}>
+                  04
+                </div>
+                <div style={{
+                  backgroundColor: 'rgba(13, 148, 136, 0.32)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '4px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(153, 246, 228, 0.5)',
+                  color: '#ccfbf1',
+                  fontSize: 12,
                   fontWeight: 700
                 }}>
                   🔥 12-Day Streak
-                </span>
-              </div>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                Morning circadian activation, hydration pacing, and evening down-regulation routines.
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-                <span><strong>💧 6/8</strong> Glasses Hydration</span>
-                <span>•</span>
-                <span><strong>🌅 Morning Flow</strong> Done</span>
-                <span>•</span>
-                <span style={{ color: '#0d9488', fontWeight: 600 }}>83% Completion</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#0d9488' }}>Open Habits</span>
-            <Icons.ChevronRight size={18} color="#0d9488" />
+            {/* Bottom Text & Metrics */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h3 style={{
+                  margin: '0 0 4px 0',
+                  fontSize: 21,
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  textShadow: '0 1px 4px rgba(0, 0, 0, 0.55)',
+                  letterSpacing: '-0.3px'
+                }}>
+                  Habits & Routines
+                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#99f6e4', fontSize: 13, fontWeight: 700 }}>
+                  <span>Open Habits</span>
+                  <Icons.ChevronRight size={17} color="#99f6e4" />
+                </div>
+              </div>
+
+              <p style={{
+                margin: '0 0 12px 0',
+                fontSize: 13.5,
+                color: 'rgba(240, 253, 250, 0.95)',
+                fontWeight: 500,
+                textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
+                lineHeight: 1.4,
+                maxWidth: 680
+              }}>
+                Morning circadian activation, hydration pacing, and evening down-regulation routines.
+              </p>
+
+              {/* Glowing Metric Chips */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                <div style={{
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  backdropFilter: 'blur(8px)',
+                  padding: '5px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  fontSize: 12,
+                  color: '#ffffff',
+                  fontWeight: 600
+                }}>
+                  ✅ <strong>5/6</strong> Completed Today
+                </div>
+                <div style={{
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  backdropFilter: 'blur(8px)',
+                  padding: '5px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  fontSize: 12,
+                  color: '#ffffff',
+                  fontWeight: 600
+                }}>
+                  💧 <strong>6/8</strong> Glasses Hydration
+                </div>
+                <div style={{
+                  background: 'rgba(13, 148, 136, 0.3)',
+                  backdropFilter: 'blur(8px)',
+                  padding: '5px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(153, 246, 228, 0.4)',
+                  fontSize: 12,
+                  color: '#ccfbf1',
+                  fontWeight: 700
+                }}>
+                  🌅 Morning Flow Done
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
