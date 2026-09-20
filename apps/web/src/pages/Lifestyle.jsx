@@ -169,13 +169,151 @@ export default function LifestyleCoach({ profile, t = (k)=>k }) {
   if (activeSection === 'nutrition') return <NutritionDashboard onBack={() => setActiveSection('overview')} profile={profile} />;
   if (activeSection === 'digital') return <DigitalWellnessDashboard onBack={() => setActiveSection('overview')} />;
   if (activeSection === 'recovery') return <BurnoutRecoveryDashboard onBack={() => setActiveSection('overview')} recent={recentData} profile={profile} />;
+  if (activeSection === 'habits') return <HabitsRoutinesDashboard onBack={() => setActiveSection('overview')} />;
+  if (activeSection === 'social') return <SocialWellbeingDashboard onBack={() => setActiveSection('overview')} />;
 
   return (
     <div className="page active">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Lifestyle & Nutrition</h1>
-          <p className="page-subtitle">AI-driven habits, workouts, and natural remedies</p>
+          <h1 className="page-title">Lifestyle & Wellbeing Hub</h1>
+          <p className="page-subtitle">Metabolic nutrition, athletic fitness, holistic wellbeing, and circadian habits</p>
+        </div>
+      </div>
+
+      {/* LIFESTYLE WELCOME HERO BANNER */}
+      <div style={{
+        position: 'relative',
+        borderRadius: 24,
+        overflow: 'hidden',
+        marginBottom: 28,
+        background: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)',
+        color: '#ffffff',
+        boxShadow: '0 12px 36px rgba(6, 78, 59, 0.16)',
+        display: 'flex',
+        minHeight: 220
+      }}>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'url("/healthy life style.jfif")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 35%',
+          opacity: 0.38,
+          mixBlendMode: 'luminosity',
+          pointerEvents: 'none'
+        }} />
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(90deg, rgba(6, 78, 59, 0.95) 0%, rgba(6, 95, 70, 0.82) 50%, rgba(4, 120, 87, 0.45) 100%)',
+          pointerEvents: 'none'
+        }} />
+
+        <div style={{
+          position: 'relative',
+          zIndex: 1,
+          padding: '28px 28px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          width: '100%'
+        }}>
+          <div>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              background: 'rgba(255, 255, 255, 0.16)',
+              backdropFilter: 'blur(10px)',
+              padding: '4px 12px',
+              borderRadius: 20,
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 0.4,
+              textTransform: 'uppercase',
+              marginBottom: 10
+            }}>
+              <Icons.Sparkles size={13} color="#86efac" />
+              <span>NuraCare Lifestyle Sanctuary</span>
+            </div>
+
+            <h2 style={{
+              fontSize: 26,
+              fontWeight: 800,
+              fontFamily: 'var(--font-head)',
+              margin: '0 0 8px 0',
+              letterSpacing: '-0.5px'
+            }}>
+              Welcome to Your Lifestyle & Vitality Hub
+            </h2>
+
+            <p style={{
+              fontSize: 14,
+              color: 'rgba(255, 255, 255, 0.9)',
+              margin: '0 0 18px 0',
+              maxWidth: 620,
+              lineHeight: 1.5
+            }}>
+              Track metabolic nutrition, power gym workouts with specialized athletic fueling, nurture digital & mental harmony, and cultivate enduring daily routines.
+            </p>
+          </div>
+
+          {/* Quick Metrics Bar */}
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 12,
+            alignItems: 'center'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'rgba(0, 0, 0, 0.28)',
+              backdropFilter: 'blur(10px)',
+              padding: '8px 16px',
+              borderRadius: 14,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              fontSize: 13,
+              fontWeight: 700
+            }}>
+              <Icons.Flame size={16} color="#fbbf24" />
+              <span>12-Day Vitality Streak</span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'rgba(0, 0, 0, 0.28)',
+              backdropFilter: 'blur(10px)',
+              padding: '8px 16px',
+              borderRadius: 14,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              fontSize: 13,
+              fontWeight: 700
+            }}>
+              <Icons.Activity size={16} color="#4ade80" />
+              <span>82% Consistency Score</span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'rgba(0, 0, 0, 0.28)',
+              backdropFilter: 'blur(10px)',
+              padding: '8px 16px',
+              borderRadius: 14,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              fontSize: 13,
+              fontWeight: 700
+            }}>
+              <Icons.HeartPulse size={16} color="#f472b6" />
+              <span>Resting HR: 64 bpm</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -228,42 +366,484 @@ export default function LifestyleCoach({ profile, t = (k)=>k }) {
         </div>
       )}
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-        <OverviewCard 
-          title="Running Tracker" desc="Track your outdoor runs or treadmill distance."
-          icon={<Icons.Navigation size={28} color="var(--green-dark)" />}
-          onClick={() => setActiveSection('running')}
-        />
+      {/* SECTION TITLE */}
+      <div className="section-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Icons.LayoutGrid size={20} color="var(--green-dark)" /> Lifestyle Pillars
+        </span>
+        <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>
+          Tap any pillar to open tracker & specialized guides
+        </span>
+      </div>
 
-        <OverviewCard 
-          title="Gym & Strength" desc="Log sets, reps, and get routine suggestions."
-          icon={<Icons.Dumbbell size={28} color="var(--green-dark)" />}
-          onClick={() => setActiveSection('gym')}
-        />
+      {/* 4 HORIZONTAL PILLAR CARDS GRID */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
 
-        <OverviewCard 
-          title="Nutrition & Fasting" desc="Log your meals, macros, and track fasting rules."
-          icon={<Icons.Utensils size={28} color="var(--green-dark)" />}
+        {/* 1. NUTRITION HORIZONTAL CARD */}
+        <div 
           onClick={() => setActiveSection('nutrition')}
-        />
+          className="dash-card"
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '20px 24px',
+            borderRadius: 20,
+            background: 'rgba(255, 255, 255, 0.88)',
+            border: '1px solid rgba(22, 163, 74, 0.25)',
+            boxShadow: '0 4px 18px rgba(22, 163, 74, 0.06)',
+            cursor: 'pointer',
+            transition: 'all 0.25s ease',
+            gap: 20
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18, flex: 1 }}>
+            <div style={{
+              width: 54,
+              height: 54,
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.15) 0%, rgba(34, 197, 94, 0.25) 100%)',
+              border: '1px solid rgba(22, 163, 74, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Icons.Utensils size={26} color="#16a34a" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Nutrition</h3>
+                <span style={{
+                  background: 'rgba(22, 163, 74, 0.12)',
+                  color: '#15803d',
+                  padding: '2px 8px',
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 700
+                }}>
+                  3/3 Meals Logged
+                </span>
+                <span style={{
+                  background: 'rgba(245, 158, 11, 0.12)',
+                  color: '#b45309',
+                  padding: '2px 8px',
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 700
+                }}>
+                  ⚡ Gym Nutrition Active
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                Metabolic fuel, eating patterns, athletic macros & cultural Ethiopian superfoods (Teff, Shiro, Beso).
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+                <span><strong>95g / 120g</strong> Protein</span>
+                <span>•</span>
+                <span><strong>1,840 kcal</strong> Target</span>
+                <span>•</span>
+                <span style={{ color: '#16a34a', fontWeight: 600 }}>82% Macro Adherence</span>
+              </div>
+            </div>
+          </div>
 
-        <OverviewCard 
-          title="Yoga Flow" desc="Guided sessions based on your body tension."
-          icon={<Icons.Flower2 size={28} color="var(--green-dark)" />}
-          onClick={() => setActiveSection('yoga')}
-        />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--green-dark)' }}>Open Nutrition</span>
+            <Icons.ChevronRight size={18} color="var(--green-dark)" />
+          </div>
+        </div>
 
-        <OverviewCard 
-          title="Digital Wellness" desc="Screen limits, focus blocks, safe browsing & bedtime pause."
-          icon={<Icons.Smartphone size={28} color="#4338ca" />}
-          onClick={() => setActiveSection('digital')}
-        />
+        {/* 2. FITNESS & GYM HORIZONTAL CARD */}
+        <div 
+          onClick={() => setActiveSection('gym')}
+          className="dash-card"
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '20px 24px',
+            borderRadius: 20,
+            background: 'rgba(255, 255, 255, 0.88)',
+            border: '1px solid rgba(234, 88, 12, 0.25)',
+            boxShadow: '0 4px 18px rgba(234, 88, 12, 0.06)',
+            cursor: 'pointer',
+            transition: 'all 0.25s ease',
+            gap: 20
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18, flex: 1 }}>
+            <div style={{
+              width: 54,
+              height: 54,
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(249, 115, 22, 0.25) 100%)',
+              border: '1px solid rgba(234, 88, 12, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Icons.Dumbbell size={26} color="#ea580c" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Fitness & Gym</h3>
+                <span style={{
+                  background: 'rgba(234, 88, 12, 0.12)',
+                  color: '#c2410c',
+                  padding: '2px 8px',
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 700
+                }}>
+                  4/5 Workouts Done
+                </span>
+                <span style={{
+                  background: 'rgba(59, 130, 246, 0.12)',
+                  color: '#1d4ed8',
+                  padding: '2px 8px',
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 700
+                }}>
+                  Push / Pull / Legs
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                Strength tracking, hypertrophy splits, Bluetooth wearable workout sync, and live nearby gym finder.
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+                <span><strong>6,482</strong> Steps Today</span>
+                <span>•</span>
+                <span><strong>45 mins</strong> Active Session</span>
+                <span>•</span>
+                <span style={{ color: '#ea580c', fontWeight: 600 }}>72% Weekly Goal</span>
+              </div>
+            </div>
+          </div>
 
-        <OverviewCard 
-          title="Burnout & Recovery" desc="Maslach strain evaluation, 3-day reset & nervous system calming."
-          icon={<Icons.HeartHandshake size={28} color="#dc2626" />}
-          onClick={() => setActiveSection('recovery')}
-        />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#ea580c' }}>Open Gym</span>
+            <Icons.ChevronRight size={18} color="#ea580c" />
+          </div>
+        </div>
+
+        {/* 3. WELLBEING HORIZONTAL CARD (With Digital, Mental & Social Wellbeing Sub-Grid) */}
+        <div 
+          className="dash-card"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '22px 24px',
+            borderRadius: 20,
+            background: 'rgba(255, 255, 255, 0.92)',
+            border: '1px solid rgba(99, 102, 241, 0.25)',
+            boxShadow: '0 4px 20px rgba(99, 102, 241, 0.07)',
+            gap: 16
+          }}
+        >
+          {/* Header Row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 14,
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(129, 140, 248, 0.25) 100%)',
+                border: '1px solid rgba(99, 102, 241, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Icons.Sparkles size={24} color="#6366f1" />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Wellbeing</h3>
+                  <span style={{
+                    background: 'rgba(99, 102, 241, 0.12)',
+                    color: '#4f46e5',
+                    padding: '2px 8px',
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontWeight: 700
+                  }}>
+                    82% Mind & Body Balance
+                  </span>
+                </div>
+                <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--text-muted)' }}>
+                  Integrated harmony across your screen boundaries, nervous system recovery, and social bonds.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Dedicated Sub-Grid: Digital Wellbeing, Mental Wellbeing, Social Wellbeing */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: 12,
+            marginTop: 4
+          }}>
+            {/* 3A. DIGITAL WELLBEING */}
+            <div
+              onClick={() => setActiveSection('digital')}
+              style={{
+                background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.04) 0%, rgba(2, 132, 199, 0.08) 100%)',
+                border: '1px solid rgba(2, 132, 199, 0.22)',
+                borderRadius: 16,
+                padding: '16px 18px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 12
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#0284c7'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(2, 132, 199, 0.22)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: 'rgba(2, 132, 199, 0.14)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Icons.Smartphone size={18} color="#0284c7" />
+                </div>
+                <Icons.ChevronRight size={16} color="#0284c7" />
+              </div>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Digital Wellbeing</h4>
+                <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                  Screen limits, focus blocks, bedtime pause & blue-light detox.
+                </p>
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#0284c7' }}>
+                ⏱ 2h 15m Screen Time Today
+              </div>
+            </div>
+
+            {/* 3B. MENTAL WELLBEING */}
+            <div
+              onClick={() => setActiveSection('recovery')}
+              style={{
+                background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.04) 0%, rgba(147, 51, 234, 0.08) 100%)',
+                border: '1px solid rgba(147, 51, 234, 0.22)',
+                borderRadius: 16,
+                padding: '16px 18px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 12
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#9333ea'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(147, 51, 234, 0.22)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: 'rgba(147, 51, 234, 0.14)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Icons.Brain size={18} color="#9333ea" />
+                </div>
+                <Icons.ChevronRight size={16} color="#9333ea" />
+              </div>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Mental Wellbeing</h4>
+                <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                  4-7-8 breathwork, parasympathetic down-regulation & 3-day reset.
+                </p>
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#9333ea' }}>
+                🧘 Low Tension • Score: 84/100
+              </div>
+            </div>
+
+            {/* 3C. SOCIAL WELLBEING */}
+            <div
+              onClick={() => setActiveSection('social')}
+              style={{
+                background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.04) 0%, rgba(236, 72, 153, 0.08) 100%)',
+                border: '1px solid rgba(236, 72, 153, 0.22)',
+                borderRadius: 16,
+                padding: '16px 18px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 12
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#ec4899'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(236, 72, 153, 0.22)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: 'rgba(236, 72, 153, 0.14)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Icons.Users size={18} color="#ec4899" />
+                </div>
+                <Icons.ChevronRight size={16} color="#ec4899" />
+              </div>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Social Wellbeing</h4>
+                <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                  Support circles, accountability partners & group challenges.
+                </p>
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#ec4899' }}>
+                🌿 41.8K Community Members
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. HABITS & ROUTINES HORIZONTAL CARD */}
+        <div 
+          onClick={() => setActiveSection('habits')}
+          className="dash-card"
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '20px 24px',
+            borderRadius: 20,
+            background: 'rgba(255, 255, 255, 0.88)',
+            border: '1px solid rgba(13, 148, 136, 0.25)',
+            boxShadow: '0 4px 18px rgba(13, 148, 136, 0.06)',
+            cursor: 'pointer',
+            transition: 'all 0.25s ease',
+            gap: 20
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18, flex: 1 }}>
+            <div style={{
+              width: 54,
+              height: 54,
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, rgba(13, 148, 136, 0.15) 0%, rgba(20, 184, 166, 0.25) 100%)',
+              border: '1px solid rgba(13, 148, 136, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Icons.CheckCircle2 size={26} color="#0d9488" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Habits & Routines</h3>
+                <span style={{
+                  background: 'rgba(13, 148, 136, 0.12)',
+                  color: '#0f766e',
+                  padding: '2px 8px',
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 700
+                }}>
+                  5/6 Completed Today
+                </span>
+                <span style={{
+                  background: 'rgba(245, 158, 11, 0.12)',
+                  color: '#b45309',
+                  padding: '2px 8px',
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 700
+                }}>
+                  🔥 12-Day Streak
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                Morning circadian activation, hydration pacing, and evening down-regulation routines.
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+                <span><strong>💧 6/8</strong> Glasses Hydration</span>
+                <span>•</span>
+                <span><strong>🌅 Morning Flow</strong> Done</span>
+                <span>•</span>
+                <span style={{ color: '#0d9488', fontWeight: 600 }}>83% Completion</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#0d9488' }}>Open Habits</span>
+            <Icons.ChevronRight size={18} color="#0d9488" />
+          </div>
+        </div>
+
+        {/* Secondary Quick Trackers Row: Running & Yoga */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 4 }}>
+          <div 
+            onClick={() => setActiveSection('running')}
+            style={{
+              background: 'rgba(255, 255, 255, 0.7)',
+              border: '1px solid var(--border)',
+              borderRadius: 16,
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Icons.Navigation size={20} color="var(--green-dark)" />
+              <div>
+                <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>Outdoor Running Tracker</h4>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>GPS route and distance pace</span>
+              </div>
+            </div>
+            <Icons.ChevronRight size={16} color="var(--text-muted)" />
+          </div>
+
+          <div 
+            onClick={() => setActiveSection('yoga')}
+            style={{
+              background: 'rgba(255, 255, 255, 0.7)',
+              border: '1px solid var(--border)',
+              borderRadius: 16,
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Icons.Flower2 size={20} color="#8b5cf6" />
+              <div>
+                <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>Yoga & Mobility Flow</h4>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Vinyasa, Yin & restorative poses</span>
+              </div>
+            </div>
+            <Icons.ChevronRight size={16} color="var(--text-muted)" />
+          </div>
+        </div>
+
       </div>
 
       <div className="section-title" style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -670,7 +1250,10 @@ function GymDashboard({ onBack, recent, profile, connectBluetoothDevice }) {
 
   return (
     <div className="page active">
-      <DashHeader title="Gym & Strength" onBack={onBack} icon={<div style={{background: 'var(--green-light)', padding: 10, borderRadius: 12}}><Icons.Dumbbell size={24} color="var(--green-dark)"/></div>} />
+      <DashHeader title="Gym & Strength" onBack={onBack} icon={<div style={{background: 'rgba(234, 88, 12, 0.15)', padding: 10, borderRadius: 12}}><Icons.Dumbbell size={24} color="#ea580c"/></div>} />
+
+      {/* GYM NUTRITION & ATHLETIC RECOVERY CALLOUT */}
+      <GymNutritionSection />
       
       <div style={{ background: 'var(--bg)', padding: 24, borderRadius: 20, marginBottom: 32, display: 'flex', gap: 16, alignItems: 'flex-start', border: '1px solid var(--border)' }}>
         <Icons.BrainCircuit size={28} color="var(--green-dark)" style={{ flexShrink: 0 }} />
@@ -1021,6 +1604,9 @@ function NutritionDashboard({ onBack, profile }) {
   return (
     <div className="page active">
       <DashHeader title="Nutrition Tracker" onBack={onBack} icon={<div style={{background: 'var(--green-light)', padding: 10, borderRadius: 12}}><Icons.Utensils size={24} color="var(--green-dark)"/></div>} />
+
+      {/* GYM NUTRITION CARD */}
+      <GymNutritionSection />
       
       {isEthiopia && (
         <div className="dash-card" style={{ padding: 24, marginBottom: 24 }}>
@@ -1404,3 +1990,449 @@ function BurnoutRecoveryDashboard({ onBack, recent, profile }) {
   );
 }
 
+
+
+/* ============================================================
+   GYM NUTRITION & ATHLETIC PERFORMANCE SECTION
+   ============================================================ */
+function GymNutritionSection() {
+  const [activeTab, setActiveTab] = useState('fueling'); // fueling | macros | ethiopian | fasting
+  const [bodyWeight, setBodyWeight] = useState(72);
+  const [fitnessGoal, setFitnessGoal] = useState('hypertrophy'); // hypertrophy | cutting | endurance
+
+  // Dynamic Macro calculations
+  const proteinTarget = fitnessGoal === 'hypertrophy' 
+    ? Math.round(bodyWeight * 2.0) 
+    : fitnessGoal === 'cutting' 
+      ? Math.round(bodyWeight * 2.2) 
+      : Math.round(bodyWeight * 1.6);
+
+  const carbTarget = fitnessGoal === 'hypertrophy'
+    ? Math.round(bodyWeight * 4.0)
+    : fitnessGoal === 'cutting'
+      ? Math.round(bodyWeight * 2.5)
+      : Math.round(bodyWeight * 5.0);
+
+  const fatTarget = Math.round(bodyWeight * 0.9);
+  const totalCalories = Math.round((proteinTarget * 4) + (carbTarget * 4) + (fatTarget * 9));
+
+  return (
+    <div className="dash-card" style={{ padding: 24, marginBottom: 24, borderRadius: 20, background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(234, 88, 12, 0.25)', boxShadow: '0 4px 20px rgba(234, 88, 12, 0.06)' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ width: 46, height: 46, borderRadius: 14, background: 'rgba(234, 88, 12, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icons.Zap size={24} color="#ea580c" />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Gym & Athletic Nutrition</h3>
+              <span style={{ background: 'rgba(234, 88, 12, 0.12)', color: '#c2410c', padding: '2px 8px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
+                High Performance
+              </span>
+            </div>
+            <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--text-muted)' }}>
+              Pre-workout energy timing, post-workout muscle protein synthesis & Habesha superfoods
+            </p>
+          </div>
+        </div>
+
+        {/* Tab Pills */}
+        <div style={{ display: 'flex', background: 'var(--bg)', padding: 4, borderRadius: 12, border: '1px solid var(--border)' }}>
+          {[
+            { id: 'fueling', label: 'Workout Fuel' },
+            { id: 'macros', label: 'Macro Targets' },
+            { id: 'ethiopian', label: 'Ethiopian Power' },
+            { id: 'fasting', label: 'Tsom Training' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                padding: '6px 14px',
+                borderRadius: 8,
+                border: 'none',
+                background: activeTab === tab.id ? '#ea580c' : 'transparent',
+                color: activeTab === tab.id ? '#ffffff' : 'var(--text-muted)',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* TAB 1: WORKOUT FUEL (PRE & POST WORKOUT) */}
+      {activeTab === 'fueling' && (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+            {/* Pre-Workout Card */}
+            <div style={{ background: 'var(--bg)', borderRadius: 16, padding: 18, border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <span style={{ background: 'rgba(234, 88, 12, 0.15)', color: '#ea580c', padding: '4px 10px', borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
+                  Pre-Workout (60-90m Prior)
+                </span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Glycogen Primer</span>
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                Fuel high-intensity sets and sustain muscle stamina without gastric heaviness.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, padding: '8px 12px', background: 'var(--white)', borderRadius: 10 }}>
+                  <Icons.Check size={16} color="#ea580c" />
+                  <span><strong>Beso (Roasted Barley):</strong> 3 tbsp Beso + water/honey (fast energy)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, padding: '8px 12px', background: 'var(--white)', borderRadius: 10 }}>
+                  <Icons.Check size={16} color="#ea580c" />
+                  <span><strong>Banana + 1 tbsp Peanut Butter:</strong> 35g complex carbs + electrolytes</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, padding: '8px 12px', background: 'var(--white)', borderRadius: 10 }}>
+                  <Icons.Check size={16} color="#ea580c" />
+                  <span><strong>Pre-Hydration:</strong> 500ml water + pinch of natural sea salt</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Post-Workout Card */}
+            <div style={{ background: 'var(--bg)', borderRadius: 16, padding: 18, border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <span style={{ background: 'rgba(22, 163, 74, 0.15)', color: '#15803d', padding: '4px 10px', borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
+                  Post-Workout (30-60m After)
+                </span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>25-35g Protein Target</span>
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                Stimulate Muscle Protein Synthesis (MPS) and replenish depleted intra-muscular glycogen.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, padding: '8px 12px', background: 'var(--white)', borderRadius: 10 }}>
+                  <Icons.Check size={16} color="#15803d" />
+                  <span><strong>Shiro & Lentils Bowl:</strong> 28g plant protein + fiber with Injera</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, padding: '8px 12px', background: 'var(--white)', borderRadius: 10 }}>
+                  <Icons.Check size={16} color="#15803d" />
+                  <span><strong>Telba (Flaxseed) Protein Shake:</strong> 22g protein + rich ALA Omega-3</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, padding: '8px 12px', background: 'var(--white)', borderRadius: 10 }}>
+                  <Icons.Check size={16} color="#15803d" />
+                  <span><strong>Lean Protein:</strong> 150g grilled chicken / fish + steamed vegetables</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: MACRO CALCULATOR */}
+      {activeTab === 'macros' && (
+        <div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <label style={{ fontSize: 13, fontWeight: 600 }}>Your Bodyweight:</label>
+              <input
+                type="number"
+                value={bodyWeight}
+                onChange={e => setBodyWeight(Number(e.target.value) || 60)}
+                style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', fontWeight: 700 }}
+              />
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>kg</span>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[
+                { id: 'hypertrophy', label: 'Muscle Building (Hypertrophy)' },
+                { id: 'cutting', label: 'Fat Loss (Cutting)' },
+                { id: 'endurance', label: 'Endurance & Athletics' }
+              ].map(goal => (
+                <button
+                  key={goal.id}
+                  onClick={() => setFitnessGoal(goal.id)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 8,
+                    border: fitnessGoal === goal.id ? '2px solid #ea580c' : '1px solid var(--border)',
+                    background: fitnessGoal === goal.id ? 'rgba(234, 88, 12, 0.08)' : 'var(--white)',
+                    color: fitnessGoal === goal.id ? '#ea580c' : 'var(--text)',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {goal.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+            <div style={{ background: 'var(--bg)', padding: 14, borderRadius: 12, textAlign: 'center', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Daily Protein</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#ea580c', margin: '4px 0' }}>{proteinTarget}g</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{(proteinTarget * 4)} kcal (30%)</div>
+            </div>
+
+            <div style={{ background: 'var(--bg)', padding: 14, borderRadius: 12, textAlign: 'center', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Daily Carbs</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#3b82f6', margin: '4px 0' }}>{carbTarget}g</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{(carbTarget * 4)} kcal (48%)</div>
+            </div>
+
+            <div style={{ background: 'var(--bg)', padding: 14, borderRadius: 12, textAlign: 'center', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Healthy Fats</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#10b981', margin: '4px 0' }}>{fatTarget}g</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{(fatTarget * 9)} kcal (22%)</div>
+            </div>
+
+            <div style={{ background: 'rgba(234, 88, 12, 0.08)', padding: 14, borderRadius: 12, textAlign: 'center', border: '1px solid rgba(234, 88, 12, 0.3)' }}>
+              <div style={{ fontSize: 12, color: '#c2410c' }}>Total Caloric Goal</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#c2410c', margin: '4px 0' }}>{totalCalories}</div>
+              <div style={{ fontSize: 11, color: '#c2410c' }}>kcal / day</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: ETHIOPIAN ATHLETIC SUPERFOODS */}
+      {activeTab === 'ethiopian' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+          <div style={{ background: 'var(--bg)', padding: 14, borderRadius: 12, border: '1px solid var(--border)' }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#ea580c', marginBottom: 4 }}>🌾 Teff Injera</div>
+            <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              Remarkable iron and calcium content for oxygen delivery and bone density during progressive overload.
+            </p>
+          </div>
+
+          <div style={{ background: 'var(--bg)', padding: 14, borderRadius: 12, border: '1px solid var(--border)' }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#16a34a', marginBottom: 4 }}>🌱 Telba (Flaxseed)</div>
+            <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              Anti-inflammatory ALA fatty acids that relieve tendon stiffness and accelerate DOMS muscle recovery.
+            </p>
+          </div>
+
+          <div style={{ background: 'var(--bg)', padding: 14, borderRadius: 12, border: '1px solid var(--border)' }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#3b82f6', marginBottom: 4 }}>🥣 Beso (Roasted Barley)</div>
+            <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              The iconic Ethiopian distance runner fuel. Low glycemic index with sustained glycogen replenishment.
+            </p>
+          </div>
+
+          <div style={{ background: 'var(--bg)', padding: 14, borderRadius: 12, border: '1px solid var(--border)' }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#8b5cf6', marginBottom: 4 }}>🍲 High-Protein Shiro</div>
+            <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              Chickpea flour enriched with fenugreek and spices. Fast to digest and rich in bioavailable plant BCAAs.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: TSOM (FASTING) TRAINING */}
+      {activeTab === 'fasting' && (
+        <div style={{ background: '#fef3c7', padding: 16, borderRadius: 14, border: '1px solid #fcd34d' }}>
+          <h4 style={{ margin: '0 0 8px 0', color: '#92400e', fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Icons.ShieldCheck size={18} color="#d97706" /> Fasting & Training Harmony
+          </h4>
+          <p style={{ margin: '0 0 12px 0', fontSize: 13, color: '#b45309', lineHeight: 1.5 }}>
+            You can build and preserve lean muscle during Orthodox fasting periods with deliberate timing and amino-acid pairing:
+          </p>
+          <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#92400e', lineHeight: 1.6 }}>
+            <li><strong>Workout Timing:</strong> Train 60-90 minutes before your meal breaking time (after 3:00 PM), so you can immediately refuel.</li>
+            <li><strong>Complete Amino Acids:</strong> Combine grains + legumes (e.g., Teff Injera + Shiro/Misir) to achieve all 9 essential amino acids.</li>
+            <li><strong>Hydration Priority:</strong> Drink 1L of water between breaking fast and bedtime to maintain muscular cell volumization.</li>
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   HABITS & ROUTINES DASHBOARD
+   ============================================================ */
+function HabitsRoutinesDashboard({ onBack }) {
+  const [habits, setHabits] = useState(() => {
+    const saved = localStorage.getItem('nuracare_daily_habits');
+    if (saved) return JSON.parse(saved);
+    return [
+      { id: 'h1', title: 'Hydration Target (2.5L)', category: 'hydration', completed: true, streak: 12, time: 'All Day' },
+      { id: 'h2', title: 'Daily Movement (8,000+ Steps)', category: 'movement', completed: true, streak: 8, time: 'Morning' },
+      { id: 'h3', title: 'Gym Nutrition & High Protein Meal', category: 'nutrition', completed: true, streak: 6, time: 'Post-Workout' },
+      { id: 'h4', title: '5-Minute 4-7-8 Breathwork Reset', category: 'mind', completed: true, streak: 14, time: 'Midday' },
+      { id: 'h5', title: 'Screen-Free Wind Down (45m before bed)', category: 'digital', completed: true, streak: 4, time: 'Evening' },
+      { id: 'h6', title: '7+ Hours Restful Sleep', category: 'sleep', completed: false, streak: 9, time: 'Night' },
+    ];
+  });
+
+  const toggleHabit = (id) => {
+    const updated = habits.map(h => h.id === id ? { ...h, completed: !h.completed } : h);
+    setHabits(updated);
+    localStorage.setItem('nuracare_daily_habits', JSON.stringify(updated));
+  };
+
+  const completedCount = habits.filter(h => h.completed).length;
+  const progressPct = Math.round((completedCount / habits.length) * 100);
+
+  return (
+    <div className="page active" style={{ maxWidth: 900, margin: '0 auto' }}>
+      <DashHeader 
+        title="Habits & Daily Routines" 
+        onBack={onBack} 
+        icon={<div style={{background: 'rgba(13, 148, 136, 0.15)', padding: 10, borderRadius: 12}}><Icons.CheckCircle2 size={24} color="#0d9488"/></div>} 
+      />
+
+      {/* Progress Card */}
+      <div className="dash-card" style={{ padding: 24, marginBottom: 24, borderRadius: 20, background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(13, 148, 136, 0.25)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Today's Habit Mastery</h3>
+            <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--text-muted)' }}>
+              {completedCount} of {habits.length} rituals completed today
+            </p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <span style={{ fontSize: 24, fontWeight: 800, color: '#0d9488' }}>{progressPct}%</span>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Consistency Score</div>
+          </div>
+        </div>
+
+        {/* Bar */}
+        <div style={{ width: '100%', height: 10, background: 'var(--bg)', borderRadius: 5, overflow: 'hidden' }}>
+          <div style={{ width: `${progressPct}%`, height: '100%', background: 'linear-gradient(90deg, #0d9488, #14b8a6)', borderRadius: 5, transition: 'width 0.4s ease' }} />
+        </div>
+      </div>
+
+      {/* Interactive Habit Checklist */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+        {habits.map(habit => (
+          <div
+            key={habit.id}
+            onClick={() => toggleHabit(habit.id)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              borderRadius: 16,
+              background: habit.completed ? 'rgba(13, 148, 136, 0.05)' : 'rgba(255, 255, 255, 0.85)',
+              border: habit.completed ? '1px solid rgba(13, 148, 136, 0.3)' : '1px solid var(--border)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: 8,
+                background: habit.completed ? '#0d9488' : 'var(--white)',
+                border: habit.completed ? 'none' : '2px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white'
+              }}>
+                {habit.completed && <Icons.Check size={18} />}
+              </div>
+              <div>
+                <span style={{
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: habit.completed ? 'var(--text-muted)' : 'var(--text)',
+                  textDecoration: habit.completed ? 'line-through' : 'none'
+                }}>
+                  {habit.title}
+                </span>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                  {habit.time} • 🔥 {habit.streak}-day streak
+                </div>
+              </div>
+            </div>
+
+            <span style={{
+              fontSize: 11,
+              fontWeight: 700,
+              padding: '4px 10px',
+              borderRadius: 8,
+              background: habit.completed ? 'rgba(13, 148, 136, 0.12)' : 'var(--bg)',
+              color: habit.completed ? '#0f766e' : 'var(--text-muted)'
+            }}>
+              {habit.completed ? 'Completed' : 'Tap to Complete'}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Morning & Evening Circadian Timelines */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div style={{ background: 'var(--bg)', borderRadius: 16, padding: 18, border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <Icons.Sun size={18} color="#f59e0b" />
+            <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Morning Circadian Flow</h4>
+          </div>
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7 }}>
+            <li><strong>06:30 AM:</strong> Hydrate with 500ml water + pinch of sea salt.</li>
+            <li><strong>07:00 AM:</strong> 15 mins direct natural morning sunlight.</li>
+            <li><strong>07:30 AM:</strong> Complex carb fueling (Beso / Teff porridge).</li>
+          </ul>
+        </div>
+
+        <div style={{ background: 'var(--bg)', borderRadius: 16, padding: 18, border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <Icons.Moon size={18} color="#6366f1" />
+            <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Evening Restorative Flow</h4>
+          </div>
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7 }}>
+            <li><strong>08:00 PM:</strong> Finish dinner cutoff & warm Chamomile tea.</li>
+            <li><strong>09:15 PM:</strong> Phone placed outside bedroom / blue-light filter.</li>
+            <li><strong>10:00 PM:</strong> Cool bedroom temperature & sleep onset.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   SOCIAL WELLBEING DASHBOARD
+   ============================================================ */
+function SocialWellbeingDashboard({ onBack }) {
+  return (
+    <div className="page active" style={{ maxWidth: 900, margin: '0 auto' }}>
+      <DashHeader 
+        title="Social Wellbeing & Community Circles" 
+        onBack={onBack} 
+        icon={<div style={{background: 'rgba(236, 72, 153, 0.15)', padding: 10, borderRadius: 12}}><Icons.Users size={24} color="#ec4899"/></div>} 
+      />
+
+      <div className="dash-card" style={{ padding: 24, marginBottom: 24, borderRadius: 20, background: 'rgba(255, 255, 255, 0.92)', border: '1px solid rgba(236, 72, 153, 0.25)' }}>
+        <h3 style={{ margin: '0 0 8px 0', fontSize: 18, fontWeight: 700 }}>The Science of Social Connection</h3>
+        <p style={{ margin: 0, fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+          Strong social bonds lower cortisol, improve cardiovascular longevity, and provide mutual accountability for health habits.
+        </p>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+        <div style={{ background: 'var(--bg)', padding: 18, borderRadius: 16, border: '1px solid var(--border)' }}>
+          <h4 style={{ margin: '0 0 6px 0', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>🏃 Running & Walking Circles</h4>
+          <p style={{ margin: '0 0 12px 0', fontSize: 13, color: 'var(--text-muted)' }}>Join local weekend group runs and morning step challenges.</p>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#ec4899' }}>12.4K Runners Connected</span>
+        </div>
+
+        <div style={{ background: 'var(--bg)', padding: 18, borderRadius: 16, border: '1px solid var(--border)' }}>
+          <h4 style={{ margin: '0 0 6px 0', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>🥗 Healthy Ethiopian Cooking</h4>
+          <p style={{ margin: '0 0 12px 0', fontSize: 13, color: 'var(--text-muted)' }}>Share Shiro, Beso shakes, and low-oil fasting recipes.</p>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#ec4899' }}>15.1K Members Active</span>
+        </div>
+
+        <div style={{ background: 'var(--bg)', padding: 18, borderRadius: 16, border: '1px solid var(--border)' }}>
+          <h4 style={{ margin: '0 0 6px 0', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>🧘 Mindfulness & Accountability</h4>
+          <p style={{ margin: '0 0 12px 0', fontSize: 13, color: 'var(--text-muted)' }}>Daily reflection checks and breathwork buddies.</p>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#ec4899' }}>6.3K Mindful Peers</span>
+        </div>
+      </div>
+    </div>
+  );
+}

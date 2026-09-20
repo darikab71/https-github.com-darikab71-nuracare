@@ -1,16 +1,59 @@
-import React, { useState } from 'react';
-import * as Icons from 'lucide-react';
-
 const INITIAL_POSTS = [
+  {
+    id: 'post-video-1',
+    type: 'video_demo',
+    author: 'Coach Dawit (Athletic Specialist)',
+    authorBadge: 'Trainer',
+    avatarColor: '#ea580c',
+    timeAgo: '45m ago',
+    title: '🏋️‍♂️ Squat Depth & Core Bracing Tutorial (Video)',
+    content: 'Quick 45-second demonstration on maintaining neutral spine and glute activation out of the bottom position. Notice the foot torque against the floor before descending.',
+    videoUrl: 'https://example.com/squat-demo.mp4',
+    videoPoster: '/hero.png',
+    videoDuration: '▶ 0:45',
+    likes: 68,
+    comments: 19,
+    userLiked: true,
+  },
+  {
+    id: 'post-photo-1',
+    type: 'post',
+    author: 'Selamawit B.',
+    avatarColor: '#16a34a',
+    timeAgo: '1h ago',
+    title: '🥗 Post-Gym Habesha Recovery Fuel',
+    content: 'Just smashed leg day! Refueling with high-protein Shiro, steamed Gomen, roasted chickpeas, and a cold Telba flaxseed shake. 34g plant protein.',
+    imageUrl: '/natural remidies.jfif',
+    likes: 84,
+    comments: 12,
+    userLiked: false,
+  },
+  {
+    id: 'post-video-2',
+    type: 'video_demo',
+    author: 'Nutritionist Bethlehem',
+    authorBadge: 'Dietitian',
+    avatarColor: '#8b5cf6',
+    timeAgo: '3h ago',
+    title: '🥣 High-Protein Beso Smoothie Prep (Video)',
+    content: 'How to make a 32g protein pre-workout Beso shake with roasted barley, plant milk, flaxseed, and cinnamon. Takes under 2 minutes.',
+    videoUrl: 'https://example.com/beso-recipe.mp4',
+    videoPoster: '/healthy life style.jfif',
+    videoDuration: '▶ 1:15',
+    likes: 114,
+    comments: 28,
+    userLiked: true,
+  },
   {
     id: 'post-1',
     type: 'post',
     author: 'Sarah M.',
     avatarColor: '#ec4899',
-    timeAgo: '2h ago',
+    timeAgo: '4h ago',
     content: '🔥 Finished my 7-day hydration challenge!\n\nMaintained 92% hydration consistency this week. Energy levels have visibly normalized during morning routines.',
-    likes: 24,
-    comments: 7,
+    imageUrl: '/healthy life style.jfif',
+    likes: 36,
+    comments: 9,
     userLiked: false,
   },
   {
@@ -19,7 +62,7 @@ const INITIAL_POSTS = [
     author: 'NuraCare Health Team',
     authorBadge: 'Official',
     avatarColor: '#16a34a',
-    timeAgo: '5h ago',
+    timeAgo: '6h ago',
     title: '7-Day Hydration Challenge',
     content: 'Reach your daily water target 7 days in a row. Sync with your local wellness group and earn the Hydrated Pioneer badge.',
     likes: 58,
@@ -40,6 +83,7 @@ const INITIAL_POSTS = [
     timeAgo: '1d ago',
     title: 'Ethiopian Wellness Tip 🇪🇹',
     content: 'How traditional Teff-based meals can fit seamlessly into a balanced nutrition and glycemic control routine. Teff contains resistant starch that supports a diverse microbiome.',
+    imageUrl: '/ashwaganda.jfif',
     likes: 92,
     comments: 21,
     userLiked: false,
@@ -183,7 +227,11 @@ export default function CommunityPage({ profile }) {
   // Feed State
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [newPostText, setNewPostText] = useState('');
+  const [newPostTitle, setNewPostTitle] = useState('');
+  const [attachedMedia, setAttachedMedia] = useState(null); // { url, type: 'image'|'video', name, duration }
   const [showPostModal, setShowPostModal] = useState(false);
+  const fileInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
   // Groups State
   const [groups, setGroups] = useState(INITIAL_GROUPS);
@@ -241,22 +289,41 @@ export default function CommunityPage({ profile }) {
     );
   };
 
+  const handleFileUpload = (e, mediaType) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const objectUrl = URL.createObjectURL(file);
+    setAttachedMedia({
+      url: objectUrl,
+      type: mediaType,
+      name: file.name,
+      duration: mediaType === 'video' ? '▶ Video Clip' : null
+    });
+  };
+
   const handleCreatePost = (e) => {
-    e.preventDefault();
-    if (!newPostText.trim()) return;
+    if (e && e.preventDefault) e.preventDefault();
+    if (!newPostText.trim() && !attachedMedia) return;
     const newPost = {
       id: 'post_' + Date.now(),
-      type: 'post',
+      type: attachedMedia?.type === 'video' ? 'video_demo' : 'post',
       author: profile?.name || 'You',
       avatarColor: '#16a34a',
       timeAgo: 'Just now',
+      title: newPostTitle.trim() || undefined,
       content: newPostText.trim(),
+      imageUrl: attachedMedia?.type === 'image' ? attachedMedia.url : undefined,
+      videoUrl: attachedMedia?.type === 'video' ? attachedMedia.url : undefined,
+      videoPoster: attachedMedia?.type === 'video' ? '/healthy life style.jfif' : undefined,
+      videoDuration: attachedMedia?.type === 'video' ? '▶ Video' : undefined,
       likes: 0,
       comments: 0,
       userLiked: false,
     };
     setPosts([newPost, ...posts]);
     setNewPostText('');
+    setNewPostTitle('');
+    setAttachedMedia(null);
     setShowPostModal(false);
   };
 
@@ -305,7 +372,7 @@ export default function CommunityPage({ profile }) {
           <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Icons.Users size={28} color="var(--green)" /> Community Sanctuary
           </h1>
-          <p className="page-subtitle">Connect, share wellness habits, and join community challenges.</p>
+          <p className="page-subtitle">Connect, share wellness habits, gym routines, and join community challenges.</p>
         </div>
         <button
           className="btn-outline-sm"
@@ -314,6 +381,141 @@ export default function CommunityPage({ profile }) {
         >
           <Icons.ShieldCheck size={16} color="var(--green)" /> Privacy & Safety
         </button>
+      </div>
+
+      {/* COMMUNITY WELCOME HERO BANNER */}
+      <div style={{
+        position: 'relative',
+        borderRadius: 24,
+        overflow: 'hidden',
+        marginBottom: 24,
+        background: 'linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%)',
+        color: '#ffffff',
+        boxShadow: '0 12px 36px rgba(6, 95, 70, 0.16)',
+        display: 'flex',
+        minHeight: 210
+      }}>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'url("/be healthy.jfif")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 25%',
+          opacity: 0.38,
+          mixBlendMode: 'luminosity',
+          pointerEvents: 'none'
+        }} />
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(90deg, rgba(6, 95, 70, 0.95) 0%, rgba(4, 120, 87, 0.84) 50%, rgba(5, 150, 105, 0.45) 100%)',
+          pointerEvents: 'none'
+        }} />
+
+        <div style={{
+          position: 'relative',
+          zIndex: 1,
+          padding: '26px 28px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          width: '100%'
+        }}>
+          <div>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              background: 'rgba(255, 255, 255, 0.18)',
+              backdropFilter: 'blur(10px)',
+              padding: '4px 12px',
+              borderRadius: 20,
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 0.4,
+              textTransform: 'uppercase',
+              marginBottom: 10
+            }}>
+              <Icons.Sparkles size={13} color="#86efac" />
+              <span>NuraCare Health Circle</span>
+            </div>
+
+            <h2 style={{
+              fontSize: 26,
+              fontWeight: 800,
+              fontFamily: 'var(--font-head)',
+              margin: '0 0 8px 0',
+              letterSpacing: '-0.5px'
+            }}>
+              Welcome to the NuraCare Community 🌿
+            </h2>
+
+            <p style={{
+              fontSize: 14,
+              color: 'rgba(255, 255, 255, 0.9)',
+              margin: '0 0 16px 0',
+              maxWidth: 620,
+              lineHeight: 1.5
+            }}>
+              Join over 41,000+ members sharing authentic health transformations, athletic gym workouts, cultural Ethiopian recipes, and mutual accountability.
+            </p>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 12,
+            alignItems: 'center'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'rgba(0, 0, 0, 0.28)',
+              backdropFilter: 'blur(10px)',
+              padding: '7px 14px',
+              borderRadius: 12,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              fontSize: 13,
+              fontWeight: 700
+            }}>
+              <Icons.Users size={16} color="#4ade80" />
+              <span>41.8K Members Active</span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'rgba(0, 0, 0, 0.28)',
+              backdropFilter: 'blur(10px)',
+              padding: '7px 14px',
+              borderRadius: 12,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              fontSize: 13,
+              fontWeight: 700
+            }}>
+              <Icons.ShieldCheck size={16} color="#60a5fa" />
+              <span>100% Medical Privacy Safe</span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'rgba(0, 0, 0, 0.28)',
+              backdropFilter: 'blur(10px)',
+              padding: '7px 14px',
+              borderRadius: 12,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              fontSize: 13,
+              fontWeight: 700
+            }}>
+              <Icons.Flame size={16} color="#fbbf24" />
+              <span>128 Active Challenges</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Internal 3-Section Top Segmented Navigation */}
@@ -409,42 +611,120 @@ export default function CommunityPage({ profile }) {
       {/* SECTION 1: FEED */}
       {activeSection === 'feed' && (
         <div>
-          {/* Post Composer Card */}
+          {/* Post Composer Card with Photo & Video Actions */}
           <div
             className="dash-card"
             style={{
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              flexDirection: 'column',
+              gap: 14,
               marginBottom: 20,
-              padding: '16px 20px',
-              cursor: 'pointer',
+              padding: '18px 20px',
             }}
-            onClick={() => setShowPostModal(true)}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div 
+              style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}
+              onClick={() => setShowPostModal(true)}
+            >
               <div
                 style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
+                  width: 42,
+                  height: 42,
+                  borderRadius: 21,
                   background: 'var(--green)',
                   color: '#fff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 700,
+                  flexShrink: 0
                 }}
               >
                 {profile?.name ? profile.name[0].toUpperCase() : 'U'}
               </div>
-              <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>
-                Share a wellness milestone or habit encouragement...
-              </span>
+              <div
+                style={{
+                  flex: 1,
+                  background: 'var(--bg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 24,
+                  padding: '10px 18px',
+                  color: 'var(--text-muted)',
+                  fontSize: 14,
+                }}
+              >
+                Share a gym achievement, meal photo, workout video, or habit win...
+              </div>
             </div>
-            <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}>
-              + Share
-            </button>
+
+            {/* Quick Action Buttons for Photo & Video */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+              <div style={{ display: 'flex', gap: 10 }}>
+                {/* Hidden File Inputs */}
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  accept="image/*" 
+                  style={{ display: 'none' }} 
+                  onChange={(e) => { handleFileUpload(e, 'image'); setShowPostModal(true); }} 
+                />
+                <input 
+                  type="file" 
+                  ref={videoInputRef} 
+                  accept="video/*" 
+                  style={{ display: 'none' }} 
+                  onChange={(e) => { handleFileUpload(e, 'video'); setShowPostModal(true); }} 
+                />
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    background: 'rgba(22, 163, 74, 0.08)',
+                    border: '1px solid rgba(22, 163, 74, 0.2)',
+                    color: '#15803d',
+                    padding: '6px 14px',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Icons.Image size={15} color="#16a34a" /> Add Photo
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => videoInputRef.current?.click()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    background: 'rgba(234, 88, 12, 0.08)',
+                    border: '1px solid rgba(234, 88, 12, 0.2)',
+                    color: '#c2410c',
+                    padding: '6px 14px',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Icons.Video size={15} color="#ea580c" /> Add Video
+                </button>
+              </div>
+
+              <button 
+                className="btn-primary" 
+                onClick={() => setShowPostModal(true)} 
+                style={{ padding: '8px 18px', fontSize: 13 }}
+              >
+                + Create Post
+              </button>
+            </div>
           </div>
 
           {/* Privacy Notice Banner */}
@@ -522,6 +802,96 @@ export default function CommunityPage({ profile }) {
                 <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text)', whiteSpace: 'pre-line', margin: '0 0 16px 0' }}>
                   {post.content}
                 </p>
+
+                {/* ATTACHED PHOTO RENDERING */}
+                {post.imageUrl && (
+                  <div style={{
+                    borderRadius: 16,
+                    overflow: 'hidden',
+                    marginBottom: 16,
+                    border: '1px solid var(--border)',
+                    maxHeight: 380,
+                    background: '#000'
+                  }}>
+                    <img 
+                      src={post.imageUrl} 
+                      alt="" 
+                      style={{ width: '100%', maxHeight: 380, objectFit: 'cover', display: 'block' }} 
+                    />
+                  </div>
+                )}
+
+                {/* ATTACHED VIDEO RENDERING */}
+                {(post.videoUrl || post.type === 'video_demo') && (
+                  <div style={{
+                    position: 'relative',
+                    borderRadius: 16,
+                    overflow: 'hidden',
+                    marginBottom: 16,
+                    border: '1px solid var(--border)',
+                    background: '#0f172a',
+                    maxHeight: 380
+                  }}>
+                    {post.videoPoster ? (
+                      <div 
+                        style={{ position: 'relative', cursor: 'pointer' }}
+                        onClick={() => alert('▶ Playing video demonstration: ' + (post.title || 'Workout Tutorial'))}
+                      >
+                        <img 
+                          src={post.videoPoster} 
+                          alt="Video Demonstration" 
+                          style={{ width: '100%', height: 260, objectFit: 'cover', opacity: 0.85, display: 'block' }} 
+                        />
+                        <div style={{
+                          position: 'absolute',
+                          inset: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: 'rgba(0, 0, 0, 0.28)'
+                        }}>
+                          <div style={{
+                            width: 60,
+                            height: 60,
+                            borderRadius: 30,
+                            background: 'rgba(0, 0, 0, 0.7)',
+                            border: '2px solid white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+                            transition: 'transform 0.2s'
+                          }}>
+                            <Icons.Play size={28} color="#ffffff" style={{ marginLeft: 3 }} />
+                          </div>
+                        </div>
+                        <div style={{
+                          position: 'absolute',
+                          bottom: 12,
+                          right: 12,
+                          background: 'rgba(0, 0, 0, 0.8)',
+                          color: '#fff',
+                          padding: '4px 10px',
+                          borderRadius: 8,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6
+                        }}>
+                          <Icons.Video size={13} color="#ea580c" />
+                          <span>{post.videoDuration || '▶ Video'}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <video 
+                        src={post.videoUrl} 
+                        controls 
+                        style={{ width: '100%', maxHeight: 320, display: 'block' }} 
+                      />
+                    )}
+                  </div>
+                )}
 
                 {/* Challenge Card */}
                 {post.challengeData && (
@@ -831,31 +1201,175 @@ export default function CommunityPage({ profile }) {
 
       {/* Post Modal */}
       {showPostModal && (
-        <div className="modal-overlay open" onClick={() => setShowPostModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
-            <h3 style={{ margin: '0 0 12px 0' }}>Share Wellness Milestone</h3>
+        <div className="modal-overlay open" onClick={() => { setShowPostModal(false); setAttachedMedia(null); }}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 540, borderRadius: 20, padding: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Share with Community</h3>
+              <button
+                onClick={() => { setShowPostModal(false); setAttachedMedia(null); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <Icons.X size={20} />
+              </button>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Post Title (Optional, e.g. 'Leg Day Milestone', 'Healthy Teff Recipe')"
+              value={newPostTitle}
+              onChange={e => setNewPostTitle(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: 10,
+                border: '1px solid var(--border)',
+                fontFamily: 'inherit',
+                fontSize: 14,
+                marginBottom: 12,
+              }}
+            />
+
             <textarea
-              placeholder="What healthy habit or milestone are you celebrating?"
+              placeholder="What healthy habit, gym routine, or wellness encouragement are you sharing?"
               value={newPostText}
               onChange={e => setNewPostText(e.target.value)}
               style={{
                 width: '100%',
-                minHeight: 120,
+                minHeight: 110,
                 padding: 12,
                 borderRadius: 10,
                 border: '1px solid var(--border)',
                 fontFamily: 'inherit',
                 fontSize: 14,
                 marginBottom: 14,
+                resize: 'vertical'
               }}
             />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-              <button className="btn-outline-sm" onClick={() => setShowPostModal(false)}>
-                Cancel
-              </button>
-              <button className="btn-primary" onClick={handleCreatePost}>
-                Publish
-              </button>
+
+            {/* LIVE ATTACHED MEDIA PREVIEW */}
+            {attachedMedia && (
+              <div style={{
+                position: 'relative',
+                borderRadius: 12,
+                overflow: 'hidden',
+                marginBottom: 14,
+                border: '1px solid var(--border)',
+                background: 'var(--bg)',
+                padding: 10,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12
+              }}>
+                {attachedMedia.type === 'image' ? (
+                  <img 
+                    src={attachedMedia.url} 
+                    alt="Attached preview" 
+                    style={{ width: 64, height: 64, borderRadius: 8, objectFit: 'cover' }} 
+                  />
+                ) : (
+                  <div style={{ width: 64, height: 64, borderRadius: 8, background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icons.Play size={24} color="#ea580c" />
+                  </div>
+                )}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>
+                    {attachedMedia.type === 'image' ? '📷 Photo Attached' : '🎥 Video Attached'}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{attachedMedia.name}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAttachedMedia(null)}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: 'none',
+                    color: '#ef4444',
+                    borderRadius: 8,
+                    padding: '6px 12px',
+                    fontSize: 12,
+                    cursor: 'pointer',
+                    fontWeight: 600
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+
+            {/* Media Upload Buttons & Action Buttons */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input 
+                  type="file" 
+                  id="modalPhotoInput" 
+                  accept="image/*" 
+                  style={{ display: 'none' }} 
+                  onChange={(e) => handleFileUpload(e, 'image')} 
+                />
+                <input 
+                  type="file" 
+                  id="modalVideoInput" 
+                  accept="video/*" 
+                  style={{ display: 'none' }} 
+                  onChange={(e) => handleFileUpload(e, 'video')} 
+                />
+
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('modalPhotoInput')?.click()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    background: 'rgba(22, 163, 74, 0.08)',
+                    border: '1px solid rgba(22, 163, 74, 0.2)',
+                    color: '#15803d',
+                    padding: '8px 14px',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Icons.Image size={15} color="#16a34a" /> Add Photo
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('modalVideoInput')?.click()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    background: 'rgba(234, 88, 12, 0.08)',
+                    border: '1px solid rgba(234, 88, 12, 0.2)',
+                    color: '#c2410c',
+                    padding: '8px 14px',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Icons.Video size={15} color="#ea580c" /> Add Video
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button 
+                  className="btn-outline-sm" 
+                  onClick={() => { setShowPostModal(false); setAttachedMedia(null); }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="btn-primary" 
+                  onClick={handleCreatePost}
+                  disabled={!newPostText.trim() && !attachedMedia}
+                >
+                  Publish
+                </button>
+              </div>
             </div>
           </div>
         </div>
