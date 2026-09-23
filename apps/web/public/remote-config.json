@@ -1,0 +1,66 @@
+{
+  "version": 2,
+  "minSupportedAppVersion": "1.0.0",
+  "environment": "production",
+  "timestamp": "2026-09-23T00:00:00.000Z",
+  "updateManifest": {
+    "latestVersion": "1.0.3",
+    "latestVersionCode": 4,
+    "minSupportedVersionCode": 1,
+    "updateRequired": false,
+    "downloadUrl": "https://expo.dev/artifacts/eas/GCgb_vM43BYMM1R1rOSYQgvpzfh5YqhNMdgXf9uEt0k.apk",
+    "releaseNotes": "Updated Lifestyle hub, advanced priorities & routines, simplified community discovery."
+  },
+  "home": {
+    "greetingFormat": "time_adaptive",
+    "refreshIntervalSeconds": 300,
+    "sections": [
+      { "id": "sec_ai_insight", "type": "ai_insight", "enabled": true, "priority": 1, "title": "Today's Insight", "subtitle": "Personalized wellness focus" },
+      { "id": "sec_recovery", "type": "recovery", "enabled": true, "priority": 2, "title": "Recovery Score", "subtitle": "Based on sleep & resting heart rate" },
+      { "id": "sec_sleep", "type": "sleep", "enabled": true, "priority": 3, "title": "Sleep Tracking", "subtitle": "Restorative sleep stages" },
+      { "id": "sec_hydration", "type": "hydration", "enabled": true, "priority": 4, "title": "Hydration Target", "subtitle": "Daily water intake" },
+      { "id": "sec_activity", "type": "activity", "enabled": true, "priority": 5, "title": "Daily Movement", "subtitle": "Steps and active burn" },
+      { "id": "sec_nutrition", "type": "nutrition", "enabled": true, "priority": 6, "title": "Cultural Nutrition", "subtitle": "Ethiopian meal & fasting guidance" },
+      { "id": "sec_mental_wellness", "type": "mental_wellness", "enabled": true, "priority": 7, "title": "Mindful Recovery", "subtitle": "Breathwork & stress reset" },
+      { "id": "sec_quick_actions", "type": "quick_actions", "enabled": true, "priority": 8, "title": "Quick Access" }
+    ]
+  },
+  "features": {
+    "mental_wellness": true,
+    "wearable_sync": true,
+    "voice_companion": true,
+    "fasting_tracker": true,
+    "community_challenges": true,
+    "community": true,
+    "nura_chat": true,
+    "nura_voice": false,
+    "challenges": true,
+    "lifestyle_content": true,
+    "food_scanner": false,
+    "health_connect": false,
+    "offline_ai_cache": true,
+    "emergency_kill_switch": false,
+    "media_uploads": true,
+    "analytics": true
+  },
+  "community": {
+    "realtimeEnabled": true,
+    "mediaUploadsEnabled": true,
+    "maxPostLength": 500,
+    "welcomeBannerEnabled": true,
+    "welcomeBannerMessage": "Welcome to the NuraCare Community! Share your wellness journey."
+  },
+  "ai": {
+    "enabled": true,
+    "supportedLanguages": ["en", "am", "om"],
+    "defaultTone": "encouraging",
+    "maxContextTokens": 1200,
+    "safetyFilterLevel": "strict"
+  },
+  "emergency": {
+    "maintenanceMode": false,
+    "maintenanceMessage": "NuraCare is undergoing scheduled maintenance. We'll be back shortly.",
+    "estimatedDowntimeMinutes": 30,
+    "killedFeatures": []
+  }
+}

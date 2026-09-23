@@ -8,7 +8,13 @@ import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { ProfileProvider, useProfile } from '../src/context/ProfileContext';
 
 import * as SplashScreen from 'expo-splash-screen';
+import Constants from 'expo-constants';
 import { checkForAppUpdates } from '../src/services/versionCheck';
+import { useRemoteConfigStore } from '../src/store/remoteConfigStore';
+import MaintenanceScreen from '../src/components/system/MaintenanceScreen';
+import ForceUpdateScreen from '../src/components/system/ForceUpdateScreen';
+import ConnectivityBanner from '../src/components/system/ConnectivityBanner';
+import { analytics } from '../src/services/analytics';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -18,6 +24,7 @@ function InnerLayout() {
   const currentUser = user || storeUser;
   const { profile, loading: profileLoading } = useProfile();
   const { loadWellnessData } = useWellnessStore();
+  const { config } = useRemoteConfigStore();
   const [isReady, setIsReady] = useState(false);
   const segments = useSegments();
 
@@ -30,8 +37,11 @@ function InnerLayout() {
     async function prepare() {
       try {
         useAuthStore.getState().loadUser();
+        useRemoteConfigStore.getState().initialize();
+        useRemoteConfigStore.getState().syncRemoteConfig();
         await loadWellnessData();
         startBackgroundSyncLoop();
+        analytics.track('app_opened');
       } catch (e) {
         console.warn('Initialization error:', e);
       } finally {
@@ -81,24 +91,53 @@ function InnerLayout() {
     }
   }, [currentUser, profile, authLoading, profileLoading, segments, isReady]);
 
+  // 1. Maintenance Mode check (server-driven kill switch / maintenance)
+  if (config?.emergency?.maintenanceMode) {
+    return (
+      <MaintenanceScreen
+        message={config.emergency.maintenanceMessage}
+        estimatedMinutes={config.emergency.estimatedDowntimeMinutes}
+      />
+    );
+  }
+
+  // 2. Forced Update check (server-driven Level 3 update)
+  const currentCode = Constants.expoConfig?.android?.versionCode || 4;
+  const minCode = config?.updateManifest?.minSupportedVersionCode || 1;
+  const isOutdated = currentCode < minCode || (config?.updateManifest?.updateRequired && currentCode < (config.updateManifest.latestVersionCode || 4));
+
+  if (isOutdated && config?.updateManifest) {
+    return (
+      <ForceUpdateScreen
+        latestVersion={config.updateManifest.latestVersion}
+        releaseNotes={config.updateManifest.releaseNotes}
+        downloadUrl={config.updateManifest.downloadUrl}
+        isRequired={true}
+      />
+    );
+  }
+
   return (
-    <Stack>
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="profile" options={{ headerShown: false }} />
-      <Stack.Screen name="chat" options={{ headerShown: false }} />
-      <Stack.Screen name="devices" options={{ headerShown: false }} />
-      <Stack.Screen name="records" options={{ headerShown: false }} />
-      <Stack.Screen name="privacy-center" options={{ headerShown: false }} />
-      <Stack.Screen name="consent-settings" options={{ headerShown: false }} />
-      <Stack.Screen name="permissions-management" options={{ headerShown: false }} />
-      <Stack.Screen name="delete-account" options={{ headerShown: false }} />
-      <Stack.Screen name="legal" options={{ headerShown: false }} />
-      <Stack.Screen name="discovery" options={{ headerShown: false }} />
-      <Stack.Screen name="checkin-modal" options={{ presentation: 'modal', headerShown: false }} />
-      <Stack.Screen name="subscription" options={{ presentation: 'modal', headerShown: false }} />
-    </Stack>
+    <View style={{ flex: 1 }}>
+      <ConnectivityBanner />
+      <Stack>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="profile" options={{ headerShown: false }} />
+        <Stack.Screen name="chat" options={{ headerShown: false }} />
+        <Stack.Screen name="devices" options={{ headerShown: false }} />
+        <Stack.Screen name="records" options={{ headerShown: false }} />
+        <Stack.Screen name="privacy-center" options={{ headerShown: false }} />
+        <Stack.Screen name="consent-settings" options={{ headerShown: false }} />
+        <Stack.Screen name="permissions-management" options={{ headerShown: false }} />
+        <Stack.Screen name="delete-account" options={{ headerShown: false }} />
+        <Stack.Screen name="legal" options={{ headerShown: false }} />
+        <Stack.Screen name="discovery" options={{ headerShown: false }} />
+        <Stack.Screen name="checkin-modal" options={{ presentation: 'modal', headerShown: false }} />
+        <Stack.Screen name="subscription" options={{ presentation: 'modal', headerShown: false }} />
+      </Stack>
+    </View>
   );
 }
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSupabaseProfile, useSupabaseSessions } from '@/hooks/useSupabase';
@@ -35,6 +36,7 @@ import { COUNTRIES } from '@/data/countries';
 import { discoveryData } from '@/data/discovery';
 import { fetchLocationWithSecurity } from '@/lib/liveApis';
 import ChatErrorBoundary from '@/features/chat/ChatErrorBoundary';
+import OfflineBanner from '@/components/system/OfflineBanner';
 
 const DynamicIcon = ({ name, ...props }) => {
   const IconComponent = Icons[name];
@@ -43,6 +45,53 @@ const DynamicIcon = ({ name, ...props }) => {
 
 
 export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // ── URL ↔ activePage map ──────────────────────────────────────────────────
+  const PATH_TO_PAGE = {
+    '/':           'home',
+    '/home':       'home',
+    '/nura':       'chat',
+    '/chat':       'chat',
+    '/community':  'community',
+    '/lifestyle':  'lifestyle',
+    '/medication': 'medication',
+    '/checkups':   'checkups',
+    '/checkin':    'checkin',
+    '/discover':   'discovery',
+    '/discovery':  'discovery',
+    '/profile':    'profile',
+    '/records':    'records',
+    '/devices':    'devices',
+    '/subscription': 'upgrade',
+    '/upgrade':    'upgrade',
+    '/enterprise': 'enterprise',
+    '/wellness':   'wellness',
+    '/privacy':    'privacy',
+    '/terms':      'terms',
+    '/disclaimer': 'disclaimer',
+  };
+  const PAGE_TO_PATH = {
+    'home':       '/home',
+    'chat':       '/nura',
+    'community':  '/community',
+    'lifestyle':  '/lifestyle',
+    'medication': '/medication',
+    'checkups':   '/checkups',
+    'checkin':    '/checkin',
+    'discovery':  '/discover',
+    'profile':    '/profile',
+    'records':    '/records',
+    'devices':    '/devices',
+    'upgrade':    '/subscription',
+    'enterprise': '/enterprise',
+    'wellness':   '/wellness',
+    'privacy':    '/privacy',
+    'terms':      '/terms',
+    'disclaimer': '/disclaimer',
+  };
+
   const { user, signUpWithEmail, signInWithEmail, signInWithGoogle, signOut, loading: authLoading } = useAuth();
   const { profile, setProfile, clearProfile, loading: profileLoading } = useSupabaseProfile();
   const { sessions, saveSession, deleteSession, clearSessions, loading: sessionsLoading } = useSupabaseSessions();
@@ -50,7 +99,31 @@ export default function App() {
   const { t, lang, setLang } = useTranslation();
   
   const [onboardingStep, setOnboardingStep] = useState(0);
-  const [activePage, setActivePage] = useState(() => localStorage.getItem('nuracare_activePage') || 'home');
+
+  // Initialise activePage from URL path (enables direct URL access)
+  const [activePage, setActivePageState] = useState(() => {
+    const fromUrl = PATH_TO_PAGE[location.pathname];
+    return fromUrl || localStorage.getItem('nuracare_activePage') || 'home';
+  });
+
+  // Wrap setActivePage to also update the URL
+  const setActivePage = (page) => {
+    setActivePageState(page);
+    const path = PAGE_TO_PATH[page];
+    if (path && location.pathname !== path) {
+      navigate(path);
+    }
+    localStorage.setItem('nuracare_activePage', page);
+  };
+
+  // Sync URL → activePage when user uses browser back/forward
+  useEffect(() => {
+    const pageFromUrl = PATH_TO_PAGE[location.pathname];
+    if (pageFromUrl && pageFromUrl !== activePage) {
+      setActivePageState(pageFromUrl);
+    }
+  }, [location.pathname]);
+
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   
   useEffect(() => {
@@ -72,9 +145,6 @@ export default function App() {
     }
   }, [profile]);
 
-  useEffect(() => {
-    localStorage.setItem('nuracare_activePage', activePage);
-  }, [activePage]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [discoveryTab, setDiscoveryTab] = useState(() => localStorage.getItem('nuracare_discoveryTab') || 'herbs');
   
@@ -538,6 +608,7 @@ export default function App() {
 
   return (
     <div className="main-app">
+      <OfflineBanner />
       <DailyCheckIn isGlobal={true} />
       <FloatingLeaves />
       <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)}></div>

@@ -52,7 +52,7 @@ class RemoteConfigService {
   public async fetchAndApply(remoteUrl?: string): Promise<{ updated: boolean; config: RemoteConfigPayload }> {
     try {
       // In production, remoteUrl points to Supabase Edge Function or secure CDN endpoint
-      const endpoint = remoteUrl || 'https://api.nuracare.pro.et/api/v1/config/mobile';
+      const endpoint = remoteUrl || 'https://nuracare.pro.et/api/config';
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 6000);

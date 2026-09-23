@@ -1,59 +1,137 @@
-export const ChatEngine = {
-  processMessage: async (messages: any[], profile: any) => {
-    const GROQ_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY;
-    if (!GROQ_KEY) throw new Error('Missing EXPO_PUBLIC_GROQ_API_KEY in .env');
+/**
+ * NuraCare AI Engine — Secure Backend-Proxied Client
+ *
+ * All AI calls are routed through the NuraCare Vercel backend (apps/web/api/chat.js).
+ * NO API keys are stored or used in the mobile client bundle.
+ *
+ * Supports:
+ *  - SSE streaming (token-by-token progressive rendering)
+ *  - Cancel via AbortController
+ *  - Exponential backoff retry on network failure
+ *  - Graceful fallback on error
+ */
 
-    const recentRecords = (profile?.records || []).slice(-5).map((r: any) =>
-      `- ${r.dateStr}: ${r.summary} (${r.urgency} urgency) — action: ${r.action}`
-    ).join('\n') || 'No past records yet.';
+const NURACARE_API_BASE = 'https://nuracare.pro.et';
 
-    const systemPrompt = `You are Nura, a warm and empathetic AI health companion for NuraCare. You are medically informed but always make clear you are not a replacement for a doctor.
+export interface StreamCallbacks {
+  onToken: (delta: string) => void;
+  onDone: (fullText: string) => void;
+  onError: (err: Error) => void;
+}
 
-USER PROFILE:
-- Name: ${profile?.name || 'there'}
-- Age: ${profile?.age ? profile.age + ' years old' : 'unknown'}
-- Known conditions: ${profile?.conditions?.length ? profile.conditions.join(', ') : 'none reported'}
-- Current medications: ${Array.isArray(profile?.medications) ? profile.medications.join(', ') : (profile?.medications || 'none reported')}
+/**
+ * Streams a chat response from the NuraCare backend proxy.
+ * The backend handles LLM routing, API keys, and safety filtering.
+ */
+export async function streamChatMessage(
+  messages: any[],
+  profile: any,
+  memoryContext: string | null,
+  callbacks: StreamCallbacks,
+  abortSignal?: AbortSignal,
+): Promise<void> {
+  const lang = profile?.langPref === 'Amharic' ? 'am' : profile?.langPref === 'Oromiffa' ? 'om' : 'en';
 
-PAST HEALTH RECORDS (last 5 sessions):
-${recentRecords}
+  let attempt = 0;
+  const maxRetries = 2;
 
-YOUR APPROACH: Have a natural caring conversation. Ask ONE question at a time about symptom, duration, severity. Once you have enough info, give your assessment. For LOW urgency suggest natural remedies. For HIGH urgency recommend immediate medical attention. Do NOT ask follow-up questions after giving recommendations.
+  while (attempt <= maxRetries) {
+    try {
+      const res = await fetch(`${NURACARE_API_BASE}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages, profile, memoryContext, lang }),
+        signal: abortSignal,
+      });
 
-TONE: Warm, human, 2-4 sentences max.
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody?.error?.message || `API Error: ${res.status}`);
+      }
 
-RED FLAGS (always HIGH urgency): chest pain, difficulty breathing, stroke, severe bleeding, loss of consciousness.
+      if (!res.body) throw new Error('No response body (streaming not supported)');
 
-WHEN YOU HAVE ENOUGH INFO, append this JSON at the END of your message:
-\`\`\`json
-{"urgency":"low|mid|high","summary":"one-line description","naturalRemedies":["remedy 1","remedy 2"],"action":"what to do next"}
-\`\`\`
-Only include the JSON once — after you know symptom + duration + severity.`;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
+      let buffer = '';
 
-    const groqMessages = [
-      { role: 'system', content: systemPrompt },
-      ...messages.map(m => ({ role: m.role, content: m.content }))
-    ];
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json', 
-        'Authorization': `Bearer ${GROQ_KEY}` 
-      },
-      body: JSON.stringify({ 
-        model: 'openai/gpt-oss-120b', 
-        messages: groqMessages, 
-        temperature: 0.6, 
-        max_tokens: 1000
-      })
-    });
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? ''; // Keep the incomplete last line in buffer
 
-    if (!res.ok) {
-      throw new Error(`API Error: ${res.status}`);
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') continue;
+          try {
+            const delta = JSON.parse(data)?.choices?.[0]?.delta?.content || '';
+            if (delta) {
+              fullText += delta;
+              callbacks.onToken(delta);
+            }
+          } catch {
+            // Ignore malformed SSE chunk
+          }
+        }
+      }
+
+      callbacks.onDone(fullText);
+      return; // Success — exit loop
+
+    } catch (err: any) {
+      // Don't retry if the request was intentionally cancelled
+      if (err?.name === 'AbortError') {
+        callbacks.onError(new Error('Request cancelled'));
+        return;
+      }
+
+      attempt++;
+      if (attempt > maxRetries) {
+        callbacks.onError(err instanceof Error ? err : new Error(String(err)));
+        return;
+      }
+
+      // Exponential backoff: 1s, 2s
+      await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
     }
-
-    const data = await res.json();
-    return data.choices[0]?.message?.content || "I'm having trouble processing that right now.";
   }
+}
+
+/**
+ * Non-streaming fallback for contexts that don't support streaming.
+ * Awaits the full response then calls onDone once.
+ */
+export const ChatEngine = {
+  processMessage: async (messages: any[], profile: any, memoryContext?: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => {
+        controller.abort();
+        reject(new Error('Request timed out after 30 seconds.'));
+      }, 30000);
+
+      streamChatMessage(
+        messages,
+        profile,
+        memoryContext ?? null,
+        {
+          onToken: () => {}, // Discard tokens in non-streaming mode
+          onDone: (fullText) => {
+            clearTimeout(timeout);
+            resolve(fullText || "I'm having trouble processing that right now.");
+          },
+          onError: (err) => {
+            clearTimeout(timeout);
+            reject(err);
+          },
+        },
+        controller.signal,
+      );
+    });
+  },
 };

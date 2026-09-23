@@ -34,6 +34,7 @@
     { "source": "/api/chapa-verify", "destination": "/api/payment?action=chapa-verify" },
     { "source": "/api/stripe-checkout", "destination": "/api/payment?action=stripe-checkout" },
     { "source": "/api/ocr", "destination": "/api/document?action=ocr" },
-    { "source": "/api/classify-doc", "destination": "/api/document?action=classify" }
+    { "source": "/api/classify-doc", "destination": "/api/document?action=classify" },
+    { "source": "/((?!api|share|_next).*)", "destination": "/index.html" }
   ]
 }

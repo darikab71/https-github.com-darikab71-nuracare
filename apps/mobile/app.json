@@ -26,7 +26,10 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
-        "android.permission.INTERNET"
+        "android.permission.INTERNET",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
       ]
     },
     "plugins": [

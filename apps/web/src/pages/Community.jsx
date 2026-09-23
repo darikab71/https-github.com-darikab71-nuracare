@@ -1,3 +1,8 @@
+import React, { useState, useRef, useMemo } from 'react';
+import * as Icons from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useCommunityRealtime } from '@/hooks/useCommunityRealtime';
+
 const INITIAL_POSTS = [
   {
     id: 'post-video-1',
@@ -221,11 +226,37 @@ const INITIAL_THREADS = [
 ];
 
 export default function CommunityPage({ profile }) {
+  const { user } = useAuth();
+  const { posts: realtimePosts, createPost: realtimeCreatePost, toggleLike: realtimeToggleLike } = useCommunityRealtime(user);
+
   // Top 3-Section Navigation: Feed | Groups | Messages
   const [activeSection, setActiveSection] = useState('feed');
 
   // Feed State
-  const [posts, setPosts] = useState(INITIAL_POSTS);
+  const [localPosts, setLocalPosts] = useState(INITIAL_POSTS);
+
+  const posts = useMemo(() => {
+    if (!realtimePosts || realtimePosts.length === 0) return localPosts;
+    const remoteMapped = realtimePosts.map(rp => ({
+      id: rp.id,
+      type: rp.mediaType === 'video' ? 'video_demo' : 'post',
+      author: rp.authorName,
+      authorBadge: 'Member',
+      avatarColor: '#16a34a',
+      timeAgo: 'Recently',
+      title: rp.category ? `${rp.category} Reflection` : undefined,
+      content: rp.content,
+      imageUrl: rp.mediaType === 'image' ? rp.mediaUrl : undefined,
+      videoUrl: rp.mediaType === 'video' ? rp.mediaUrl : undefined,
+      videoPoster: rp.mediaType === 'video' ? '/hero.png' : undefined,
+      videoDuration: rp.mediaType === 'video' ? '▶ Video' : undefined,
+      likes: rp.likesCount,
+      comments: rp.commentsCount,
+      userLiked: rp.userLiked,
+    }));
+    return [...remoteMapped, ...localPosts];
+  }, [realtimePosts, localPosts]);
+
   const [newPostText, setNewPostText] = useState('');
   const [newPostTitle, setNewPostTitle] = useState('');
   const [attachedMedia, setAttachedMedia] = useState(null); // { url, type: 'image'|'video', name, duration }
@@ -247,7 +278,8 @@ export default function CommunityPage({ profile }) {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   const toggleLike = (postId) => {
-    setPosts(prev =>
+    realtimeToggleLike(postId);
+    setLocalPosts(prev =>
       prev.map(p => {
         if (p.id === postId) {
           const liked = !p.userLiked;
@@ -320,7 +352,12 @@ export default function CommunityPage({ profile }) {
       comments: 0,
       userLiked: false,
     };
-    setPosts([newPost, ...posts]);
+    realtimeCreatePost(
+      newPostText.trim(),
+      'General',
+      attachedMedia ? { url: attachedMedia.url, type: attachedMedia.type } : null
+    );
+    setLocalPosts([newPost, ...localPosts]);
     setNewPostText('');
     setNewPostTitle('');
     setAttachedMedia(null);

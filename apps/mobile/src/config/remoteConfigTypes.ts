@@ -1,10 +1,10 @@
 /**
  * NuraCare Server-Driven UI (SDUI) & Remote Configuration Types
- * 
+ *
  * Strict declarative schemas. Never contains executable JS or code strings.
  */
 
-export type SectionType = 
+export type SectionType =
   | 'recovery'
   | 'sleep'
   | 'hydration'
@@ -38,16 +38,52 @@ export interface SDUISection {
 }
 
 export interface FeatureFlags {
+  // Core wellness features
   mental_wellness: boolean;
   wearable_sync: boolean;
   voice_companion: boolean;
   fasting_tracker: boolean;
+  // Community
+  community: boolean;
   community_challenges: boolean;
+  challenges: boolean;
+  media_uploads: boolean;
+  // AI
+  nura_chat: boolean;
+  nura_voice: boolean;
+  offline_ai_cache: boolean;
+  // Lifestyle
+  lifestyle_content: boolean;
+  // Devices
   food_scanner: boolean;
   health_connect: boolean;
-  offline_ai_cache: boolean;
+  // Platform
+  analytics: boolean;
+  // Kill switch — overrides all features when true
   emergency_kill_switch: boolean;
+  // Allow any additional flags from server
   [key: string]: boolean;
+}
+
+/** Update manifest — controls 3-level update system */
+export interface UpdateManifest {
+  latestVersion: string;
+  latestVersionCode: number;
+  /** If current app versionCode < this, force update screen is shown (Level 3) */
+  minSupportedVersionCode: number;
+  /** If true AND current < latest, force update (Level 3). If false, optional Alert (Level 2). */
+  updateRequired: boolean;
+  downloadUrl: string;
+  releaseNotes: string;
+}
+
+/** Community server-driven settings */
+export interface CommunityConfig {
+  realtimeEnabled: boolean;
+  mediaUploadsEnabled: boolean;
+  maxPostLength: number;
+  welcomeBannerEnabled: boolean;
+  welcomeBannerMessage: string;
 }
 
 export interface RemoteConfigPayload {
@@ -56,12 +92,14 @@ export interface RemoteConfigPayload {
   environment: 'production' | 'staging' | 'development';
   timestamp: string;
   etag?: string;
+  updateManifest?: UpdateManifest;
   home: {
     greetingFormat: 'time_adaptive' | 'standard';
     refreshIntervalSeconds: number;
     sections: SDUISection[];
   };
   features: FeatureFlags;
+  community?: CommunityConfig;
   ai: {
     enabled: boolean;
     supportedLanguages: ('en' | 'am' | 'om')[];
@@ -72,6 +110,7 @@ export interface RemoteConfigPayload {
   emergency: {
     maintenanceMode: boolean;
     maintenanceMessage?: string;
+    estimatedDowntimeMinutes?: number;
     killedFeatures: string[];
   };
 }

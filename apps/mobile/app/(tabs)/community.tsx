@@ -42,6 +42,9 @@ import {
 
 import CommunityNavBar from '../../src/components/community/CommunityNavBar';
 import { useTheme } from '../../src/context/ThemeContext';
+import { useAuth } from '../../src/context/AuthContext';
+import { useAuthStore } from '../../src/store';
+import { useCommunityRealtime } from '../../src/hooks/useCommunityRealtime';
 import DiscoveryHub from '../../src/components/community/DiscoveryHub';
 import ChallengesHub from '../../src/components/community/ChallengesHub';
 import CommunityGroupsHub from '../../src/components/community/CommunityGroupsHub';
@@ -50,13 +53,24 @@ import ReportModal from '../../src/components/community/ReportModal';
 
 export default function CommunityCenterScreen() {
   const { theme, isDark } = useTheme();
+  const { user: authUser } = useAuth();
+  const { user: storeUser } = useAuthStore();
+  const currentUser = authUser || storeUser;
+
+  // Supabase Realtime Community Synchronization
+  const {
+    discussions,
+    createPost: realtimeCreatePost,
+    toggleSupport: realtimeToggleSupport,
+    isRealtimeActive,
+  } = useCommunityRealtime(currentUser);
+
   // 1. Root Tab State (Discovery | Challenges | Community | Inbox)
   const [activeTab, setActiveTab] = useState<CommunityPrimaryTab>('discovery');
 
   // 2. Main Community State
   const [groups, setGroups] = useState<CommunityGroup[]>(INITIAL_COMMUNITY_GROUPS);
   const [challenges, setChallenges] = useState<CommunityChallenge[]>(INITIAL_COMMUNITY_CHALLENGES);
-  const [discussions, setDiscussions] = useState<CommunityDiscussion[]>(INITIAL_COMMUNITY_DISCUSSIONS);
   const [people, setPeople] = useState<SuggestedPerson[]>(INITIAL_SUGGESTED_PEOPLE);
   const [threads, setThreads] = useState<DirectThread[]>(INITIAL_DIRECT_THREADS);
 
@@ -172,22 +186,12 @@ export default function CommunityCenterScreen() {
 
   // Create Discussion / Post with Media
   const handleCreateDiscussion = (newDiscussionData: Partial<CommunityDiscussion>) => {
-    const newDisc: CommunityDiscussion = {
-      id: 'disc-' + Date.now(),
-      title: newDiscussionData.title || 'New Discussion',
-      content: newDiscussionData.content || '',
-      author: newDiscussionData.author || 'You (Explorer)',
-      authorBadge: newDiscussionData.authorBadge || 'Member',
-      avatarColor: newDiscussionData.avatarColor || '#16a34a',
-      timeAgo: 'Just now',
-      groupName: newDiscussionData.groupName || 'Community',
-      supportCount: 1,
-      userSupported: true,
-      commentCount: 0,
-      replies: [],
-      media: newDiscussionData.media || [],
-    };
-    setDiscussions((prev) => [newDisc, ...prev]);
+    const mediaItem = newDiscussionData.media && newDiscussionData.media.length > 0 ? newDiscussionData.media[0] : undefined;
+    realtimeCreatePost(
+      newDiscussionData.content || '',
+      newDiscussionData.groupName || 'Community',
+      mediaItem ? { url: mediaItem.url, type: mediaItem.type } : undefined
+    );
     Alert.alert('Post Published', 'Your story and media has been shared with the NuraCare Community!');
   };
 
@@ -213,19 +217,7 @@ export default function CommunityCenterScreen() {
 
   // Toggle Discussion Support (Reaction)
   const handleToggleSupportDiscussion = (discussionId: string) => {
-    setDiscussions((prev) =>
-      prev.map((d) => {
-        if (d.id === discussionId) {
-          const supported = !d.userSupported;
-          return {
-            ...d,
-            userSupported: supported,
-            supportCount: supported ? d.supportCount + 1 : Math.max(0, d.supportCount - 1),
-          };
-        }
-        return d;
-      })
-    );
+    realtimeToggleSupport(discussionId);
 
     if (selectedDiscussion && selectedDiscussion.id === discussionId) {
       const supported = !selectedDiscussion.userSupported;

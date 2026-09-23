@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/react"
 import App from '@/App.jsx'
@@ -9,6 +10,9 @@ import '@/styles/skeleton.css'
 import { AuthProvider } from '@/context/AuthContext'
 import { CheckupsProvider } from '@/hooks/useCheckups'
 import SharedChatPage from '@/features/chat/SharedChatPage'
+import { registerServiceWorker } from '@/registerSW'
+
+registerServiceWorker()
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 
@@ -24,14 +28,15 @@ if (window.location.pathname.startsWith('/share/')) {
 } else {
   root.render(
     <React.StrictMode>
-      <AuthProvider>
-        <CheckupsProvider>
-          <App />
-        </CheckupsProvider>
-      </AuthProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <CheckupsProvider>
+            <App />
+          </CheckupsProvider>
+        </AuthProvider>
+      </BrowserRouter>
       <Analytics />
       <SpeedInsights />
     </React.StrictMode>
   )
 }
-

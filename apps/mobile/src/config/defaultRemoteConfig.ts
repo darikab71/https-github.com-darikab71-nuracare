@@ -3,12 +3,21 @@ import { RemoteConfigPayload } from './remoteConfigTypes';
 /**
  * Built-in default configuration.
  * Loaded instantly (<2ms) on cold start or when offline, guaranteeing zero blank screens.
+ * Mirrors the structure of apps/web/api/config.js DEFAULT_CONFIG.
  */
 export const DEFAULT_REMOTE_CONFIG: RemoteConfigPayload = {
-  version: 1,
+  version: 2,
   minSupportedAppVersion: '1.0.0',
   environment: 'production',
   timestamp: new Date().toISOString(),
+  updateManifest: {
+    latestVersion: '1.0.3',
+    latestVersionCode: 4,
+    minSupportedVersionCode: 1,
+    updateRequired: false,
+    downloadUrl: 'https://expo.dev/artifacts/eas/GCgb_vM43BYMM1R1rOSYQgvpzfh5YqhNMdgXf9uEt0k.apk',
+    releaseNotes: 'Updated Lifestyle hub, advanced priorities & routines, simplified community discovery.',
+  },
   home: {
     greetingFormat: 'time_adaptive',
     refreshIntervalSeconds: 300,
@@ -19,7 +28,7 @@ export const DEFAULT_REMOTE_CONFIG: RemoteConfigPayload = {
         enabled: true,
         priority: 1,
         title: "Today's Insight",
-        subtitle: 'Personalized wellness focus'
+        subtitle: 'Personalized wellness focus',
       },
       {
         id: 'sec_recovery',
@@ -27,7 +36,7 @@ export const DEFAULT_REMOTE_CONFIG: RemoteConfigPayload = {
         enabled: true,
         priority: 2,
         title: 'Recovery Score',
-        subtitle: 'Based on sleep & resting heart rate'
+        subtitle: 'Based on sleep & resting heart rate',
       },
       {
         id: 'sec_sleep',
@@ -35,7 +44,7 @@ export const DEFAULT_REMOTE_CONFIG: RemoteConfigPayload = {
         enabled: true,
         priority: 3,
         title: 'Sleep Tracking',
-        subtitle: 'Restorative sleep stages'
+        subtitle: 'Restorative sleep stages',
       },
       {
         id: 'sec_hydration',
@@ -43,7 +52,7 @@ export const DEFAULT_REMOTE_CONFIG: RemoteConfigPayload = {
         enabled: true,
         priority: 4,
         title: 'Hydration Target',
-        subtitle: 'Daily water intake'
+        subtitle: 'Daily water intake',
       },
       {
         id: 'sec_activity',
@@ -51,7 +60,7 @@ export const DEFAULT_REMOTE_CONFIG: RemoteConfigPayload = {
         enabled: true,
         priority: 5,
         title: 'Daily Movement',
-        subtitle: 'Steps and active burn'
+        subtitle: 'Steps and active burn',
       },
       {
         id: 'sec_nutrition',
@@ -59,7 +68,7 @@ export const DEFAULT_REMOTE_CONFIG: RemoteConfigPayload = {
         enabled: true,
         priority: 6,
         title: 'Cultural Nutrition',
-        subtitle: 'Ethiopian meal & fasting guidance'
+        subtitle: 'Ethiopian meal & fasting guidance',
       },
       {
         id: 'sec_mental_wellness',
@@ -69,17 +78,17 @@ export const DEFAULT_REMOTE_CONFIG: RemoteConfigPayload = {
         title: 'Mindful Recovery',
         subtitle: 'Breathwork & stress reset',
         conditions: {
-          requiredFeatureFlag: 'mental_wellness'
-        }
+          requiredFeatureFlag: 'mental_wellness',
+        },
       },
       {
         id: 'sec_quick_actions',
         type: 'quick_actions',
         enabled: true,
         priority: 8,
-        title: 'Quick Access'
-      }
-    ]
+        title: 'Quick Access',
+      },
+    ],
   },
   features: {
     mental_wellness: true,
@@ -87,20 +96,36 @@ export const DEFAULT_REMOTE_CONFIG: RemoteConfigPayload = {
     voice_companion: true,
     fasting_tracker: true,
     community_challenges: true,
-    food_scanner: false, // In development
-    health_connect: false, // Granular readiness
+    community: true,
+    nura_chat: true,
+    nura_voice: false,
+    challenges: true,
+    lifestyle_content: true,
+    food_scanner: false,       // In development
+    health_connect: false,     // Granular readiness check needed
     offline_ai_cache: true,
-    emergency_kill_switch: false
+    emergency_kill_switch: false,
+    media_uploads: true,
+    analytics: true,
+  },
+  community: {
+    realtimeEnabled: true,
+    mediaUploadsEnabled: true,
+    maxPostLength: 500,
+    welcomeBannerEnabled: true,
+    welcomeBannerMessage: 'Welcome to the NuraCare Community! Share your wellness journey.',
   },
   ai: {
     enabled: true,
     supportedLanguages: ['en', 'am', 'om'],
     defaultTone: 'encouraging',
     maxContextTokens: 1200,
-    safetyFilterLevel: 'strict'
+    safetyFilterLevel: 'strict',
   },
   emergency: {
     maintenanceMode: false,
-    killedFeatures: []
-  }
+    maintenanceMessage: "NuraCare is undergoing scheduled maintenance. We'll be back shortly.",
+    estimatedDowntimeMinutes: 30,
+    killedFeatures: [],
+  },
 };
