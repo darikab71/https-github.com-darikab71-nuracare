@@ -43,6 +43,95 @@ export default function LifestyleCoach({ profile, t = (k)=>k }) {
   const [activeSection, setActiveSection] = useState('overview');
   const [recentData, setRecentData] = useState(null);
   const [analysis, setAnalysis] = useState(null);
+
+  // Today's Priorities State
+  const [prioritiesFilter, setPrioritiesFilter] = useState('all');
+  const [webPriorities, setWebPriorities] = useState([
+    {
+      id: 'p-1',
+      category: 'Nutrition',
+      color: '#16a34a',
+      timeCue: 'Post-Workout',
+      duration: '45m window',
+      title: 'Teff Protein & Glycogen Window',
+      detail: 'Deliver 30g bioavailable plant protein to accelerate muscle protein synthesis.',
+      actionLabel: 'Log Protein',
+      completed: true,
+      section: 'gym'
+    },
+    {
+      id: 'p-2',
+      category: 'Hydration',
+      color: '#0ea5e9',
+      timeCue: 'Throughout Day',
+      duration: 'Target 2.5L',
+      title: 'Cellular ATP Hydration Target',
+      detail: 'Paced mineral water intake to maintain blood viscosity & cognitive focus.',
+      actionLabel: '+250ml Water',
+      completed: false,
+      section: 'hydration'
+    },
+    {
+      id: 'p-3',
+      category: 'Parasympathetic',
+      color: '#f59e0b',
+      timeCue: 'Afternoon Slump',
+      duration: '2 minutes',
+      title: '4-7-8 Autonomic Reset',
+      detail: 'Down-regulate sympathetic nervous system tone and clear afternoon cortisol.',
+      actionLabel: 'Start Reset',
+      completed: false,
+      section: 'recovery'
+    },
+    {
+      id: 'p-4',
+      category: 'Sleep & Digital',
+      color: '#6366f1',
+      timeCue: 'Evening 21:30',
+      duration: '60 min',
+      title: 'Digital Sunset & Blue Light Cutoff',
+      detail: 'Protect pineal melatonin synthesis by shifting to low lux warm ambient lighting.',
+      actionLabel: 'Focus Mode',
+      completed: false,
+      section: 'digital'
+    },
+  ]);
+
+  // Daily Routines State
+  const [routineTab, setRoutineTab] = useState('morning');
+  const [expandedRoutineStep, setExpandedRoutineStep] = useState(null);
+  const [webRoutines, setWebRoutines] = useState({
+    morning: [
+      { id: 'm-1', time: '06:30 AM', title: 'Natural Awakening Anchor', detail: 'Consistent wake window anchor to prime cortisol.', science: 'Waking within the same 30m window locks the suprachiasmatic nucleus circadian clock.', completed: true },
+      { id: 'm-2', time: '06:35 AM', title: 'Electrolyte Hydration', detail: '500ml mineral water with pinch of natural salt.', science: 'Replaces nocturnal respiration water loss and primes cellular osmotic pressure.', completed: true },
+      { id: 'm-3', time: '06:45 AM', title: 'Solar Lux Photons', detail: '10-15 mins direct morning sunlight exposure.', science: 'Direct morning lux triggers retinal melanopsin cells to trigger cortisol rise & time nighttime melatonin.', completed: true },
+      { id: 'm-4', time: '07:05 AM', title: 'Gentle Mobility Reset', detail: 'Thoracic rotations & joint flossing flow.', science: 'Mobilizes synovial fluid in spinal facet joints and downregulates early-morning stiffness.', completed: false },
+    ],
+    evening: [
+      { id: 'e-1', time: '19:30 PM', title: 'Nutrition Fasting Anchor', detail: 'Conclude caloric intake 3 hours prior to sleep.', science: 'Prevents late-night insulin spikes that blunt growth hormone and disrupt stage-3 deep sleep.', completed: false },
+      { id: 'e-2', time: '21:00 PM', title: 'Digital Sunset & Dimming', detail: 'Shift screens to low lux warm amber tones.', science: 'Blue photons suppress melatonin secretion by up to 85%. Amber light protects sleep architecture.', completed: false },
+      { id: 'e-3', time: '22:15 PM', title: '4-7-8 Breathwork Downregulation', detail: '2-4 cycles of parasympathetic vagal stimulation.', science: '4-7-8 breathing activates the vagus nerve, reducing heart rate and increasing heart rate variability.', completed: false },
+      { id: 'e-4', time: '22:45 PM', title: 'Thermal Drop Prep', detail: 'Cool bedroom to 18-19°C for rapid sleep onset.', science: 'Peripheral vasodilation drops core body temperature by 0.5-1°C, the biological trigger for sleep initiation.', completed: false },
+    ]
+  });
+
+  const toggleWebPriority = (id) => {
+    setWebPriorities(prev => prev.map(p => p.id === id ? { ...p, completed: !p.completed } : p));
+  };
+
+  const toggleWebRoutineStep = (routineKey, stepId) => {
+    setWebRoutines(prev => ({
+      ...prev,
+      [routineKey]: prev[routineKey].map(s => s.id === stepId ? { ...s, completed: !s.completed } : s)
+    }));
+  };
+
+  const resetWebRoutine = (routineKey) => {
+    setWebRoutines(prev => ({
+      ...prev,
+      [routineKey]: prev[routineKey].map(s => ({ ...s, completed: false }))
+    }));
+  };
   const [syncingVitals, setSyncingVitals] = useState(false);
 
   useEffect(() => {
@@ -1106,6 +1195,385 @@ export default function LifestyleCoach({ profile, t = (k)=>k }) {
               </div>
             </div>
             <Icons.ChevronRight size={16} color="var(--text-muted)" />
+          </div>
+        </div>
+
+      </div>
+
+      {/* ADVANCED & CLEAN 2-COLUMN SECTION: TODAY'S PRIORITIES & DAILY ROUTINES */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: 24, marginTop: 32 }}>
+        
+        {/* COLUMN 1: TODAY'S PRIORITIES */}
+        <div style={{
+          background: 'var(--white)',
+          borderRadius: 20,
+          padding: 24,
+          border: '1px solid var(--border)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}>
+          <div>
+            {/* Header with live count & completion pill */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Icons.Target size={20} color="var(--green-dark)" /> Today's Priorities
+                </h3>
+                <span style={{ fontSize: 12.5, color: 'var(--text-muted)', fontWeight: 500 }}>
+                  High-impact actions to balance your day
+                </span>
+              </div>
+              {(() => {
+                const doneCount = webPriorities.filter(p => p.completed).length;
+                const pct = Math.round((doneCount / webPriorities.length) * 100);
+                return (
+                  <span style={{
+                    backgroundColor: pct === 100 ? '#dcfce7' : 'rgba(22, 163, 74, 0.1)',
+                    color: pct === 100 ? '#15803d' : 'var(--green-dark)',
+                    border: '1px solid ' + (pct === 100 ? '#86efac' : 'rgba(22, 163, 74, 0.25)'),
+                    padding: '4px 10px',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 700
+                  }}>
+                    {doneCount}/{webPriorities.length} Done ({pct}%)
+                  </span>
+                );
+              })()}
+            </div>
+
+            {/* Slim Animated Progress Track */}
+            {(() => {
+              const doneCount = webPriorities.filter(p => p.completed).length;
+              const pct = Math.round((doneCount / webPriorities.length) * 100);
+              return (
+                <div style={{ width: '100%', height: 4, background: '#e2e8f0', borderRadius: 2, overflow: 'hidden', margin: '10px 0 14px' }}>
+                  <div style={{ width: `${pct}%`, height: '100%', background: 'var(--green)', borderRadius: 2, transition: 'width 0.3s ease' }} />
+                </div>
+              );
+            })()}
+
+            {/* Filter Pills: All / Remaining / Done */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+              {['all', 'todo', 'done'].map((mode) => {
+                const isSelected = prioritiesFilter === mode;
+                const remaining = webPriorities.filter(p => !p.completed).length;
+                const done = webPriorities.filter(p => p.completed).length;
+                const label = mode === 'all' ? `All (${webPriorities.length})` : mode === 'todo' ? `Remaining (${remaining})` : `Done (${done})`;
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => setPrioritiesFilter(mode)}
+                    style={{
+                      background: isSelected ? 'rgba(22, 163, 74, 0.12)' : 'var(--bg)',
+                      border: '1px solid ' + (isSelected ? 'var(--green)' : 'var(--border)'),
+                      color: isSelected ? 'var(--green-dark)' : 'var(--text-muted)',
+                      padding: '4px 10px',
+                      borderRadius: 8,
+                      fontSize: 11.5,
+                      fontWeight: isSelected ? 700 : 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Priorities Cards List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {webPriorities
+                .filter(p => prioritiesFilter === 'todo' ? !p.completed : prioritiesFilter === 'done' ? p.completed : true)
+                .map((p) => (
+                  <div
+                    key={p.id}
+                    style={{
+                      background: 'var(--bg)',
+                      border: '1px solid ' + (p.completed ? 'var(--border)' : 'rgba(22, 163, 74, 0.25)'),
+                      borderRadius: 14,
+                      padding: '12px 14px',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 12,
+                      opacity: p.completed ? 0.75 : 1,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <button
+                      onClick={() => toggleWebPriority(p.id)}
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 6,
+                        border: '1.5px solid ' + (p.completed ? 'var(--green)' : 'var(--border)'),
+                        background: p.completed ? 'var(--green)' : 'var(--white)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginTop: 2,
+                        padding: 0,
+                        flexShrink: 0
+                      }}
+                    >
+                      {p.completed && <Icons.Check size={13} color="white" />}
+                    </button>
+
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, flexWrap: 'wrap', gap: 6 }}>
+                        <span style={{
+                          backgroundColor: `${p.color}15`,
+                          color: p.color,
+                          fontSize: 10,
+                          fontWeight: 700,
+                          padding: '2px 7px',
+                          borderRadius: 6,
+                          textTransform: 'uppercase'
+                        }}>
+                          {p.category}
+                        </span>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Icons.Clock size={11} /> {p.timeCue} • {p.duration}
+                        </span>
+                      </div>
+                      <div style={{
+                        fontSize: 13.5,
+                        fontWeight: 700,
+                        color: 'var(--text)',
+                        textDecoration: p.completed ? 'line-through' : 'none',
+                        marginBottom: 3
+                      }}>
+                        {p.title}
+                      </div>
+                      <p style={{ margin: '0 0 8px 0', fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                        {p.detail}
+                      </p>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                        {p.completed ? (
+                          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--green-dark)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <Icons.CheckCircle2 size={12} color="var(--green-dark)" /> Completed for today
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              if (p.section === 'hydration') {
+                                updateVital('water', Math.min(8, (Number(vitals.water) || 0) + 1));
+                              } else {
+                                setActiveSection(p.section);
+                              }
+                            }}
+                            style={{
+                              background: `${p.color}12`,
+                              border: `1px solid ${p.color}35`,
+                              color: p.color,
+                              padding: '4px 10px',
+                              borderRadius: 8,
+                              fontSize: 11.5,
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 4
+                            }}
+                          >
+                            <span>{p.actionLabel}</span>
+                            <Icons.ArrowRight size={11} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+
+        {/* COLUMN 2: DAILY ROUTINES TIMELINE */}
+        <div style={{
+          background: 'var(--white)',
+          borderRadius: 20,
+          padding: 24,
+          border: '1px solid var(--border)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}>
+          <div>
+            {/* Header with routine count and reset */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Icons.SunMedium size={20} color="#f59e0b" /> Daily Routines
+                </h3>
+                <span style={{ fontSize: 12.5, color: 'var(--text-muted)', fontWeight: 500 }}>
+                  Circadian synchronization & nervous tone
+                </span>
+              </div>
+
+              <button
+                onClick={() => resetWebRoutine(routineTab)}
+                style={{
+                  background: 'var(--bg)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-muted)',
+                  padding: '4px 10px',
+                  borderRadius: 8,
+                  fontSize: 11.5,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}
+              >
+                <Icons.RotateCcw size={12} /> Reset
+              </button>
+            </div>
+
+            {/* Segmented Circadian Tabs */}
+            <div style={{ display: 'flex', gap: 8, background: 'var(--bg)', padding: 4, borderRadius: 12, border: '1px solid var(--border)', margin: '12px 0 14px' }}>
+              <button
+                onClick={() => setRoutineTab('morning')}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  padding: '7px 12px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: routineTab === 'morning' ? 'var(--white)' : 'transparent',
+                  color: routineTab === 'morning' ? 'var(--text)' : 'var(--text-muted)',
+                  fontWeight: routineTab === 'morning' ? 700 : 500,
+                  fontSize: 12,
+                  boxShadow: routineTab === 'morning' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <Icons.Sun size={14} color="#f59e0b" /> Morning Awakening (06:30 - 08:30)
+              </button>
+              <button
+                onClick={() => setRoutineTab('evening')}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  padding: '7px 12px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: routineTab === 'evening' ? 'var(--white)' : 'transparent',
+                  color: routineTab === 'evening' ? 'var(--text)' : 'var(--text-muted)',
+                  fontWeight: routineTab === 'evening' ? 700 : 500,
+                  fontSize: 12,
+                  boxShadow: routineTab === 'evening' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <Icons.Moon size={14} color="#6366f1" /> Evening Wind-Down (20:30 - 23:00)
+              </button>
+            </div>
+
+            {/* Routine Timeline Steps */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {webRoutines[routineTab].map((step, idx) => {
+                const isExpanded = expandedRoutineStep === step.id;
+                return (
+                  <div
+                    key={step.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 12,
+                      background: 'var(--bg)',
+                      border: '1px solid ' + (step.completed ? 'var(--border)' : 'rgba(99, 102, 241, 0.25)'),
+                      borderRadius: 14,
+                      padding: '12px 14px',
+                      opacity: step.completed ? 0.8 : 1,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ width: 62, flexShrink: 0, textAlign: 'center' }}>
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--text-muted)' }}>{step.time}</span>
+                      <div
+                        onClick={() => toggleWebRoutineStep(routineTab, step.id)}
+                        style={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: 11,
+                          margin: '4px auto 0',
+                          border: '1.5px solid ' + (step.completed ? 'var(--green)' : 'var(--border)'),
+                          background: step.completed ? 'var(--green)' : 'var(--white)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {step.completed && <Icons.Check size={12} color="white" />}
+                      </div>
+                    </div>
+
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                        <span style={{
+                          fontSize: 13.5,
+                          fontWeight: 700,
+                          color: 'var(--text)',
+                          textDecoration: step.completed ? 'line-through' : 'none'
+                        }}>
+                          {step.title}
+                        </span>
+                        <button
+                          onClick={() => setExpandedRoutineStep(isExpanded ? null : step.id)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--green-dark)',
+                            fontSize: 11,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 2
+                          }}
+                        >
+                          Science {isExpanded ? <Icons.ChevronUp size={12} /> : <Icons.ChevronDown size={12} />}
+                        </button>
+                      </div>
+
+                      <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                        {step.detail}
+                      </p>
+
+                      {isExpanded && (
+                        <div style={{
+                          background: 'rgba(22, 163, 74, 0.08)',
+                          border: '1px solid rgba(22, 163, 74, 0.2)',
+                          borderRadius: 8,
+                          padding: '6px 10px',
+                          marginTop: 8,
+                          fontSize: 11.5,
+                          color: 'var(--text)',
+                          lineHeight: 1.4,
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 6
+                        }}>
+                          <Icons.Sparkles size={12} color="var(--green-dark)" style={{ marginTop: 2, flexShrink: 0 }} />
+                          <span>{step.science}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
