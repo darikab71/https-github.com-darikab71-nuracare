@@ -7,8 +7,8 @@ export default function DownloadAppModal({ isOpen = true, onClose }) {
 
   if (!isOpen) return null;
 
-  // Direct standalone APK binary link (Android 13 / One UI 7 compatible, green leaf icon, v1.0.2)
-  const directCdnApkUrl = 'https://expo.dev/artifacts/eas/N5gp8YJOJta4o8Shyy2Jwdb0vNeHg8nrZ8UzUMKnhV8.apk';
+  // Direct standalone APK binary link (v1.0.3, code 4)
+  const directCdnApkUrl = 'https://expo.dev/artifacts/eas/GCgb_vM43BYMM1R1rOSYQgvpzfh5YqhNMdgXf9uEt0k.apk';
   const serverApkUrl = '/nuracare.apk';
   const activeDownloadUrl = directCdnApkUrl;
 
@@ -77,9 +77,14 @@ export default function DownloadAppModal({ isOpen = true, onClose }) {
               <Icons.Smartphone size={24} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '19px', fontWeight: 700, color: 'var(--text-main, #14532d)' }}>
-                Get NuraCare Mobile
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 style={{ margin: 0, fontSize: '19px', fontWeight: 700, color: 'var(--text-main, #14532d)' }}>
+                  Get NuraCare Mobile
+                </h3>
+                <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, border: '1px solid #86efac' }}>
+                  v1.0.3 Latest
+                </span>
+              </div>
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted, #4b5563)' }}>
                 Android APK Direct Download
               </p>
