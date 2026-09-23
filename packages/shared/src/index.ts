@@ -3,3 +3,7 @@ export { getCheckins, saveCheckin, computeBurnoutRisk, computeWellnessScore, com
 export { getDiscoveryFeed, getAvailableTags } from './discoveryEngine';
 export { TSOM_TYPES, isFastingToday, getCurrentFastName, isRamadanActive, checkGlycemicSpikeRisk } from './ethiopianCalendar';
 export { discoveryData, getDailyTip } from './data/discoveryData';
+export { NuraTokens } from './designTokens';
+export type { NuraTokensType } from './designTokens';
+export { evaluateUpdateRequirement } from './versionSystem';
+export type { VersionManifest, UpdateLevel } from './versionSystem';

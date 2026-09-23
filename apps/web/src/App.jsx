@@ -37,6 +37,8 @@ import { discoveryData } from '@/data/discovery';
 import { fetchLocationWithSecurity } from '@/lib/liveApis';
 import ChatErrorBoundary from '@/features/chat/ChatErrorBoundary';
 import OfflineBanner from '@/components/system/OfflineBanner';
+import AdminDashboard from '@/pages/Admin';
+import WebUpdateToast from '@/components/system/WebUpdateToast';
 
 const DynamicIcon = ({ name, ...props }) => {
   const IconComponent = Icons[name];
@@ -71,6 +73,7 @@ export default function App() {
     '/privacy':    'privacy',
     '/terms':      'terms',
     '/disclaimer': 'disclaimer',
+    '/admin':      'admin',
   };
   const PAGE_TO_PATH = {
     'home':       '/home',
@@ -90,6 +93,7 @@ export default function App() {
     'privacy':    '/privacy',
     'terms':      '/terms',
     'disclaimer': '/disclaimer',
+    'admin':      '/admin',
   };
 
   const { user, signUpWithEmail, signInWithEmail, signInWithGoogle, signOut, loading: authLoading } = useAuth();
@@ -829,6 +833,7 @@ export default function App() {
             />
           </div>
         )}
+        {activePage === 'admin' && <AdminDashboard onBack={() => setActivePage('home')} />}
       </main>
 
       <DeleteModal 
@@ -845,6 +850,7 @@ export default function App() {
         isOpen={downloadModalOpen} 
         onClose={() => setDownloadModalOpen(false)} 
       />
+      <WebUpdateToast />
       <ToastContainer />
     </div>
   );
