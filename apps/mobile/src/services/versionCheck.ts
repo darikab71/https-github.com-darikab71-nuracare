@@ -36,7 +36,10 @@ export async function checkForAppUpdates(showUpToDateAlert = false) {
           { 
             text: 'Update Now', 
             onPress: () => {
-              const url = remote.downloadUrl || `${remote.websiteUrl || 'https://nuracare.pro.et'}`;
+              let url = remote.downloadUrl || `${remote.websiteUrl || 'https://nuracare.pro.et'}/nuracare.apk`;
+              if (url.startsWith('/')) {
+                url = `${remote.websiteUrl || 'https://nuracare.pro.et'}${url}`;
+              }
               Linking.openURL(url).catch(() => {});
             } 
           }

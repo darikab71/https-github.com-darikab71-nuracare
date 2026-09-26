@@ -1,9 +1,9 @@
 {
-  "appVersion": "1.0.3",
-  "versionCode": 4,
+  "appVersion": "1.0.4",
+  "versionCode": 5,
   "minSupportedVersion": "1.0.0",
   "releaseDate": "2026-09-23",
   "websiteUrl": "https://nuracare.pro.et",
   "downloadUrl": "https://expo.dev/artifacts/eas/GCgb_vM43BYMM1R1rOSYQgvpzfh5YqhNMdgXf9uEt0k.apk",
-  "releaseNotes": "Updated Lifestyle management hub (Quick Action cards, 8 pillars, breathwork, bottom weekly insights radar) and simplified Community discovery hub."
+  "releaseNotes": "Enhanced welcome & login page, bundled offline botanical photography, 3D interactive avatar canvas on all devices, and calming ambient water stream audio."
 }

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { CategoryOverviewData, LifestyleCategoryKey } from '../../storage/lifestyleStorage';
+import { LocalImages } from '../../assets/images';
 
 interface LifestyleCategoriesGridProps {
   categories: CategoryOverviewData[];
@@ -55,7 +56,7 @@ export default function LifestyleCategoriesGrid({
           activeOpacity={0.84}
         >
           <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&auto=format&fit=crop&q=80' }}
+            source={LocalImages.healthyLifestyle}
             style={StyleSheet.absoluteFillObject}
             resizeMode="cover"
           />
@@ -110,7 +111,7 @@ export default function LifestyleCategoriesGrid({
           activeOpacity={0.84}
         >
           <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80' }}
+            source={LocalImages.beHealthy}
             style={StyleSheet.absoluteFillObject}
             resizeMode="cover"
           />
@@ -161,7 +162,7 @@ export default function LifestyleCategoriesGrid({
         {/* 3. WELLBEING QUICK ACTION CARD (With Sub-Cards) */}
         <View style={[styles.actionCardShift, styles.wellbeingCardWrapper]}>
           <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&auto=format&fit=crop&q=80' }}
+            source={LocalImages.chamomile}
             style={StyleSheet.absoluteFillObject}
             resizeMode="cover"
           />
@@ -250,7 +251,7 @@ export default function LifestyleCategoriesGrid({
           activeOpacity={0.84}
         >
           <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=800&auto=format&fit=crop&q=80' }}
+            source={LocalImages.naturalRemedies}
             style={StyleSheet.absoluteFillObject}
             resizeMode="cover"
           />

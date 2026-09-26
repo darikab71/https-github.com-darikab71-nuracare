@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Users, Sparkles, PlusCircle, Video, Image as ImageIcon } from 'lucide-react-native';
 import { useTheme } from '../../context/ThemeContext';
+import { LocalImages } from '../../assets/images';
 
 interface CommunityWelcomeCardProps {
   onOpenCreatePost: () => void;
@@ -18,7 +19,7 @@ export default function CommunityWelcomeCard({
     <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
       <View style={styles.imageWrap}>
         <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80' }}
+          source={LocalImages.beHealthy}
           style={styles.bannerImage}
           resizeMode="cover"
         />

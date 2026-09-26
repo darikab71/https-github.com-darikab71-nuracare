@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import ThreeAvatarCanvas from './ThreeAvatarCanvas';
 import { useTheme } from '../../context/ThemeContext';
+import { useProfile } from '../../context/ProfileContext';
 
 interface CompanionAvatar3DProps {
   onStartChatTransition?: () => void;
@@ -24,9 +25,11 @@ export default function CompanionAvatar3D({
 }: CompanionAvatar3DProps) {
   const router = useRouter();
   const { theme, isDark } = useTheme();
+  const { profile } = useProfile();
 
-  // Selected companion: 'nura' (female) or 'nuri' (male)
-  const [character, setCharacter] = useState<'nura' | 'nuri'>('nura');
+  // Character appearance automatically matches user profile gender from onboarding.
+  // Both female and male avatars are ALWAYS named "Nura".
+  const character: 'female' | 'male' = (profile?.gender === 'male' || (profile as any)?.genderPreference === 'male') ? 'male' : 'female';
   const [speechText, setSpeechText] = useState<string | null>(null);
 
   // Animation values for classic cartoon kinematics
@@ -85,19 +88,15 @@ export default function CompanionAvatar3D({
 
   // Tap Interaction: Classic Cartoon Anticipation, Squash & Stretch
   const handleTapAvatar = () => {
-    const quotes = character === 'nura' 
-      ? [
-          "Feeling balanced today!",
-          "Remember to take 2 deep breaths.",
-          "Your circadian rhythm is on track!",
-          "I'm here whenever you need guidance."
-        ]
-      : [
-          "Let's crush that daily movement goal!",
-          "Hydration check! Grab a sip of water.",
-          "Looking great today, champ!",
-          "Ready for an afternoon posture reset?"
-        ];
+    const quotes = [
+      "Feeling balanced and calm today!",
+      "Remember to take 2 deep breaths.",
+      "Your circadian rhythm is on track!",
+      "I'm Nura, here whenever you need wellness guidance.",
+      "Hydration check! Grab a sip of fresh water.",
+      "Let's crush that daily movement goal!",
+      "Looking radiant and energized today!"
+    ];
     const quote = quotes[Math.floor(Math.random() * quotes.length)];
     setSpeechText(quote);
     setTimeout(() => setSpeechText(null), 3200);
@@ -204,87 +203,8 @@ export default function CompanionAvatar3D({
       )}
 
       {/* 3D Character Stage */}
-      {Platform.OS === 'web' ? (
-        <View style={styles.avatarTouchStage}>
-          <ThreeAvatarCanvas character={character} onTap={handleTapAvatar} />
-        </View>
-      ) : (
-        <TouchableOpacity
-          onPress={handleTapAvatar}
-          activeOpacity={0.92}
-          style={styles.avatarTouchStage}
-        >
-          <Animated.View
-            style={[
-              styles.avatarRenderBox,
-              {
-                transform: [
-                  { translateY: Animated.add(breathingTranslateY, bounceY) },
-                  { scaleX: squashStretchX },
-                  { scaleY: Animated.multiply(squashStretchY, breathingScaleY) },
-                  { rotateZ: swayRotateZ },
-                  { perspective: 800 },
-                  { rotateY: swayRotateY },
-                ],
-              },
-            ]}
-          >
-            <View style={styles.avatarImageWrapper}>
-              <Image
-                source={
-                  character === 'nura'
-                    ? require('../../../assets/avatars/nura_avatar.jpg')
-                    : require('../../../assets/avatars/nuri_avatar.jpg')
-                }
-                style={styles.avatarImage}
-                resizeMode="cover"
-              />
-            </View>
-          </Animated.View>
-        </TouchableOpacity>
-      )}
-
-      {/* Companion Switcher Pill (Discreet, Elegant Toggle) */}
-      <View style={styles.companionSelectorRow}>
-        <TouchableOpacity
-          style={[
-            styles.companionPill,
-            { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle },
-            character === 'nura' && { backgroundColor: theme.accentDeep, borderColor: theme.accent },
-          ]}
-          onPress={() => setCharacter('nura')}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.companionPillText,
-              { color: theme.textSecondary },
-              character === 'nura' && { color: theme.accent, fontWeight: '700' },
-            ]}
-          >
-            NURA
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.companionPill,
-            { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle },
-            character === 'nuri' && { backgroundColor: theme.accentDeep, borderColor: theme.accent },
-          ]}
-          onPress={() => setCharacter('nuri')}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.companionPillText,
-              { color: theme.textSecondary },
-              character === 'nuri' && { color: theme.accent, fontWeight: '700' },
-            ]}
-          >
-            NURI
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.avatarTouchStage}>
+        <ThreeAvatarCanvas character={character} onTap={handleTapAvatar} />
       </View>
     </View>
   );

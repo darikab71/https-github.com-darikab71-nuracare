@@ -2,17 +2,25 @@ import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import * as THREE from 'three';
 
+let WebView: any = null;
+if (Platform.OS !== 'web') {
+  try {
+    WebView = require('react-native-webview')?.WebView;
+  } catch (e) {}
+}
+
 interface ThreeAvatarCanvasProps {
-  character: 'nura' | 'nuri';
+  character?: 'female' | 'male' | 'nura' | 'nuri';
   onTap?: () => void;
   isSquashing?: boolean;
 }
 
 export default function ThreeAvatarCanvas({
-  character,
+  character = 'female',
   onTap,
   isSquashing = false,
 }: ThreeAvatarCanvasProps) {
+  const isMale = character === 'male' || character === 'nuri';
   const containerRef = useRef<HTMLDivElement | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -89,7 +97,7 @@ export default function ThreeAvatarCanvas({
     characterGroupRef.current = charGroup;
     scene.add(charGroup);
 
-    buildCharacter(charGroup, character);
+    buildCharacter(charGroup, isMale ? 'nuri' : 'nura');
 
     // 6. FLOATING PARTICLES (Subtle wellness motes)
     const particleCount = 28;
@@ -583,7 +591,232 @@ export default function ThreeAvatarCanvas({
           }}
           onClick={handleTriggerTap}
         />
-      ) : null}
+      ) : WebView ? (
+        <WebView
+          originWhitelist={['*']}
+          source={{
+            html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    body, html { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:transparent; touch-action:manipulation; user-select:none; }
+    #canvas-box { width:100%; height:100%; display:flex; justify-content:center; align-items:center; position:relative; }
+    canvas { display:block; width:100%; height:100%; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <div id="canvas-box">
+    <canvas id="c"></canvas>
+  </div>
+  <script>
+    const canvas = document.getElementById('c');
+    const dpr = Math.min(window.devicePixelRatio || 2, 2);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const isNura = ${!isMale};
+    const skinColor = isNura ? '#C68B59' : '#9E6941';
+    const skinDark = isNura ? '#A86C3E' : '#804F2D';
+    const hairColor = '#1A1412';
+    const blushColor = isNura ? 'rgba(239, 68, 68, 0.22)' : 'rgba(234, 88, 12, 0.16)';
+
+    // Ambient floating particles
+    const particles = [];
+    for(let i = 0; i < 22; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: 1.2 + Math.random() * 2.2,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: -0.3 - Math.random() * 0.5,
+        alpha: 0.3 + Math.random() * 0.5
+      });
+    }
+
+    let t = 0;
+    let blink = 0;
+    let blinkTimer = 2.0;
+    let tapScaleX = 1;
+    let tapScaleY = 1;
+
+    function render() {
+      t += 0.024;
+      ctx.clearRect(0, 0, w, h);
+
+      // 1. Draw particles
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.y < 0) { p.y = h; p.x = Math.random() * w; }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(134, 239, 172, ' + p.alpha + ')';
+        ctx.fill();
+      });
+
+      // 2. Character dynamics
+      const sway = Math.sin(t * 1.4) * 8;
+      const breath = Math.sin(t * 2.2) * 5;
+      const cx = w / 2 + sway;
+      const cy = h / 2 + 10 + breath;
+
+      // Handle blink
+      blinkTimer -= 0.024;
+      if (blinkTimer <= 0) {
+        blink = 1;
+        if (blinkTimer < -0.16) {
+          blink = 0;
+          blinkTimer = 2.5 + Math.random() * 2.5;
+        }
+      }
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(tapScaleX, tapScaleY);
+
+      // Gentle glow behind head
+      const glowGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, 75);
+      glowGrad.addColorStop(0, 'rgba(134, 239, 172, 0.28)');
+      glowGrad.addColorStop(1, 'rgba(134, 239, 172, 0)');
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 75, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hair Back / Afro / Bun
+      ctx.fillStyle = hairColor;
+      ctx.beginPath();
+      if (isNura) {
+        // High curly puff
+        ctx.arc(0, -32, 42, 0, Math.PI * 2);
+        ctx.arc(-22, -18, 30, 0, Math.PI * 2);
+        ctx.arc(22, -18, 30, 0, Math.PI * 2);
+      } else {
+        // Tapered fade
+        ctx.arc(0, -12, 42, 0, Math.PI * 2);
+      }
+      ctx.fill();
+
+      // Head / Face
+      ctx.fillStyle = skinColor;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 36, 44, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Subtle cheek blush
+      ctx.fillStyle = blushColor;
+      ctx.beginPath();
+      ctx.ellipse(-20, 10, 8, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(20, 10, 8, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eyes
+      const eyeY = 2;
+      const eyeSpacing = 16;
+      if (blink > 0) {
+        // Closed eye arcs
+        ctx.strokeStyle = '#2D1B10';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(-eyeSpacing, eyeY, 6, 0.1 * Math.PI, 0.9 * Math.PI, false);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(eyeSpacing, eyeY, 6, 0.1 * Math.PI, 0.9 * Math.PI, false);
+        ctx.stroke();
+      } else {
+        // Wide expressive eyes
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.ellipse(-eyeSpacing, eyeY, 8.5, 11, 0, 0, Math.PI * 2);
+        ctx.ellipse(eyeSpacing, eyeY, 8.5, 11, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pupils
+        ctx.fillStyle = '#22140A';
+        ctx.beginPath();
+        ctx.arc(-eyeSpacing, eyeY + 1, 5.5, 0, Math.PI * 2);
+        ctx.arc(eyeSpacing, eyeY + 1, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye glints
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(-eyeSpacing - 2, eyeY - 2, 2.4, 0, Math.PI * 2);
+        ctx.arc(eyeSpacing - 2, eyeY - 2, 2.4, 0, Math.PI * 2);
+        ctx.arc(-eyeSpacing + 2, eyeY + 2, 1.2, 0, Math.PI * 2);
+        ctx.arc(eyeSpacing + 2, eyeY + 2, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Nose
+      ctx.strokeStyle = skinDark;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 14, 3, 0.2 * Math.PI, 0.8 * Math.PI);
+      ctx.stroke();
+
+      // Smile
+      ctx.strokeStyle = '#2D1B10';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(0, 20, 8, 0.15 * Math.PI, 0.85 * Math.PI, false);
+      ctx.stroke();
+
+      ctx.restore();
+      requestAnimationFrame(render);
+    }
+
+    render();
+
+    window.addEventListener('click', () => {
+      tapScaleX = 1.18;
+      tapScaleY = 0.84;
+      setTimeout(() => {
+        tapScaleX = 0.92;
+        tapScaleY = 1.12;
+        setTimeout(() => {
+          tapScaleX = 1;
+          tapScaleY = 1;
+        }, 160);
+      }, 120);
+
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage('tap');
+      }
+    });
+  </script>
+</body>
+</html>
+          `,
+          }}
+          style={{ width: '100%', height: 185, backgroundColor: 'transparent' }}
+          containerStyle={{ backgroundColor: 'transparent' }}
+          scrollEnabled={false}
+          bounces={false}
+          onMessage={(e) => {
+            if (e.nativeEvent.data === 'tap') {
+              handleTriggerTap();
+            }
+          }}
+        />
+      ) : (
+        <TouchableOpacity
+          onPress={handleTriggerTap}
+          activeOpacity={0.88}
+          style={styles.canvasContainer}
+        >
+          <View style={styles.nativeFallbackBox}>
+            <View style={styles.nativeAvatarGlow} />
+          </View>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -595,5 +828,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+  },
+  nativeFallbackBox: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nativeAvatarGlow: {
+    position: 'absolute',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(134, 239, 172, 0.25)',
   },
 });

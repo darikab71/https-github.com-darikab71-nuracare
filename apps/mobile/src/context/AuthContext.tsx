@@ -110,12 +110,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error('Error signing out:', error);
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+    setUser(null);
+    useAuthStore.getState().setUser(null);
   };
 
   const setGuestUser = (guest: any) => {
     setUser(guest);
+    useAuthStore.getState().setUser(guest);
   };
 
   return (

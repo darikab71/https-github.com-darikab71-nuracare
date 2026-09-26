@@ -13,13 +13,13 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface AvatarLocomotionOverlayProps {
   visible: boolean;
-  character: 'nura' | 'nuri';
+  character?: 'female' | 'male' | 'nura' | 'nuri';
   onComplete: () => void;
 }
 
 export default function AvatarLocomotionOverlay({
   visible,
-  character,
+  character = 'female',
   onComplete,
 }: AvatarLocomotionOverlayProps) {
   const progress = useRef(new Animated.Value(0)).current;
@@ -132,9 +132,9 @@ export default function AvatarLocomotionOverlay({
       >
         <Image
           source={
-            character === 'nura'
-              ? require('../../../assets/avatars/nura_avatar.jpg')
-              : require('../../../assets/avatars/nuri_avatar.jpg')
+            character === 'male' || character === 'nuri'
+              ? require('../../../assets/avatars/nuri_avatar.jpg')
+              : require('../../../assets/avatars/nura_avatar.jpg')
           }
           style={styles.flyingImage}
           resizeMode="cover"

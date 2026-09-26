@@ -17,17 +17,21 @@ const defaultGuestUser: User = {
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: defaultGuestUser,
+  user: null,
   setUser: (user) => {
-    set({ user: user || defaultGuestUser });
-    cacheData('auth_user', user || defaultGuestUser);
+    set({ user });
+    if (user && !String(user.id).startsWith('guest_')) {
+      cacheData('auth_user', user);
+    } else {
+      cacheData('auth_user', null);
+    }
   },
   loadUser: () => {
     const cachedUser = getCachedData<User>('auth_user');
-    if (cachedUser) {
+    if (cachedUser && cachedUser.id && !String(cachedUser.id).startsWith('guest_')) {
       set({ user: cachedUser });
     } else {
-      set({ user: defaultGuestUser });
+      set({ user: null });
     }
   }
 }));

@@ -29,10 +29,13 @@ interface CreatePostModalProps {
   onSubmit: (post: Partial<CommunityDiscussion>) => void;
 }
 
+import { LocalImages } from '../../assets/images';
+
 const PRESET_PHOTOS = [
-  { label: 'Gym Meal Bowl', url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80' },
-  { label: 'Workout Station', url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80' },
-  { label: 'Morning Trail', url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&auto=format&fit=crop&q=80' },
+  { label: 'Gym Meal Bowl', url: 'local:healthyLifestyle', source: LocalImages.healthyLifestyle },
+  { label: 'Workout Station', url: 'local:beHealthy', source: LocalImages.beHealthy },
+  { label: 'Morning Calm', url: 'local:chamomile', source: LocalImages.chamomile },
+  { label: 'Herbal Wellness', url: 'local:naturalRemedies', source: LocalImages.naturalRemedies },
 ];
 
 const PRESET_VIDEOS = [
@@ -226,7 +229,7 @@ export default function CreatePostModal({
                       }}
                       activeOpacity={0.8}
                     >
-                      <Image source={{ uri: p.url }} style={styles.presetImg} />
+                      <Image source={p.source || { uri: p.url }} style={styles.presetImg} />
                       <Text style={[styles.presetLabel, { color: theme.textPrimary }]} numberOfLines={1}>
                         {p.label}
                       </Text>

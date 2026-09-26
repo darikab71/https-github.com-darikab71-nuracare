@@ -6,7 +6,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace=apps/web"
+    "build": "npm run build --workspace=apps/web",
+    "app:publish": "node scripts/auto_publish_app.js",
+    "app:sync": "node scripts/auto_publish_app.js --sync-only"
   },
   "dependencies": {
     "abort-controller": "^3.0.0",

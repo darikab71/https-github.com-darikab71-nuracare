@@ -21,6 +21,7 @@ export default function OnboardingStep1() {
   const { profile, setProfile } = useProfile();
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
+  const [gender, setGender] = useState<'female' | 'male'>('female');
   const [country, setCountry] = useState('Ethiopia');
   const [language, setLanguage] = useState('English');
   const [loading, setLoading] = useState(false);
@@ -29,6 +30,7 @@ export default function OnboardingStep1() {
     if (profile) {
       if (profile.name) setName(profile.name);
       if (profile.age) setAge(profile.age.toString());
+      if (profile.gender) setGender(profile.gender === 'male' ? 'male' : 'female');
       if (profile.culturalHeritage) setCountry(profile.culturalHeritage);
       if (profile.langPref) setLanguage(profile.langPref);
     }
@@ -39,6 +41,7 @@ export default function OnboardingStep1() {
     await setProfile({
       name: name.trim() || 'Wellness Friend',
       age: parseInt(age, 10) || null,
+      gender,
       culturalHeritage: country,
       langPref: language,
     });
@@ -89,6 +92,26 @@ export default function OnboardingStep1() {
               placeholderTextColor="#94a3b8"
               keyboardType="numeric"
             />
+
+            <Text style={styles.label}>Gender (Personalizes your Nura companion appearance)</Text>
+            <View style={styles.chipContainer}>
+              <TouchableOpacity
+                style={[styles.chip, gender === 'female' && styles.chipActive]}
+                onPress={() => setGender('female')}
+              >
+                <Text style={[styles.chipText, gender === 'female' && styles.chipTextActive]}>
+                  👩 Female
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.chip, gender === 'male' && styles.chipActive]}
+                onPress={() => setGender('male')}
+              >
+                <Text style={[styles.chipText, gender === 'male' && styles.chipTextActive]}>
+                  👨 Male
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             <Text style={styles.label}>Cultural Heritage & Wellness Background</Text>
             <View style={styles.chipContainer}>

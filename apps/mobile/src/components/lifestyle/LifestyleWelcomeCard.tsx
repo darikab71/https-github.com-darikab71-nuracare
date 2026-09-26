@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Flame, Sparkles, Droplets, Wind, ChevronRight } from 'lucide-react-native';
 import { useTheme } from '../../context/ThemeContext';
+import { LocalImages } from '../../assets/images';
 
 interface LifestyleWelcomeCardProps {
   balanceScore: number;
@@ -26,7 +27,7 @@ export default function LifestyleWelcomeCard({
     <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
       <View style={styles.imageWrap}>
         <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&auto=format&fit=crop&q=80' }}
+          source={LocalImages.hero}
           style={styles.bannerImage}
           resizeMode="cover"
         />

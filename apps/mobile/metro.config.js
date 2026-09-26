@@ -14,6 +14,9 @@ if (fs.existsSync(rootNodeModules)) {
   ];
 }
 
+// Ensure audio and image extensions are fully handled by Metro bundler
+config.resolver.assetExts = Array.from(new Set([...(config.resolver.assetExts || []), 'jfif', 'wav', 'mp3']));
+
 // Fix for react-freeze 1.0.4 missing src/index.tsx
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (moduleName === 'react-freeze') {

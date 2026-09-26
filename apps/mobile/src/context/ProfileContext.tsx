@@ -57,7 +57,8 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         const fastingMode = storage.getString(`fastingMode_${user.id}`) || 'None';
         const culturalHeritage = storage.getString(`culturalHeritage_${user.id}`) || 'Global';
         const langPref = storage.getString(`langPref_${user.id}`) || 'English';
-        setProfileState({ ...data, medicalNotes: data.medical_notes, fastingMode, culturalHeritage, langPref });
+        const gender = storage.getString(`gender_${user.id}`) || data.gender || 'female';
+        setProfileState({ ...data, medicalNotes: data.medical_notes, fastingMode, culturalHeritage, langPref, gender });
       } else if (error && error.code === 'PGRST116') {
         const { data: newProfile } = await supabase
           .from('profiles')
@@ -105,6 +106,10 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       storage.set(`langPref_${user.id}`, dbPayload.langPref);
       delete dbPayload.langPref;
     }
+
+    if ('gender' in dbPayload) {
+      storage.set(`gender_${user.id}`, dbPayload.gender);
+    }
     
     const { data, error } = await supabase
       .from('profiles')
@@ -116,7 +121,8 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       const fastingMode = storage.getString(`fastingMode_${user.id}`) || 'None';
       const culturalHeritage = storage.getString(`culturalHeritage_${user.id}`) || 'Global';
       const langPref = storage.getString(`langPref_${user.id}`) || 'English';
-      setProfileState({ ...data, medicalNotes: data.medical_notes, fastingMode, culturalHeritage, langPref });
+      const gender = storage.getString(`gender_${user.id}`) || data.gender || 'female';
+      setProfileState({ ...data, medicalNotes: data.medical_notes, fastingMode, culturalHeritage, langPref, gender });
     } else {
       console.error('Error updating profile', error);
     }

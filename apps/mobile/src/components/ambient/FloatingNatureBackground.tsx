@@ -295,7 +295,7 @@ export default function FloatingNatureBackground({
     // 1. Web HTML5 Audio setup (works in all modern browsers)
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       try {
-        const audio = new (window as any).Audio('https://cdn.freesound.org/previews/530/530697_11234978-lq.mp3');
+        const audio = new (window as any).Audio('/water_stream.wav');
         audio.loop = true;
         audio.volume = 0.55;
         webAudioRef.current = audio;
@@ -316,7 +316,7 @@ export default function FloatingNatureBackground({
       }
     }
 
-    // 2. Native Expo AV Audio setup
+    // 2. Native Expo AV Audio setup with bundled local asset
     async function initNativeSound() {
       if (Platform.OS === 'web' || !Audio?.Sound) return;
       try {
@@ -326,8 +326,15 @@ export default function FloatingNatureBackground({
           shouldDuckAndroid: false,
         });
 
+        let soundSource: any;
+        try {
+          soundSource = require('../../../assets/sounds/water_stream.wav');
+        } catch {
+          soundSource = { uri: 'https://nuracare.pro.et/water_stream.wav' };
+        }
+
         const { sound } = await Audio.Sound.createAsync(
-          { uri: 'https://cdn.freesound.org/previews/530/530697_11234978-lq.mp3' },
+          soundSource,
           { isLooping: true, volume: 0.55, shouldPlay: true }
         );
 
@@ -511,15 +518,22 @@ const styles = StyleSheet.create({
   windLineWrap: {
     position: 'absolute',
     left: 0,
-    zIndex: 1,
+    zIndex: 9998,
+    elevation: 9998,
   },
   element: {
     position: 'absolute',
-    zIndex: 20, // Above content
+    top: 0,
+    left: 0,
+    zIndex: 9999, // Above content
+    elevation: 9999,
   },
   leaf: {
     position: 'absolute',
-    zIndex: 20,
+    top: 0,
+    left: 0,
+    zIndex: 9999,
+    elevation: 9999,
   },
   contentWrap: {
     flex: 1,

@@ -66,28 +66,10 @@ function InnerLayout() {
     const isGuest = currentUser?.id && String(currentUser.id).startsWith('guest_');
     
     if (!currentUser && !inAuthGroup) {
-      // Ensure default guest session so user can explore all tabs freely
-      const guest = {
-        id: 'guest_nura',
-        name: 'Nura Explorer',
-        fastingMode: 'Orthodox Christian (Tsom)',
-      };
-      useAuthStore.getState().setUser(guest);
+      router.replace('/(auth)/login');
       return;
-    } else if (currentUser) {
-      if (isGuest) {
-        if (inAuthGroup) {
-          router.replace('/(tabs)');
-        }
-        return;
-      }
-
-      if (profileLoading) return;
-      
-      // If user is already authenticated and viewing login, go to tabs
-      if (inAuthGroup) {
-        router.replace('/(tabs)');
-      }
+    } else if (currentUser && inAuthGroup) {
+      router.replace('/(tabs)');
     }
   }, [currentUser, profile, authLoading, profileLoading, segments, isReady]);
 

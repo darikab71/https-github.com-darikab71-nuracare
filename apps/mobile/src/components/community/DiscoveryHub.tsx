@@ -37,6 +37,7 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 import CommunityWelcomeCard from './CommunityWelcomeCard';
 import CreatePostModal from './CreatePostModal';
+import { getSafeImageSource } from '../../assets/images';
 
 interface DiscoveryHubProps {
   groups: CommunityGroup[];
@@ -499,14 +500,14 @@ export default function DiscoveryHub({
                         <View key={mIdx} style={styles.mediaItemWrap}>
                           {m.type === 'image' ? (
                             <Image
-                              source={{ uri: m.url }}
+                              source={getSafeImageSource(m.url, 'hero')}
                               style={styles.mediaImage}
                               resizeMode="cover"
                             />
                           ) : (
                             <View style={styles.videoWrap}>
                               <Image
-                                source={{ uri: m.thumbnailUrl || m.url }}
+                                source={getSafeImageSource(m.thumbnailUrl || m.url, 'beHealthy')}
                                 style={styles.mediaImage}
                                 resizeMode="cover"
                               />

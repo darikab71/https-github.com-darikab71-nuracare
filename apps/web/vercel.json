@@ -35,6 +35,6 @@
     { "source": "/api/stripe-checkout", "destination": "/api/payment?action=stripe-checkout" },
     { "source": "/api/ocr", "destination": "/api/document?action=ocr" },
     { "source": "/api/classify-doc", "destination": "/api/document?action=classify" },
-    { "source": "/((?!api|share|_next).*)", "destination": "/index.html" }
+    { "source": "/((?!api|share|_next|.*\\.(?:apk|json|wav|png|jpg|jpeg|jfif|svg|ico|txt|pdf)$).*)", "destination": "/index.html" }
   ]
 }

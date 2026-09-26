@@ -201,6 +201,7 @@ export default function App() {
     }
   }, [user]);
   const [obAge, setObAge] = useState('');
+  const [obGender, setObGender] = useState('female');
   const [obCulturalHeritage, setObCulturalHeritage] = useState('Global');
   const [obLang, setObLang] = useState('English');
   const [obConditions, setObConditions] = useState([]);
@@ -256,7 +257,7 @@ export default function App() {
     setOnboardingStep(0);
     setActivePage('home');
     setCurrentSessionId('session-' + Date.now());
-    setObName(''); setObAge(''); setObCulturalHeritage('Global'); setObConditions([]); setObOtherCondition(''); setObFasting(TSOM_TYPES.NONE); setObMeds([]);
+    setObName(''); setObAge(''); setObGender('female'); setObCulturalHeritage('Global'); setObConditions([]); setObOtherCondition(''); setObFasting(TSOM_TYPES.NONE); setObMeds([]);
     localStorage.removeItem('nuracare_activePage');
     localStorage.removeItem('nuracare_guest_profile');
   };
@@ -287,6 +288,7 @@ export default function App() {
     const p = {
       name: obName,
       age: obAge,
+      gender: obGender,
       culturalHeritage: obCulturalHeritage,
       langPref: obLang,
       conditions: allConditions,
@@ -454,6 +456,51 @@ export default function App() {
                 <div className="form-group">
                   <label>How old are you?</label>
                   <input type="number" value={obAge} onChange={e => setObAge(e.target.value)} placeholder="e.g. 28" />
+                </div>
+                <div className="form-group">
+                  <label>Gender (Selects your companion appearance)</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 6 }}>
+                    <button
+                      type="button"
+                      onClick={() => setObGender('female')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: obGender === 'female' ? '2px solid var(--green)' : '1px solid var(--border)',
+                        background: obGender === 'female' ? 'var(--green-light)' : 'transparent',
+                        fontWeight: 700,
+                        color: obGender === 'female' ? 'var(--green-dark)' : 'var(--text)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      👩 Female (Nura)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setObGender('male')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: obGender === 'male' ? '2px solid var(--green)' : '1px solid var(--border)',
+                        background: obGender === 'male' ? 'var(--green-light)' : 'transparent',
+                        fontWeight: 700,
+                        color: obGender === 'male' ? 'var(--green-dark)' : 'var(--text)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      👨 Male (Nura)
+                    </button>
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>Location Born (Heritage/Cultural Identity)</label>

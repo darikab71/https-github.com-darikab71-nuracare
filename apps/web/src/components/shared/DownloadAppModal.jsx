@@ -7,17 +7,18 @@ export default function DownloadAppModal({ isOpen = true, onClose }) {
 
   if (!isOpen) return null;
 
-  // Direct standalone APK binary link (v1.0.3, code 4)
-  const directCdnApkUrl = 'https://expo.dev/artifacts/eas/GCgb_vM43BYMM1R1rOSYQgvpzfh5YqhNMdgXf9uEt0k.apk';
+  // Direct standalone APK binary link from the hosted platform
   const serverApkUrl = '/nuracare.apk';
-  const activeDownloadUrl = directCdnApkUrl;
+  const directCdnApkUrl = 'https://expo.dev/artifacts/eas/GCgb_vM43BYMM1R1rOSYQgvpzfh5YqhNMdgXf9uEt0k.apk';
+  const activeDownloadUrl = serverApkUrl;
+  const fullDownloadUrl = typeof window !== 'undefined' ? `${window.location.origin}/nuracare.apk` : 'https://nuracare.pro.et/nuracare.apk';
 
   // QR code encodes the direct .apk link so scanning it immediately triggers Android's native APK download
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(activeDownloadUrl)}&color=166534&bgcolor=f0fdf4`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(fullDownloadUrl)}&color=166534&bgcolor=f0fdf4`;
 
   const handleCopyLink = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(activeDownloadUrl);
+      navigator.clipboard.writeText(fullDownloadUrl);
       setCopied(true);
       showToast('Direct APK link copied to clipboard!', 'success');
       setTimeout(() => setCopied(false), 2500);
@@ -82,7 +83,7 @@ export default function DownloadAppModal({ isOpen = true, onClose }) {
                   Get NuraCare Mobile
                 </h3>
                 <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, border: '1px solid #86efac' }}>
-                  v1.0.3 Latest
+                  v1.0.4 Latest
                 </span>
               </div>
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted, #4b5563)' }}>

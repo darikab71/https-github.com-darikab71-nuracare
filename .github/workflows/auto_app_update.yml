@@ -1,0 +1,73 @@
+name: Auto Build & Publish NuraCare APK
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/auto_app_update.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    name: Build APK and Publish to Website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Detect Version & Build APK
+        id: build_apk
+        working-directory: apps/mobile
+        run: |
+          VERSION=$(node -p "require('./app.json').expo.version")
+          VERSION_CODE=$(node -p "require('./app.json').expo.android.versionCode")
+          echo "Building NuraCare v$VERSION (code $VERSION_CODE)..."
+          
+          # Build APK on Expo Cloud
+          if [ -n "${{ secrets.EXPO_TOKEN }}" ]; then
+            BUILD_OUTPUT=$(eas build --platform android --profile preview --non-interactive --json)
+            echo "BUILD_OUTPUT=$BUILD_OUTPUT" >> $GITHUB_ENV
+            APK_URL=$(echo "$BUILD_OUTPUT" | jq -r '.[0].artifacts.buildUrl // .artifacts.applicationArchiveUrl // empty')
+            echo "APK_URL=$APK_URL" >> $GITHUB_ENV
+          else
+            echo "EXPO_TOKEN not set, skipping EAS remote cloud build."
+          fi
+
+      - name: Download APK and Update Website Artifacts
+        run: |
+          node scripts/auto_publish_app.js --sync-only
+
+      - name: Commit and Push Updated Website Files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps/web/public/version.json apps/web/public/remote-config.json apps/web/public/nuracare.apk apps/web/vercel.json || true
+          if git diff --staged --quiet; then
+            echo "No updates to commit."
+          else
+            git commit -m "chore(release): auto-publish updated NuraCare APK and version metadata [skip ci]"
+            git push origin main
+          fi
