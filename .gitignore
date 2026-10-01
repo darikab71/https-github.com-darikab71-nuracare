@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+.expo/
+
+# Build output
+dist/
+dist-ssr/
+dist-web/
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.vscode/
+*.suo
+*.user
+Thumbs.db
+
+# Vite cache
+.vite/
+
+.vercel
+.env*.local
+*.apk
+public/*.apk
+apps/web/public/*.apk
+package-lock.json
+buildlist*
+*.tgz
+apps/mobile/*_build*.json
