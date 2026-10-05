@@ -31,6 +31,7 @@ import {
   LifestyleGoal,
   DayTrendPoint,
 } from '../../../storage/lifestyleStorage';
+import DigitalWellbeingScreen from '../../digitalWellbeing/DigitalWellbeingScreen';
 
 interface CategoryDetailViewProps {
   categoryKey: LifestyleCategoryKey;
@@ -64,6 +65,10 @@ export default function CategoryDetailView({
   onOpenBreathwork,
 }: CategoryDetailViewProps) {
   const { theme, isDark } = useTheme();
+
+  if (categoryKey === 'digital') {
+    return <DigitalWellbeingScreen onBack={onBack} />;
+  }
 
   const getCategoryConfig = () => {
     switch (categoryKey) {
@@ -125,27 +130,6 @@ export default function CategoryDetailView({
             { title: 'Digital Sunset (60 min prior)', desc: 'Dim harsh ambient lighting and blue screens to prompt pineal melatonin synthesis.' },
             { title: 'Thermal Bedroom Regulation', desc: 'Maintain bedroom between 18°C – 20°C for uninterrupted deep slow-wave stage 3/4 sleep.' },
             { title: 'Chamomile & Magnesium', desc: 'Warm herbal infusion relaxes autonomic neuromuscular tension without morning grogginess.' },
-          ],
-        };
-      case 'digital':
-        return {
-          name: 'Digital Wellbeing',
-          subtitle: 'Create healthier screen boundaries & intentional focus',
-          icon: Smartphone,
-          color: '#0284c7',
-          actionLabel: 'Take Digital Break (+1 Logged)',
-          actionHandler: () => {
-            onLogDigitalBreak();
-            Alert.alert('Digital Break Logged', 'Great job stepping away from screens for a mindful reset.');
-          },
-          primaryTitle: "Today's Screen Time",
-          primaryVal: `${Math.floor(snapshot.screenMinutes / 60)}h ${snapshot.screenMinutes % 60}m`,
-          primarySub: `${snapshot.digitalBreaksCount} Breaks Taken • ${Math.floor(snapshot.focusMinutes / 60)}h ${snapshot.focusMinutes % 60}m Focus`,
-          insight: 'Applying the 20-20-20 ocular rule (looking 20 feet away for 20 seconds every 20 minutes) releases ocular ciliary muscle tension and prevents cognitive fatigue.',
-          protocols: [
-            { title: '20-20-20 Ocular Micro-Pauses', desc: 'Rest eyes from computer screens regularly to protect ciliary optic relaxation.' },
-            { title: 'Evening Blue Screen Curfew', desc: 'Switch devices to grayscale or dark night mode 90 minutes before sleep.' },
-            { title: 'App Boundaries & Notification Batching', desc: 'Silence non-urgent notification buzzes to retain deep cognitive flow state.' },
           ],
         };
       case 'mental':

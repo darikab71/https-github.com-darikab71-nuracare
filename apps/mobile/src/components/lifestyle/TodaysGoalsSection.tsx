@@ -18,7 +18,7 @@ export default function TodaysGoalsSection({
   const { theme, isDark } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
-  const [selectedCat, setSelectedCat] = useState<LifestyleGoal['category']>('movement');
+  const [selectedCat, setSelectedCat] = useState<LifestyleGoal['category']>('fitness');
 
   const completedCount = goals.filter((g) => g.completed).length;
 
@@ -32,10 +32,11 @@ export default function TodaysGoalsSection({
   const getCatIcon = (cat: LifestyleGoal['category']) => {
     switch (cat) {
       case 'sleep': return <Moon size={14} color="#6366f1" />;
-      case 'movement': return <Activity size={14} color="#10b981" />;
+      case 'fitness': return <Activity size={14} color="#10b981" />;
       case 'hydration': return <Droplets size={14} color="#0ea5e9" />;
-      case 'mindfulness': return <Wind size={14} color="#f59e0b" />;
+      case 'mental': return <Wind size={14} color="#f59e0b" />;
       case 'nutrition': return <Leaf size={14} color="#16a34a" />;
+      default: return <Activity size={14} color="#10b981" />;
     }
   };
 
@@ -128,7 +129,7 @@ export default function TodaysGoalsSection({
 
             <Text style={[styles.catLabel, { color: theme.textSecondary }]}>Category</Text>
             <View style={styles.catRow}>
-              {(['movement', 'hydration', 'sleep', 'mindfulness', 'nutrition'] as const).map((c) => (
+              {(['fitness', 'hydration', 'sleep', 'mental', 'nutrition'] as const).map((c) => (
                 <TouchableOpacity
                   key={c}
                   style={[

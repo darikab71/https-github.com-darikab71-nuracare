@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { Stack, router, useSegments } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useWellnessStore, useAuthStore } from '../src/store';
@@ -63,15 +63,15 @@ function InnerLayout() {
     if (!isReady || authLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
-    const isGuest = currentUser?.id && String(currentUser.id).startsWith('guest_');
     
+    // Only redirect if unauthenticated and trying to access protected screens
     if (!currentUser && !inAuthGroup) {
       router.replace('/(auth)/login');
-      return;
     } else if (currentUser && inAuthGroup) {
+      // If user is already authenticated and lands on login/auth, send to tabs
       router.replace('/(tabs)');
     }
-  }, [currentUser, profile, authLoading, profileLoading, segments, isReady]);
+  }, [currentUser?.id, authLoading, isReady, segments[0]]);
 
   // 1. Maintenance Mode check (server-driven kill switch / maintenance)
   if (config?.emergency?.maintenanceMode) {

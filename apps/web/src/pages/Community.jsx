@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo } from 'react';
 import * as Icons from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCommunityRealtime } from '@/hooks/useCommunityRealtime';
+import ChallengesSection from '@/components/community/ChallengesSection';
 
 const INITIAL_POSTS = [
   {
@@ -11,11 +12,11 @@ const INITIAL_POSTS = [
     authorBadge: 'Trainer',
     avatarColor: '#ea580c',
     timeAgo: '45m ago',
-    title: '🏋️‍♂️ Squat Depth & Core Bracing Tutorial (Video)',
+    title: 'Squat Depth & Core Bracing Tutorial (Video)',
     content: 'Quick 45-second demonstration on maintaining neutral spine and glute activation out of the bottom position. Notice the foot torque against the floor before descending.',
     videoUrl: 'https://example.com/squat-demo.mp4',
     videoPoster: '/hero.png',
-    videoDuration: '▶ 0:45',
+    videoDuration: '0:45',
     likes: 68,
     comments: 19,
     userLiked: true,
@@ -26,7 +27,7 @@ const INITIAL_POSTS = [
     author: 'Selamawit B.',
     avatarColor: '#16a34a',
     timeAgo: '1h ago',
-    title: '🥗 Post-Gym Habesha Recovery Fuel',
+    title: 'Post-Gym Habesha Recovery Fuel',
     content: 'Just smashed leg day! Refueling with high-protein Shiro, steamed Gomen, roasted chickpeas, and a cold Telba flaxseed shake. 34g plant protein.',
     imageUrl: '/natural remidies.jfif',
     likes: 84,
@@ -40,11 +41,11 @@ const INITIAL_POSTS = [
     authorBadge: 'Dietitian',
     avatarColor: '#8b5cf6',
     timeAgo: '3h ago',
-    title: '🥣 High-Protein Beso Smoothie Prep (Video)',
+    title: 'High-Protein Beso Smoothie Prep (Video)',
     content: 'How to make a 32g protein pre-workout Beso shake with roasted barley, plant milk, flaxseed, and cinnamon. Takes under 2 minutes.',
     videoUrl: 'https://example.com/beso-recipe.mp4',
     videoPoster: '/healthy life style.jfif',
-    videoDuration: '▶ 1:15',
+    videoDuration: '1:15',
     likes: 114,
     comments: 28,
     userLiked: true,
@@ -55,7 +56,7 @@ const INITIAL_POSTS = [
     author: 'Sarah M.',
     avatarColor: '#ec4899',
     timeAgo: '4h ago',
-    content: '🔥 Finished my 7-day hydration challenge!\n\nMaintained 92% hydration consistency this week. Energy levels have visibly normalized during morning routines.',
+    content: 'Finished my 7-day hydration challenge!\n\nMaintained 92% hydration consistency this week. Energy levels have visibly normalized during morning routines.',
     imageUrl: '/healthy life style.jfif',
     likes: 36,
     comments: 9,
@@ -86,7 +87,7 @@ const INITIAL_POSTS = [
     authorBadge: 'Nutritionist',
     avatarColor: '#8b5cf6',
     timeAgo: '1d ago',
-    title: 'Ethiopian Wellness Tip 🇪🇹',
+    title: 'Ethiopian Wellness Insight',
     content: 'How traditional Teff-based meals can fit seamlessly into a balanced nutrition and glycemic control routine. Teff contains resistant starch that supports a diverse microbiome.',
     imageUrl: '/ashwaganda.jfif',
     likes: 92,
@@ -112,9 +113,9 @@ const INITIAL_POSTS = [
 const INITIAL_GROUPS = [
   {
     id: 'grp-1',
-    name: 'Running Ethiopia 🇪🇹',
+    name: 'Running Ethiopia',
     category: 'Cardio & Athletics',
-    icon: '🏃',
+    icon: 'Activity',
     membersCount: '12.4K',
     description: 'For Ethiopian runners sharing routes, morning distance goals, motivation, and regional half-marathons.',
     privacy: 'Public',
@@ -589,6 +590,27 @@ export default function CommunityPage({ profile }) {
         </button>
 
         <button
+          onClick={() => setActiveSection('challenges')}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            padding: '12px 18px',
+            borderRadius: 10,
+            border: 'none',
+            background: activeSection === 'challenges' ? 'var(--green-light)' : 'transparent',
+            color: activeSection === 'challenges' ? 'var(--green-dark)' : 'var(--text-muted)',
+            fontWeight: activeSection === 'challenges' ? 700 : 500,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+        >
+          <Icons.Trophy size={18} /> Challenges & Stakes
+        </button>
+
+        <button
           onClick={() => setActiveSection('groups')}
           style={{
             flex: 1,
@@ -644,6 +666,9 @@ export default function CommunityPage({ profile }) {
           )}
         </button>
       </div>
+
+      {/* SECTION: CHALLENGES & STAKES */}
+      {activeSection === 'challenges' && <ChallengesSection />}
 
       {/* SECTION 1: FEED */}
       {activeSection === 'feed' && (

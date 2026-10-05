@@ -57,7 +57,7 @@ export default function LifestyleCategoriesGrid({
         >
           <Image
             source={LocalImages.healthyLifestyle}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
             resizeMode="cover"
           />
           <View style={styles.actionCardImageOverlay} />
@@ -112,7 +112,7 @@ export default function LifestyleCategoriesGrid({
         >
           <Image
             source={LocalImages.beHealthy}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
             resizeMode="cover"
           />
           <View style={[styles.actionCardImageOverlay, { backgroundColor: 'rgba(15, 23, 42, 0.58)' }]} />
@@ -163,7 +163,7 @@ export default function LifestyleCategoriesGrid({
         <View style={[styles.actionCardShift, styles.wellbeingCardWrapper]}>
           <Image
             source={LocalImages.chamomile}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
             resizeMode="cover"
           />
           <View style={[styles.actionCardImageOverlay, { backgroundColor: 'rgba(15, 23, 42, 0.68)' }]} />
@@ -252,7 +252,7 @@ export default function LifestyleCategoriesGrid({
         >
           <Image
             source={LocalImages.naturalRemedies}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
             resizeMode="cover"
           />
           <View style={[styles.actionCardImageOverlay, { backgroundColor: 'rgba(15, 23, 42, 0.58)' }]} />
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   actionCardImageOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(15, 23, 42, 0.55)',
   },
   actionCardContentHover: {

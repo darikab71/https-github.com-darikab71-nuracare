@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../services/supabase/client';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
+import { useAuthStore } from '../store';
 
 // To support Google OAuth in Expo
 WebBrowser.maybeCompleteAuthSession();

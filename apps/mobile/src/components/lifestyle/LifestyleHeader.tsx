@@ -18,7 +18,7 @@ export default function LifestyleHeader({
 
   // Generate 7 days ending today
   const days = React.useMemo(() => {
-    const list = [];
+    const list: { iso: string; dayName: string; dayNum: number; isToday: boolean }[] = [];
     const today = new Date();
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     for (let i = 6; i >= 0; i--) {

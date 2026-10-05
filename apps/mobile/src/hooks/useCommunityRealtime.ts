@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../services/supabase/client';
-import { CommunityDiscussion, DiscussionReply } from '../types/communityTypes';
+import { CommunityDiscussion, DiscussionReply, MediaItem } from '../types/communityTypes';
 import { INITIAL_COMMUNITY_DISCUSSIONS } from '../data/communityData';
 
 export function useCommunityRealtime(user: any) {
@@ -12,7 +12,7 @@ export function useCommunityRealtime(user: any) {
   // Map database row to CommunityDiscussion
   const mapRowToDiscussion = (row: any): CommunityDiscussion => {
     const isLiked = user?.id && Array.isArray(row.liked_by) ? row.liked_by.includes(user.id) : false;
-    let mediaItems = [];
+    let mediaItems: MediaItem[] = [];
     if (row.media_url) {
       mediaItems.push({
         type: (row.media_type === 'video' ? 'video' : 'image') as 'image' | 'video',
@@ -196,6 +196,7 @@ export function useCommunityRealtime(user: any) {
 
   return {
     discussions,
+    setDiscussions,
     loading,
     isRealtimeActive,
     refreshPosts: fetchPosts,

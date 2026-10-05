@@ -12,7 +12,7 @@ export default function TabLayout() {
   const { theme, isDark } = useTheme();
 
   // Show floating chat button permanently on all tabs EXCEPT index (Home)
-  const activeTabRoute = segments[1] || 'index';
+  const activeTabRoute = (segments as string[])[1] || 'index';
   const showFloatingChat = activeTabRoute !== 'index';
 
   // Profile avatar header right icon constant for all 5 tabs

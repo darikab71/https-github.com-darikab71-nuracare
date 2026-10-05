@@ -1,6 +1,25 @@
+export * from '../shared/types';
+import {
+  ChallengeCategory as SharedCategory,
+  ChallengeMode,
+  ChallengeObjective,
+  ChallengeRule,
+  ChallengeStakeConfig,
+  VerificationType,
+  VerificationStrength,
+  ChallengeParticipant
+} from '../shared/types';
+
 export type CommunityPrimaryTab = 'discovery' | 'challenges' | 'community' | 'inbox';
 
 export type ChallengeCategory =
+  | 'physical'
+  | 'sleep'
+  | 'digital_wellbeing'
+  | 'hydration'
+  | 'habits'
+  | 'social'
+  | 'nura_360'
   | 'Fitness'
   | 'Sleep'
   | 'Hydration'
@@ -11,7 +30,7 @@ export type ChallengeCategory =
   | 'Digital'
   | 'Habits';
 
-export type ChallengeDifficulty = 'Easy' | 'Moderate' | 'Challenging';
+export type ChallengeDifficulty = 'Easy' | 'Moderate' | 'Challenging' | 'Beginner' | 'Advanced' | 'Custom';
 
 export interface CommunityChallenge {
   id: string;
@@ -19,13 +38,14 @@ export interface CommunityChallenge {
   category: ChallengeCategory;
   description: string;
   creator: string;
+  creatorId?: string;
   creatorBadge?: string;
   participantsCount: number;
   durationDays: number;
   difficulty: ChallengeDifficulty;
   startDate: string;
   endDate: string;
-  rules: string[];
+  rules: string[] | ChallengeRule[];
   dailyGoal: string;
   currentDay: number;
   streak: number;
@@ -34,6 +54,27 @@ export interface CommunityChallenge {
   completedDays: number[];
   coverColor: string;
   iconName: string;
+  imageUrl?: string;
+  bannerUrl?: string;
+  mode?: ChallengeMode;
+  objectives?: ChallengeObjective[];
+  status?: 'draft' | 'published' | 'joining' | 'locked' | 'active' | 'final_verification' | 'settlement' | 'completed' | 'archived';
+  isMonetary?: boolean;
+  entryFee?: number;
+  currency?: string;
+  grossPool?: number;
+  platformFeePct?: number;
+  creatorRewardPct?: number;
+  prizePool?: number;
+  winnerRules?: {
+    type: 'split_all_verified_completers' | 'winner_take_all' | 'top_three_split';
+    payoutDistribution?: number[];
+  };
+  inviteCode?: string;
+  isPrivate?: boolean;
+  verificationType?: VerificationType;
+  verificationStrength?: VerificationStrength;
+  participants?: ChallengeParticipant[];
 }
 
 export interface CommunityGroup {

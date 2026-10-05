@@ -46,45 +46,56 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function fetchProfile() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      if (data) {
-        const fastingMode = storage.getString(`fastingMode_${user.id}`) || 'None';
-        const culturalHeritage = storage.getString(`culturalHeritage_${user.id}`) || 'Global';
-        const langPref = storage.getString(`langPref_${user.id}`) || 'English';
-        const gender = storage.getString(`gender_${user.id}`) || data.gender || 'female';
-        setProfileState({ ...data, medicalNotes: data.medical_notes, fastingMode, culturalHeritage, langPref, gender });
-      } else if (error && error.code === 'PGRST116') {
-        const { data: newProfile } = await supabase
-          .from('profiles')
-          .upsert({ id: user.id, name: user.user_metadata?.full_name || '', updated_at: new Date() })
-          .select()
-          .single();
-        if (newProfile) {
-          const fastingMode = storage.getString(`fastingMode_${user.id}`) || 'None';
-          const culturalHeritage = storage.getString(`culturalHeritage_${user.id}`) || 'Global';
-          const langPref = storage.getString(`langPref_${user.id}`) || 'English';
-          setProfileState({ ...newProfile, medicalNotes: newProfile.medical_notes, fastingMode, culturalHeritage, langPref });
-        } else {
-          setProfileState({ id: user.id, name: user.user_metadata?.full_name || '', _fallback: true });
-        }
-      } else {
-        console.error("Error fetching profile", error);
-        setProfileState({ id: user.id, name: user.user_metadata?.full_name || '', _fallback: true });
+      if (!currentUser?.id) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+      setLoading(true);
+      try {
+        const userId = currentUser.id;
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        
+        if (data) {
+          const fastingMode = storage.getString(`fastingMode_${userId}`) || 'None';
+          const culturalHeritage = storage.getString(`culturalHeritage_${userId}`) || 'Global';
+          const langPref = storage.getString(`langPref_${userId}`) || 'English';
+          const gender = storage.getString(`gender_${userId}`) || data.gender || 'female';
+          setProfileState({ ...data, medicalNotes: data.medical_notes, fastingMode, culturalHeritage, langPref, gender });
+        } else if (error && error.code === 'PGRST116') {
+          const { data: newProfile } = await supabase
+            .from('profiles')
+            .upsert({ id: userId, name: currentUser.name || currentUser.user_metadata?.full_name || '', updated_at: new Date() })
+            .select()
+            .single();
+          if (newProfile) {
+            const fastingMode = storage.getString(`fastingMode_${userId}`) || 'None';
+            const culturalHeritage = storage.getString(`culturalHeritage_${userId}`) || 'Global';
+            const langPref = storage.getString(`langPref_${userId}`) || 'English';
+            setProfileState({ ...newProfile, medicalNotes: newProfile.medical_notes, fastingMode, culturalHeritage, langPref });
+          } else {
+            setProfileState({ id: userId, name: currentUser.name || currentUser.user_metadata?.full_name || '', _fallback: true });
+          }
+        } else {
+          setProfileState({ id: userId, name: currentUser.name || currentUser.user_metadata?.full_name || '', _fallback: true });
+        }
+      } catch (err) {
+        console.warn("Profile fetch error, using local fallback", err);
+        setProfileState({ id: currentUser.id, name: currentUser.name || 'Nura Explorer', _fallback: true });
+      } finally {
+        setLoading(false);
+      }
     }
 
     fetchProfile();
-  }, [user]);
+  }, [currentUser?.id]);
 
   const setProfile = async (updates: any) => {
-    if (!user) return;
+    if (!currentUser?.id) return;
+    const userId = currentUser.id;
     
     const dbPayload = { ...updates };
     if ('medicalNotes' in dbPayload) {
@@ -93,38 +104,42 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     }
     
     if ('fastingMode' in dbPayload) {
-      storage.set(`fastingMode_${user.id}`, dbPayload.fastingMode);
+      storage.set(`fastingMode_${userId}`, dbPayload.fastingMode);
       delete dbPayload.fastingMode;
     }
 
     if ('culturalHeritage' in dbPayload) {
-      storage.set(`culturalHeritage_${user.id}`, dbPayload.culturalHeritage);
+      storage.set(`culturalHeritage_${userId}`, dbPayload.culturalHeritage);
       delete dbPayload.culturalHeritage;
     }
 
     if ('langPref' in dbPayload) {
-      storage.set(`langPref_${user.id}`, dbPayload.langPref);
+      storage.set(`langPref_${userId}`, dbPayload.langPref);
       delete dbPayload.langPref;
     }
 
     if ('gender' in dbPayload) {
-      storage.set(`gender_${user.id}`, dbPayload.gender);
+      storage.set(`gender_${userId}`, dbPayload.gender);
     }
     
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert({ id: user.id, ...dbPayload, updated_at: new Date() })
-      .select()
-      .single();
-      
-    if (!error && data) {
-      const fastingMode = storage.getString(`fastingMode_${user.id}`) || 'None';
-      const culturalHeritage = storage.getString(`culturalHeritage_${user.id}`) || 'Global';
-      const langPref = storage.getString(`langPref_${user.id}`) || 'English';
-      const gender = storage.getString(`gender_${user.id}`) || data.gender || 'female';
-      setProfileState({ ...data, medicalNotes: data.medical_notes, fastingMode, culturalHeritage, langPref, gender });
-    } else {
-      console.error('Error updating profile', error);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .upsert({ id: userId, ...dbPayload, updated_at: new Date() })
+        .select()
+        .single();
+        
+      if (!error && data) {
+        const fastingMode = storage.getString(`fastingMode_${userId}`) || 'None';
+        const culturalHeritage = storage.getString(`culturalHeritage_${userId}`) || 'Global';
+        const langPref = storage.getString(`langPref_${userId}`) || 'English';
+        const gender = storage.getString(`gender_${userId}`) || data.gender || 'female';
+        setProfileState({ ...data, medicalNotes: data.medical_notes, fastingMode, culturalHeritage, langPref, gender });
+      } else {
+        setProfileState((prev: any) => ({ ...(prev || {}), ...updates }));
+      }
+    } catch (err) {
+      setProfileState((prev: any) => ({ ...(prev || {}), ...updates }));
     }
   };
 

@@ -77,6 +77,7 @@ import HabitTrackerGrid from '../../src/components/lifestyle/HabitTrackerGrid';
 
 // Detail View
 import CategoryDetailView from '../../src/components/lifestyle/detail/CategoryDetailView';
+import DigitalWellbeingScreen from '../../src/components/digitalWellbeing/DigitalWellbeingScreen';
 
 export default function LifestyleScreen() {
   const router = useRouter();
@@ -116,7 +117,7 @@ export default function LifestyleScreen() {
 
   // Breathwork timer cycle
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setInterval>;
     if (breathingActive) {
       if (breathPhase === 'Ready' || breathPhase === 'Exhale (8s)') {
         setBreathPhase('Inhale (4s)');
@@ -214,6 +215,11 @@ export default function LifestyleScreen() {
     const updated = resetRoutine(type);
     setRoutines(updated);
   };
+
+  // IF DIGITAL CATEGORY IS SELECTED, RENDER FULL DIGITAL WELLBEING CONTROL CENTER
+  if (activeCategory === 'digital') {
+    return <DigitalWellbeingScreen onBack={() => setActiveCategory(null)} />;
+  }
 
   // IF CATEGORY DETAIL IS SELECTED, RENDER DETAIL EXPERIENCE
   if (activeCategory) {
@@ -374,7 +380,7 @@ export default function LifestyleScreen() {
       {/* Permanent Floating Chat FAB */}
       <TouchableOpacity
         style={[styles.floatingChatFab, { backgroundColor: theme.accent }]}
-        onPress={() => router.push('/(tabs)/chat')}
+        onPress={() => router.push('/chat')}
         activeOpacity={0.85}
       >
         <Bot size={22} color="#ffffff" />

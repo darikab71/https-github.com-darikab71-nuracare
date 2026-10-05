@@ -14,7 +14,7 @@ export default function HabitTrackerGrid({ habits, onToggleHabit }: HabitTracker
 
   // Generate 7 days ending today
   const last7Days = React.useMemo(() => {
-    const list = [];
+    const list: { iso: string; letter: string; isToday: boolean }[] = [];
     const today = new Date();
     const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     for (let i = 6; i >= 0; i--) {

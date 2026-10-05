@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -63,6 +63,19 @@ export default function ChallengesHub({
   const [newRule1, setNewRule1] = useState('');
   const [newRule2, setNewRule2] = useState('');
   const [newPrivacy, setNewPrivacy] = useState<'Public' | 'Private'>('Public');
+
+  // Nura AI Challenge Architect state
+  const [showNuraAiModal, setShowNuraAiModal] = useState<boolean>(false);
+  const scrollViewRef = useRef<any>(null);
+  const [chatMessages, setChatMessages] = useState<Array<{ id: string; sender: 'nura' | 'user'; text: string; isBlueprint?: boolean; blueprintData?: any }>>([
+    {
+      id: '1',
+      sender: 'nura',
+      text: 'Hey! I am Nura. What kind of habit challenge do you want to build today? You can just say "Make me a 30-day coding challenge" and I will design it!'
+    }
+  ]);
+  const [nuraPrompt, setNuraPrompt] = useState<string>('');
+  const [isNuraGenerating, setIsNuraGenerating] = useState<boolean>(false);
 
   // Milestone Celebration Toast state
   const [celebrationToast, setCelebrationToast] = useState<{
@@ -176,14 +189,22 @@ export default function ChallengesHub({
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Small steps. Shared progress.</Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.createChallengeBtn}
-          onPress={() => setShowCreateWizard(true)}
-          activeOpacity={0.85}
-        >
-          <Plus size={16} color="#ffffff" />
-          <Text style={styles.createChallengeBtnText}>Create</Text>
-        </TouchableOpacity>
+              {/* 2. Nura AI Banner */}
+      <TouchableOpacity
+        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, backgroundColor: `${theme.accent}15`, borderRadius: 16, marginBottom: 20 }}
+        onPress={() => setShowCreateWizard(true)}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: `${theme.accent}20`, alignItems: 'center', justifyContent: 'center' }}>
+            <Sparkles size={22} color={theme.accent} />
+          </View>
+          <View>
+            <Text style={{ fontSize: 16, fontWeight: '800', color: theme.textPrimary, marginBottom: 2 }}>Create with Nura AI Architect</Text>
+            <Text style={{ fontSize: 12, color: theme.textSecondary }}>Automated anti-cheat habit design</Text>
+          </View>
+        </View>
+        <ChevronRight size={20} color={theme.accent} />
+      </TouchableOpacity>
       </View>
 
       {/* 2. Sub-Filter Pills */}
@@ -664,41 +685,242 @@ export default function ChallengesHub({
             </ScrollView>
 
             {/* Wizard Navigation Footer */}
-            <View style={styles.wizardFooter}>
-              {wizardStep > 1 && (
-                <TouchableOpacity
-                  style={styles.wizardBackBtn}
-                  onPress={() => setWizardStep((prev) => (prev - 1) as any)}
-                >
-                  <Text style={styles.wizardBackBtnText}>Back</Text>
-                </TouchableOpacity>
-              )}
-
-              {wizardStep < 4 ? (
-                <TouchableOpacity
-                  style={styles.wizardNextBtn}
-                  onPress={() => {
-                    if (wizardStep === 1 && !newTitle.trim()) {
-                      Alert.alert('Title required', 'Please enter a title for your challenge.');
-                      return;
-                    }
-                    setWizardStep((prev) => (prev + 1) as any);
-                  }}
-                >
-                  <Text style={styles.wizardNextBtnText}>Next Step</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  style={styles.wizardPublishBtn}
-                  onPress={handlePublishChallenge}
-                >
-                  <Text style={styles.wizardPublishBtnText}>Publish Challenge</Text>
-                </TouchableOpacity>
-              )}
+                        <View style={[styles.wizardFooter, { borderTopColor: theme.borderSubtle, backgroundColor: isDark ? '#1e293b' : '#ffffff', flexDirection: 'column', gap: 12 }]}>
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                {wizardStep > 1 && (
+                  <TouchableOpacity
+                    style={[styles.wizardBackBtn, { borderColor: theme.borderSubtle, backgroundColor: isDark ? '#334155' : '#f1f5f9' }]}
+                    onPress={() => setWizardStep((prev) => (prev - 1) as any)}
+                    activeOpacity={0.75}
+                  >
+                    <Text style={[styles.wizardBackBtnText, { color: theme.textPrimary }]}>Back</Text>
+                  </TouchableOpacity>
+                )}
+                {wizardStep < 4 ? (
+                  <TouchableOpacity
+                    style={styles.wizardNextBtn}
+                    onPress={() => setWizardStep((prev) => (prev + 1) as any)}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={styles.wizardNextBtnText}>Next Step</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.wizardPublishBtn}
+                    onPress={handlePublishChallenge}
+                    activeOpacity={0.85}
+                  >
+                     <Text style={styles.wizardPublishBtnText}>Launch Challenge</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 12, backgroundColor: `${theme.accent}15`, borderRadius: 12 }}
+                onPress={() => {
+                  setShowCreateWizard(false);
+                  setTimeout(() => setShowNuraAiModal(true), 300);
+                }}
+              >
+                <Sparkles size={16} color={theme.accent} />
+                <Text style={{ color: theme.accent, fontWeight: '700', fontSize: 14 }}>Create with Nura AI Chat</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
+            </Modal>
+
+      {/* ======================================================== */}
+      {/* 9.5. NURA AI CHALLENGE ARCHITECT MODAL                    */}
+      {/* ======================================================== */}
+      <Modal
+        visible={showNuraAiModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowNuraAiModal(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalOverlay}
+        >
+          <View style={[styles.wizardModalSheet, { backgroundColor: theme.surfaceElevated }]}>
+            <View style={[styles.sheetHeader, { borderBottomColor: theme.borderSubtle }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={[styles.sheetIconWrap, { backgroundColor: `${theme.accent}20` }]}>
+                  <Sparkles size={20} color={theme.accent} />
+                </View>
+                <View>
+                  <Text style={[styles.sheetTitle, { color: theme.textPrimary }]}>Nura AI Challenge Architect</Text>
+                  <Text style={[styles.sheetSubtitle, { color: theme.textSecondary }]}>
+                    Automated Anti-Cheat Habit Design
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() => setShowNuraAiModal(false)}
+                style={styles.sheetCloseBtn}
+              >
+                <X size={20} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              style={{ flex: 1, paddingHorizontal: 16 }} 
+              showsVerticalScrollIndicator={false} 
+              contentContainerStyle={{ paddingBottom: 20, paddingTop: 16 }}
+              ref={scrollViewRef}
+              onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+            >
+              {chatMessages.map((msg) => (
+                <View key={msg.id} style={{ marginBottom: 16, flexDirection: msg.sender === 'nura' ? 'row' : 'row-reverse', gap: 12 }}>
+                  {msg.sender === 'nura' && (
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: theme.accent, alignItems: 'center', justifyContent: 'center' }}>
+                      <Sparkles size={16} color="#fff" />
+                    </View>
+                  )}
+                  <View style={{ 
+                    maxWidth: '85%', 
+                    backgroundColor: msg.sender === 'nura' ? (isDark ? '#1e293b' : '#f1f5f9') : theme.accent, 
+                    padding: 14, 
+                    borderRadius: 18, 
+                    borderTopLeftRadius: msg.sender === 'nura' ? 4 : 18,
+                    borderTopRightRadius: msg.sender === 'nura' ? 18 : 4
+                  }}>
+                    <Text style={{ color: msg.sender === 'nura' ? theme.textPrimary : '#fff', fontSize: 15, lineHeight: 22 }}>
+                      {msg.text}
+                    </Text>
+                    
+                    {msg.isBlueprint && msg.blueprintData && (
+                      <View style={[styles.previewCard, { backgroundColor: theme.surfaceElevated, borderColor: '#16a34a', marginHorizontal: 0, marginTop: 12, width: '100%' }]}>
+                        <View style={styles.previewCardInner}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                              <Target size={14} color="#16a34a" />
+                              <Text style={styles.previewCategory}>{msg.blueprintData.category}</Text>
+                            </View>
+                            <View style={styles.previewDurationBadge}>
+                              <Text style={styles.previewDurationText}>{msg.blueprintData.durationDays} Days</Text>
+                            </View>
+                          </View>
+                          
+                          <Text style={[styles.previewTitle, { color: theme.textPrimary }]}>{msg.blueprintData.title}</Text>
+                          <Text style={[styles.previewDesc, { color: theme.textSecondary }]}>{msg.blueprintData.description}</Text>
+                          
+                          <View style={[styles.previewVerificationBox, { backgroundColor: isDark ? '#334155' : '#f1f5f9' }]}>
+                            <CheckCircle2 size={16} color="#64748b" />
+                            <Text style={[styles.previewVerificationText, { color: theme.textSecondary }]}>
+                              Requires Daily Check-in
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              ))}
+              
+              {isNuraGenerating && (
+                <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
+                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: theme.accent, alignItems: 'center', justifyContent: 'center' }}>
+                    <Sparkles size={16} color="#fff" />
+                  </View>
+                  <View style={{ backgroundColor: isDark ? '#1e293b' : '#f1f5f9', padding: 14, borderRadius: 18, borderTopLeftRadius: 4 }}>
+                    <Text style={{ color: theme.textPrimary, fontSize: 15, fontStyle: 'italic' }}>Nura is thinking...</Text>
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+
+            <View style={[styles.wizardFooter, { borderTopColor: theme.borderSubtle, backgroundColor: isDark ? '#1e293b' : '#ffffff', flexDirection: 'column', gap: 12, paddingBottom: 16 }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, width: '100%' }}>
+                <TextInput
+                  style={{
+                    flex: 1,
+                    backgroundColor: isDark ? '#0f172a' : '#f8fafc',
+                    borderWidth: 1,
+                    borderColor: theme.borderSubtle,
+                    borderRadius: 24,
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    fontSize: 15,
+                    color: theme.textPrimary,
+                  }}
+                  placeholder="Describe your challenge..."
+                  placeholderTextColor={theme.textSecondary}
+                  value={nuraPrompt}
+                  onChangeText={setNuraPrompt}
+                  onSubmitEditing={() => {
+                    if (!nuraPrompt.trim()) return;
+                    
+                    const userMsg = { id: Date.now().toString(), sender: 'user', text: nuraPrompt.trim() };
+                    setChatMessages(prev => [...prev, userMsg]);
+                    setNuraPrompt('');
+                    setIsNuraGenerating(true);
+                    
+                    setTimeout(() => {
+                      setIsNuraGenerating(false);
+                      const aiMsg = { 
+                        id: (Date.now() + 1).toString(), 
+                        sender: 'nura', 
+                        text: "I've drafted a challenge based on your idea! Here is the blueprint. You can launch it now or tell me what to change.",
+                        isBlueprint: true,
+                        blueprintData: {
+                          title: "100 Deep Squats Morning War",
+                          description: "Build leg strength and morning discipline. Must be completed before 9 AM.",
+                          category: "Fitness",
+                          durationDays: 30,
+                          dailyGoal: "100 Squats",
+                        }
+                      };
+                      setChatMessages(prev => [...prev, aiMsg]);
+                    }, 1500);
+                  }}
+                />
+                <TouchableOpacity
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: theme.accent,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: nuraPrompt.trim() ? 1 : 0.5
+                  }}
+                  disabled={!nuraPrompt.trim() || isNuraGenerating}
+                  onPress={() => {
+                    if (!nuraPrompt.trim()) return;
+                    
+                    const userMsg = { id: Date.now().toString(), sender: 'user', text: nuraPrompt.trim() };
+                    setChatMessages(prev => [...prev, userMsg]);
+                    setNuraPrompt('');
+                    setIsNuraGenerating(true);
+                    
+                    setTimeout(() => {
+                      setIsNuraGenerating(false);
+                      const aiMsg = { 
+                        id: (Date.now() + 1).toString(), 
+                        sender: 'nura', 
+                        text: "I've drafted a challenge based on your idea! Here is the blueprint. You can launch it now or tell me what to change.",
+                        isBlueprint: true,
+                        blueprintData: {
+                          title: "100 Deep Squats Morning War",
+                          description: "Build leg strength and morning discipline. Must be completed before 9 AM.",
+                          category: "Fitness",
+                          durationDays: 30,
+                          dailyGoal: "100 Squats",
+                        }
+                      };
+                      setChatMessages(prev => [...prev, aiMsg]);
+                    }, 1500);
+                  }}
+                >
+                  <ChevronRight size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
+
     </ScrollView>
   );
 }

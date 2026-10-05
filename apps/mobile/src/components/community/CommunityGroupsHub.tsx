@@ -379,7 +379,7 @@ export default function CommunityGroupsHub({
                       selectedGroup.joined && styles.heroJoinBtnTextJoined,
                     ]}
                   >
-                    {selectedGroup.joined ? 'Joined Community ✓' : '+ Join Community'}
+                    {selectedGroup.joined ? 'Joined Community' : '+ Join Community'}
                   </Text>
                 </TouchableOpacity>
               </View>

@@ -17,6 +17,10 @@ class PermissionService {
     return cached || 'undetermined';
   }
 
+  public checkPermission(type: PermissionType): boolean {
+    return this.getStatus(type) === 'granted';
+  }
+
   /**
    * Updates local tracking of permission status.
    */

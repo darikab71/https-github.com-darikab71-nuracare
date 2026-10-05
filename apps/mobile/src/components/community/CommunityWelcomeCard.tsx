@@ -94,10 +94,10 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   bannerImage: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   imageOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0, 0, 0, 0.42)',
   },
   badgeWrap: {

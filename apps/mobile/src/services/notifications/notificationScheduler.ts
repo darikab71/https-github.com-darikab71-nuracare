@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { storage } from '../storage/mmkv';
+import { storage } from '../../storage/mmkv';
 
 const STORAGE_KEY_SCHEDULED_REMINDERS = 'nuracare_scheduled_reminders';
 

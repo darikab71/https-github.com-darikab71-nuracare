@@ -77,7 +77,7 @@ export const lightTheme: ThemeTokens = {
   accent: '#16a34a',
   accentSecondary: '#15803d',
   accentSoft: '#bbf7d0',
-  accentDeep: '#dcfce7',
+  accentDeep: '#166534',
   accentGlow: 'rgba(22, 163, 74, 0.12)',
   
   success: '#16a34a',

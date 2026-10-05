@@ -60,13 +60,14 @@ export default function CommunityCenterScreen() {
   // Supabase Realtime Community Synchronization
   const {
     discussions,
+    setDiscussions,
     createPost: realtimeCreatePost,
     toggleSupport: realtimeToggleSupport,
     isRealtimeActive,
   } = useCommunityRealtime(currentUser);
 
   // 1. Root Tab State (Discovery | Challenges | Community | Inbox)
-  const [activeTab, setActiveTab] = useState<CommunityPrimaryTab>('discovery');
+  const [activeTab, setActiveTab] = useState<CommunityPrimaryTab>('challenges');
 
   // 2. Main Community State
   const [groups, setGroups] = useState<CommunityGroup[]>(INITIAL_COMMUNITY_GROUPS);
@@ -395,7 +396,6 @@ export default function CommunityCenterScreen() {
             onCreateGroup={handleCreateGroup}
             onPostDiscussion={handlePostDiscussion}
             onReportItem={handleOpenReport}
-            onCreateDiscussion={handleCreateDiscussion}
           />
         )}
 

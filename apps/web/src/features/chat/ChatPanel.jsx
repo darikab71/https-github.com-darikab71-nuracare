@@ -7,6 +7,8 @@ import { UrgencyCard } from '@/features/chat/UrgencyCard';
 import { getSessionName, extractSessionMemory, buildCrossSessionMemory } from '@/features/chat/chatMemory';
 import ChatErrorBoundary from '@/features/chat/ChatErrorBoundary';
 import { useCheckups } from '@/hooks/useCheckups';
+import { webAgentEngine } from '@/features/chat/webAgentEngine';
+import { webToolExecutor } from '@/features/chat/webToolExecutor';
 function Chat({ profile, saveProfile, sessions, saveSession, deleteSession, handleDeleteSession, setShareSession, currentSessionId, setCurrentSessionId, t = (k)=>k, lang = 'en' }) {
   const firstName = profile?.name?.split(' ')[0] || 'there';
   const { addCheckup } = useCheckups();
@@ -82,6 +84,7 @@ WELLNESS CONTEXT:${checkinContext}
     const cur = sessions.find(s => s.id === currentSessionId);
     return !cur || !cur.messages || cur.messages.length <= 1;
   });
+  const [pendingConfirmation, setPendingConfirmation] = useState(null);
   const chatEndRef = useRef(null);
   const GROQ_KEY = import.meta.env.VITE_GROQ_API_KEY || '';
 
@@ -269,6 +272,22 @@ Only include the JSON once — after you know symptom + duration + severity.${ch
     setIsLoading(true);
 
     try {
+      // 1. Check for Nura Agent Tool Execution Layer
+      const agentResult = await webAgentEngine.processUserMessage(trimmed, profile?.id, profile);
+      if (agentResult.isActionPlan) {
+        if (agentResult.pendingConfirmation) {
+          setPendingConfirmation(agentResult.pendingConfirmation);
+        }
+        setMessages(prev => [...prev, {
+          id: 'agent_' + Date.now(),
+          role: 'assistant',
+          content: agentResult.textResponse,
+          executedSteps: agentResult.executedSteps
+        }]);
+        setIsLoading(false);
+        return;
+      }
+
       let res;
       const isDev = import.meta.env.DEV;
 
@@ -467,6 +486,29 @@ Only include the JSON once — after you know symptom + duration + severity.${ch
     }
   };
 
+  const handleConfirmAction = async () => {
+    if (!pendingConfirmation) return;
+    setIsLoading(true);
+    const result = await webToolExecutor.execute(pendingConfirmation.toolName, pendingConfirmation.params, profile?.id, profile);
+    const completedTool = pendingConfirmation.toolName;
+    setPendingConfirmation(null);
+    setMessages(prev => [...prev, {
+      id: 'agent_' + Date.now(),
+      role: 'assistant',
+      content: result.success ? `Confirmed: ${result.message}` : `Action failed: ${result.message}`,
+      executedSteps: [{ toolName: completedTool, result, status: result.success ? 'completed' : 'failed' }]
+    }]);
+    setIsLoading(false);
+  };
+
+  const handleCancelAction = () => {
+    setPendingConfirmation(null);
+    setMessages(prev => [...prev, {
+      id: 'agent_' + Date.now(),
+      role: 'assistant',
+      content: 'Action cancelled. Nothing was changed.'
+    }]);
+  };
 
   const startNewSession = () => {
     const newId = 'session-' + Date.now();
@@ -599,6 +641,27 @@ Only include the JSON once — after you know symptom + duration + severity.${ch
                       <div className="chat-bubble bubble-ai">
                         <div className="bubble-label"><Icons.Leaf size={12} style={{ marginRight: 4 }} />Nura</div>
                         {displayText}
+                        {m.executedSteps && m.executedSteps.length > 0 && (
+                          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {m.executedSteps.map((step, idx) => (
+                              <div key={idx} style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                padding: '4px 8px',
+                                borderRadius: 6,
+                                background: 'rgba(22, 163, 74, 0.08)',
+                                border: '1px solid rgba(22, 163, 74, 0.2)',
+                                fontSize: 12,
+                                fontWeight: 500,
+                                color: 'var(--text)'
+                              }}>
+                                <Icons.CheckCircle2 size={13} color="#16a34a" />
+                                <span>{step.result?.message || step.toolName}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     {urgencyData?.urgency && <UrgencyCard data={urgencyData} />}
@@ -615,6 +678,60 @@ Only include the JSON once — after you know symptom + duration + severity.${ch
             )}
             <div ref={chatEndRef} />
           </div>
+
+          {/* Authorization Required Card */}
+          {pendingConfirmation && (
+            <div style={{
+              margin: '8px 16px 12px',
+              padding: 14,
+              borderRadius: 12,
+              border: '1px solid var(--border)',
+              background: 'var(--surface-elevated, #f8fafc)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: '#f59e0b', fontWeight: 700, fontSize: 13 }}>
+                <Icons.AlertTriangle size={16} />
+                <span>Authorization Required</span>
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text)', marginBottom: 12, lineHeight: 1.5 }}>
+                {pendingConfirmation.prompt}
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={handleCancelAction}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 8,
+                    border: '1px solid var(--border)',
+                    background: 'transparent',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    fontSize: 12,
+                    fontWeight: 600
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmAction}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 8,
+                    border: 'none',
+                    background: '#16a34a',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    fontSize: 12,
+                    fontWeight: 700
+                  }}
+                >
+                  Confirm Action
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="chat-input-area">
             {showQuickStart && !messages.some(m => m.role === 'user') && (

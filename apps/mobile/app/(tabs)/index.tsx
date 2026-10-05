@@ -411,7 +411,7 @@ export default function AdaptiveHomeScreen() {
                 {/* Background Image */}
                 <Image 
                   source={{ uri: act.image }} 
-                  style={StyleSheet.absoluteFillObject}
+                  style={StyleSheet.absoluteFill}
                   resizeMode="cover"
                 />
                 {/* Semi-transparent Emerald Glass & Dark Overlay */}
@@ -503,7 +503,7 @@ export default function AdaptiveHomeScreen() {
                 {/* Background Image */}
                 <Image 
                   source={{ uri: item.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Pfefferminze_natur_peppermint.jpg/400px-Pfefferminze_natur_peppermint.jpg' }} 
-                  style={StyleSheet.absoluteFillObject}
+                  style={StyleSheet.absoluteFill}
                   resizeMode="cover"
                 />
                 {/* Semi-transparent Emerald/Dark Glass Overlay */}
@@ -905,7 +905,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   actionCardImageOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(15, 23, 42, 0.48)',
   },
   actionCardContentHover: {

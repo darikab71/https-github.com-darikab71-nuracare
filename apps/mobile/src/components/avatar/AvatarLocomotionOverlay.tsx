@@ -113,7 +113,7 @@ export default function AvatarLocomotionOverlay({
   });
 
   return (
-    <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
       <Animated.View
         style={[
           styles.flyingCharacterWrap,

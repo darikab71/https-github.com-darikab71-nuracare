@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   Alert
 } from 'react-native';
-import { Send, Bot, ArrowLeft, Mic, MicOff, AlertTriangle, Globe, Sparkles } from 'lucide-react-native';
+import { Send, Bot, ArrowLeft, Mic, MicOff, AlertTriangle, Globe, Sparkles, CheckCircle2, ShieldAlert } from 'lucide-react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useChatStore } from '../src/store';
 import { useProfile } from '../src/context/ProfileContext';
@@ -22,6 +22,8 @@ import { classifyHealthQuery } from '../src/ai/safetyClassifier';
 import { buildMinimizedContext } from '../src/ai/contextMinimizer';
 import PermissionExplanationModal from '../src/permissions/components/PermissionExplanationModal';
 import { permissionService } from '../src/permissions/permissionService';
+import { nuraAgentEngine, AgentProcessResult } from '../src/services/nura/nuraAgentEngine';
+import { nuraToolExecutor } from '../src/services/nura/nuraToolExecutor';
 
 export default function ChatScreen() {
   const { prompt: paramPrompt } = useLocalSearchParams<{ prompt?: string }>();
@@ -35,6 +37,7 @@ export default function ChatScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [emergencyAlert, setEmergencyAlert] = useState<string | null>(null);
   const [showMicModal, setShowMicModal] = useState(false);
+  const [pendingConfirmation, setPendingConfirmation] = useState<{ toolName: string; params: any; prompt: string } | null>(null);
   
   const scrollViewRef = useRef<ScrollView>(null);
   const prompts = TRILINGUAL_PROMPTS[selectedLanguage];
@@ -81,28 +84,55 @@ export default function ChatScreen() {
     addMessage(userMsg);
     setIsLoading(true);
 
-    // 3. Build Minimized Context (Consent-aware)
-    const context = buildMinimizedContext(profile, [], userText);
-
-    // 4. Generate context-aware response
-    setTimeout(() => {
-      let aiResponseText = '';
-      if (selectedLanguage === 'am') {
-        aiResponseText = `ጤና ይስጥልኝ! መልዕክትዎን ተመልክቻለሁ። እንደ እርስዎ የሰውነት ዕረፍት ሁኔታ (Recovery ${context?.recoveryScore ?? 84}%)፣ ዛሬ የተመጣጠነ ምግብ (ሽሮ፣ ጤፍና ተልባ) መመገብና በቂ ውኃ መጠጣት ይመከራል።`;
-      } else if (selectedLanguage === 'om') {
-        aiResponseText = `Akkam jirtu! Ergaa keessan argeera. Haala boqonnaa keessan irratti hundaa'uun (Recovery ${context?.recoveryScore ?? 84}%), har'a bishaan gahaa dhuguu fi soorata madaalawaa soorachuun baay'ee gaariidha.`;
-      } else {
-        aiResponseText = `Based on your recovery level (${context?.recoveryScore ?? 84}%), your energy is in a good range. If you are observing Ethiopian fasting (Tsom), ensure you get sufficient plant proteins like lentils, chickpeas, and flaxseed.`;
+    try {
+      // Execute through Nura Agent Engine
+      const agentResult = await nuraAgentEngine.processUserMessage(userText, profile?.id);
+      
+      if (agentResult.pendingConfirmation) {
+        setPendingConfirmation(agentResult.pendingConfirmation);
       }
 
       addMessage({
         id: `msg_${Date.now() + 1}`,
         role: 'assistant',
-        content: aiResponseText,
+        content: agentResult.textResponse,
+        executedSteps: agentResult.executedSteps,
         created_at: new Date().toISOString()
       });
+    } catch (err) {
+      addMessage({
+        id: `msg_${Date.now() + 1}`,
+        role: 'assistant',
+        content: `I encountered an unexpected issue processing that request. Please try again.`,
+        created_at: new Date().toISOString()
+      });
+    } finally {
       setIsLoading(false);
-    }, 950);
+    }
+  };
+
+  const handleConfirmAction = async () => {
+    if (!pendingConfirmation) return;
+    setIsLoading(true);
+    const result = await nuraToolExecutor.execute(pendingConfirmation.toolName, pendingConfirmation.params, profile?.id);
+    setPendingConfirmation(null);
+    addMessage({
+      id: `msg_${Date.now()}`,
+      role: 'assistant',
+      content: result.success ? `Confirmed: ${result.message}` : `Action failed: ${result.message}`,
+      created_at: new Date().toISOString()
+    });
+    setIsLoading(false);
+  };
+
+  const handleCancelAction = () => {
+    setPendingConfirmation(null);
+    addMessage({
+      id: `msg_${Date.now()}`,
+      role: 'assistant',
+      content: `Action cancelled. Nothing was changed.`,
+      created_at: new Date().toISOString()
+    });
   };
 
   const handleVoicePress = async () => {
@@ -231,6 +261,20 @@ export default function ChatScreen() {
                 ]}>
                   {msg.content}
                 </Text>
+
+                {/* Subtle Action Trace */}
+                {!isUser && msg.executedSteps && msg.executedSteps.length > 0 && (
+                  <View style={styles.actionTraceContainer}>
+                    {msg.executedSteps.map((step: any, idx: number) => (
+                      <View key={idx} style={[styles.actionTraceChip, { backgroundColor: theme.surfaceElevated, borderColor: theme.borderSubtle }]}>
+                        <CheckCircle2 size={12} color={theme.accent} />
+                        <Text style={[styles.actionTraceText, { color: theme.textSecondary }]}>
+                          {step.result?.message || step.toolName}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
               </View>
             );
           })
@@ -243,6 +287,27 @@ export default function ChatScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Confirmation Required Card */}
+      {pendingConfirmation && (
+        <View style={[styles.confirmationCard, { backgroundColor: theme.surfaceModal, borderColor: theme.borderElevated }]}>
+          <View style={styles.confirmationHeader}>
+            <ShieldAlert size={18} color={theme.warning} />
+            <Text style={[styles.confirmationTitle, { color: theme.textPrimary }]}>Authorization Required</Text>
+          </View>
+          <Text style={[styles.confirmationPrompt, { color: theme.textSecondary }]}>
+            {pendingConfirmation.prompt}
+          </Text>
+          <View style={styles.confirmationBtnRow}>
+            <TouchableOpacity onPress={handleCancelAction} style={[styles.confirmCancelBtn, { backgroundColor: theme.surfaceElevated }]}>
+              <Text style={[styles.confirmCancelText, { color: theme.textSecondary }]}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleConfirmAction} style={[styles.confirmActionBtn, { backgroundColor: theme.accent }]}>
+              <Text style={styles.confirmActionText}>Confirm Action</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Voice Recording Waveform Indicator */}
       {isRecording && (
@@ -358,4 +423,16 @@ const styles = StyleSheet.create({
   micBtnActive: {},
   input: { flex: 1, borderRadius: 22, paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, maxHeight: 100, borderWidth: 1 },
   sendBtn: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
+  actionTraceContainer: { marginTop: 8, gap: 4 },
+  actionTraceChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  actionTraceText: { fontSize: 12, fontWeight: '500' },
+  confirmationCard: { margin: 16, padding: 16, borderRadius: 16, borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 6, elevation: 3 },
+  confirmationHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  confirmationTitle: { fontSize: 15, fontWeight: '700' },
+  confirmationPrompt: { fontSize: 13, lineHeight: 18, marginBottom: 14 },
+  confirmationBtnRow: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
+  confirmCancelBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
+  confirmCancelText: { fontSize: 13, fontWeight: '600' },
+  confirmActionBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10 },
+  confirmActionText: { color: '#ffffff', fontSize: 13, fontWeight: '700' },
 });
