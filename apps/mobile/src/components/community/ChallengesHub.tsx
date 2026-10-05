@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -23,6 +24,7 @@ import {
   Droplets,
   Moon,
   Sparkles,
+  Wallet,
   ShieldCheck,
 } from 'lucide-react-native';
 import {
@@ -31,6 +33,7 @@ import {
   ChallengeDifficulty,
 } from '../../types/communityTypes';
 import CommunityMascot from './CommunityMascot';
+import WalletRewardsModal from './WalletRewardsModal';
 import { useTheme } from '../../context/ThemeContext';
 
 interface ChallengesHubProps {
@@ -65,6 +68,7 @@ export default function ChallengesHub({
   const [newPrivacy, setNewPrivacy] = useState<'Public' | 'Private'>('Public');
 
   // Nura AI Challenge Architect state
+  const [showWallet, setShowWallet] = useState(false);
   const [showNuraAiModal, setShowNuraAiModal] = useState<boolean>(false);
   const scrollViewRef = useRef<any>(null);
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; sender: 'nura' | 'user'; text: string; isBlueprint?: boolean; blueprintData?: any }>>([
@@ -256,10 +260,25 @@ export default function ChallengesHub({
             return (
               <TouchableOpacity
                 key={ch.id}
-                style={styles.challengeCard}
+            style={[styles.challengeCard, { overflow: 'hidden' }]}
                 onPress={() => setSelectedChallenge(ch)}
                 activeOpacity={0.9}
               >
+
+            {/* Picture Hero Header */}
+            <View style={{ width: '100%', height: 120, backgroundColor: '#f1f5f9' }}>
+               <Image
+                 source={{ uri: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800&auto=format&fit=crop&q=80' }}
+                 style={{ width: '100%', height: '100%' }}
+                 resizeMode="cover"
+               />
+               <View style={{ position: 'absolute', top: 12, left: 12, flexDirection: 'row', gap: 6 }}>
+                  <View style={{ backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Users size={12} color="#fff" />
+                    <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>{ch.participantsCount}</Text>
+                  </View>
+               </View>
+            </View>
                 {/* Card Top Row */}
                 <View style={styles.cardTopRow}>
                   <View style={[styles.categoryBadge, { backgroundColor: `${ch.coverColor}15` }]}>
@@ -921,6 +940,7 @@ export default function ChallengesHub({
         </KeyboardAvoidingView>
       </Modal>
 
+      <WalletRewardsModal visible={showWallet} onClose={() => setShowWallet(false)} />
     </ScrollView>
   );
 }
