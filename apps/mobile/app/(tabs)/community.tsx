@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -50,6 +50,10 @@ import ChallengesHub from '../../src/components/community/ChallengesHub';
 import CommunityGroupsHub from '../../src/components/community/CommunityGroupsHub';
 import InboxHub from '../../src/components/community/InboxHub';
 import ReportModal from '../../src/components/community/ReportModal';
+import { challengeEngine } from '../../src/services/challenge/challengeEngine';
+import { notificationScheduler } from '../../src/services/notifications/notificationScheduler';
+
+
 
 export default function CommunityCenterScreen() {
   const { theme, isDark } = useTheme();
@@ -71,9 +75,28 @@ export default function CommunityCenterScreen() {
 
   // 2. Main Community State
   const [groups, setGroups] = useState<CommunityGroup[]>(INITIAL_COMMUNITY_GROUPS);
-  const [challenges, setChallenges] = useState<CommunityChallenge[]>(INITIAL_COMMUNITY_CHALLENGES);
+  const [challenges, setChallenges] = useState<CommunityChallenge[]>([]);
+  const [challengesLoading, setChallengesLoading] = useState(true);
   const [people, setPeople] = useState<SuggestedPerson[]>(INITIAL_SUGGESTED_PEOPLE);
   const [threads, setThreads] = useState<DirectThread[]>(INITIAL_DIRECT_THREADS);
+
+  // Load real challenges from Supabase on mount
+  const loadChallenges = useCallback(async () => {
+    setChallengesLoading(true);
+    try {
+      const real = await challengeEngine.getChallenges();
+      setChallenges(real);
+    } catch {
+      // fallback: keep empty, ChallengesHub will handle empty state gracefully
+    } finally {
+      setChallengesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadChallenges();
+  }, [loadChallenges]);
+
 
   // 3. Selection & Modal States
   const [selectedDiscussion, setSelectedDiscussion] = useState<CommunityDiscussion | null>(null);
@@ -114,76 +137,118 @@ export default function CommunityCenterScreen() {
     );
   };
 
-  // Toggle Challenge Membership
-  const handleToggleJoinChallenge = (challengeId: string) => {
-    setChallenges((prev) =>
-      prev.map((c) => {
-        if (c.id === challengeId) {
-          const isNowJoined = !c.isJoined;
-          return {
-            ...c,
-            isJoined: isNowJoined,
-            participantsCount: isNowJoined
-              ? c.participantsCount + 1
-              : Math.max(0, c.participantsCount - 1),
-          };
+  // Toggle Challenge Membership — real Supabase sync
+  const handleToggleJoinChallenge = async (challengeId: string) => {
+    const userId = currentUser?.id;
+    const target = challenges.find(c => c.id === challengeId);
+    if (!target) return;
+
+    if (target.isJoined) {
+      // Optimistic leave (UI only — challenge engine doesn't expose leave yet)
+      setChallenges(prev => prev.map(c => c.id === challengeId ? { ...c, isJoined: false, participantsCount: Math.max(0, c.participantsCount - 1) } : c));
+      return;
+    }
+
+    // Optimistic join
+    setChallenges(prev => prev.map(c => c.id === challengeId ? { ...c, isJoined: true, participantsCount: c.participantsCount + 1 } : c));
+
+    // Real sync
+    try {
+      const result = await challengeEngine.joinChallenge(challengeId, userId);
+      if (!result.success) {
+        // Revert optimistic update
+        setChallenges(prev => prev.map(c => c.id === challengeId ? { ...c, isJoined: false, participantsCount: Math.max(0, c.participantsCount - 1) } : c));
+        Alert.alert('Could not join', result.message);
+      } else {
+        // Fire join notification
+        notificationScheduler.notifyChallengeEvent({
+          type: 'join',
+          challengeTitle: target.title,
+        }).catch(() => {});
+      }
+    } catch (err) {
+      console.warn('[Community] joinChallenge error:', err);
+    }
+  };
+
+  // Complete Day for Challenge — real session via challengeEngine
+  const handleCompleteDay = async (challengeId: string) => {
+    const userId = currentUser?.id;
+    const target = challenges.find(c => c.id === challengeId);
+    if (!target) return;
+    if (target.completedDays.includes(target.currentDay)) return;
+
+    // Optimistic UI update
+    const updatedDays = [...target.completedDays, target.currentDay];
+    const nextDay = Math.min(target.durationDays, target.currentDay + 1);
+    const isCompleted = updatedDays.length >= target.durationDays;
+    const newStreak = target.streak + 1;
+    setChallenges(prev => prev.map(c => c.id === challengeId ? {
+      ...c, completedDays: updatedDays, currentDay: isCompleted ? c.currentDay : nextDay, streak: newStreak, isCompleted
+    } : c));
+
+    // Fire streak milestone notification
+    const STREAK_MILESTONES = [3, 7, 14, 30];
+    if (STREAK_MILESTONES.includes(newStreak)) {
+      notificationScheduler.notifyChallengeEvent({
+        type: 'streak',
+        challengeTitle: target.title,
+        streakDays: newStreak,
+      }).catch(() => {});
+    }
+
+
+    // Real sync — start + auto-complete session
+    if (userId && !userId.startsWith('guest_')) {
+      try {
+        const objectiveId = target.objectives?.[0]?.id || 'default';
+        const session = await challengeEngine.startSession(
+          challengeId,
+          objectiveId,
+          'self_report',
+          1,
+          userId
+        );
+        if (session) {
+          await challengeEngine.completeSession(session.id, 1, undefined, userId);
         }
-        return c;
-      })
-    );
+      } catch (err) {
+        console.warn('[Community] completeDay sync error:', err);
+      }
+    }
+
   };
 
-  // Complete Day for Challenge
-  const handleCompleteDay = (challengeId: string) => {
-    setChallenges((prev) =>
-      prev.map((c) => {
-        if (c.id === challengeId) {
-          const isAlreadyCompletedToday = c.completedDays.includes(c.currentDay);
-          if (isAlreadyCompletedToday) return c;
-
-          const updatedDays = [...c.completedDays, c.currentDay];
-          const nextDay = Math.min(c.durationDays, c.currentDay + 1);
-          const isCompleted = updatedDays.length >= c.durationDays;
-
-          return {
-            ...c,
-            completedDays: updatedDays,
-            currentDay: isCompleted ? c.currentDay : nextDay,
-            streak: c.streak + 1,
-            isCompleted,
-          };
-        }
-        return c;
-      })
-    );
+  // Create Challenge — real Supabase sync via challengeEngine
+  const handleCreateChallenge = async (newChallengeData: Partial<CommunityChallenge>) => {
+    const userId = currentUser?.id;
+    try {
+      const created = await challengeEngine.createChallenge(newChallengeData, userId);
+      setChallenges(prev => [created, ...prev]);
+    } catch (err) {
+      console.warn('[Community] createChallenge error:', err);
+      // Fallback: local-only create
+      const fallback: CommunityChallenge = {
+        id: 'ch_' + Date.now(),
+        title: newChallengeData.title || 'Untitled Challenge',
+        category: newChallengeData.category || 'physical',
+        description: newChallengeData.description || '',
+        creator: 'You',
+        participantsCount: 1,
+        durationDays: newChallengeData.durationDays || 7,
+        difficulty: newChallengeData.difficulty || 'Easy',
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + (newChallengeData.durationDays || 7) * 86400000).toISOString().split('T')[0],
+        rules: newChallengeData.rules || ['Stay consistent'],
+        dailyGoal: newChallengeData.dailyGoal || 'Daily check-in',
+        currentDay: 1, streak: 1, isJoined: true, isCompleted: false,
+        completedDays: [], coverColor: '#16a34a', iconName: 'Flame',
+      };
+      setChallenges(prev => [fallback, ...prev]);
+    }
   };
 
-  // Create Challenge
-  const handleCreateChallenge = (newChallengeData: Partial<CommunityChallenge>) => {
-    const newChallenge: CommunityChallenge = {
-      id: 'ch_' + Date.now(),
-      title: newChallengeData.title || 'Untitled Challenge',
-      category: newChallengeData.category || 'Fitness',
-      description: newChallengeData.description || '',
-      creator: 'You',
-      creatorBadge: 'Member',
-      participantsCount: 1,
-      durationDays: newChallengeData.durationDays || 7,
-      difficulty: newChallengeData.difficulty || 'Easy',
-      startDate: 'Today',
-      endDate: `${newChallengeData.durationDays || 7} Days`,
-      rules: newChallengeData.rules || ['Stay consistent and listen to your body.'],
-      dailyGoal: newChallengeData.dailyGoal || 'Daily wellness check-in',
-      currentDay: 1,
-      streak: 1,
-      isJoined: true,
-      isCompleted: false,
-      completedDays: [1],
-      coverColor: '#16a34a',
-      iconName: 'Flame',
-    };
-    setChallenges([newChallenge, ...challenges]);
-  };
+
 
   // Create Discussion / Post with Media
   const handleCreateDiscussion = (newDiscussionData: Partial<CommunityDiscussion>) => {

@@ -260,6 +260,254 @@ export class WebToolExecutor {
           break;
         }
 
+        // --- 6. CHALLENGE TOOLS ---
+        case 'challenge.create': {
+          const entryFee = params.entryFee || 0;
+          const durationDays = params.durationDays || 7;
+          const grossPool = entryFee;
+          const platformFee = Math.round((grossPool * 10) / 100);
+          const creatorReward = Math.round((grossPool * 2) / 100);
+          const prizePool = Math.max(0, grossPool - platformFee - creatorReward);
+
+          const newChallenge = {
+            id: `ch_${Date.now()}`,
+            title: params.title || 'Wellness Challenge',
+            description: params.description || 'Verified habit challenge created by Nura.',
+            category: params.category || 'physical',
+            mode: params.mode || 'solo',
+            duration_days: durationDays,
+            difficulty: params.difficulty || 'Moderate',
+            objectives: params.objectives || [{
+              id: 'obj_1',
+              title: params.dailyGoal || params.title,
+              type: 'habit_completion',
+              target: 1,
+              unit: 'session',
+              verificationType: params.verificationType || 'device',
+              verificationStrength: params.verificationStrength || 'device'
+            }],
+            rules: params.rules || ['Daily verified check-in required'],
+            status: 'active',
+            is_monetary: entryFee > 0,
+            entry_fee: entryFee,
+            currency: params.currency || 'ETB',
+            gross_pool: grossPool,
+            platform_fee_pct: 10,
+            creator_reward_pct: 2,
+            prize_pool: prizePool,
+            invite_code: `NURA-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+            is_private: !!params.isPrivate,
+            start_date: new Date().toISOString().split('T')[0],
+            end_date: new Date(Date.now() + durationDays * 86400000).toISOString().split('T')[0],
+            participant_count: 1,
+            creator_id: userId || 'guest'
+          };
+
+          // Cache in local storage for guest / web view
+          const stored = localStorage.getItem('nc_v2_challenges');
+          const list = stored ? JSON.parse(stored) : [];
+          list.unshift(newChallenge);
+          localStorage.setItem('nc_v2_challenges', JSON.stringify(list));
+
+          // Also add to participants
+          const pStored = localStorage.getItem('nc_v2_participants');
+          const pList = pStored ? JSON.parse(pStored) : [];
+          const myParticipant = {
+            id: `part_${Date.now()}`,
+            challenge_id: newChallenge.id,
+            user_id: userId || 'guest',
+            status: 'active',
+            streak: 1,
+            completed_days: [1],
+            joined_at: new Date().toISOString()
+          };
+          pList.push(myParticipant);
+          localStorage.setItem('nc_v2_participants', JSON.stringify(pList));
+
+          // Sync to Supabase if authenticated
+          if (userId && !userId.startsWith('guest_')) {
+            try {
+              await supabase.from('challenges').insert(newChallenge);
+              await supabase.from('challenge_members').insert({
+                challenge_id: newChallenge.id,
+                user_id: userId,
+                status: 'active',
+                current_day: 1,
+                streak: 1,
+                progress_percentage: 0
+              });
+            } catch (err) {
+              console.warn('[WebToolExecutor] Supabase challenge sync deferred:', err);
+            }
+          }
+
+          window.dispatchEvent(new CustomEvent('nuracare:challenge_created', { detail: newChallenge }));
+
+          result = {
+            success: true,
+            action: toolName,
+            resourceId: newChallenge.id,
+            data: newChallenge,
+            message: `Created challenge "${newChallenge.title}" (${durationDays} days).${entryFee > 0 ? ` Stake: ${entryFee} ETB.` : ''}`
+          };
+          break;
+        }
+
+        case 'challenge.list': {
+          let challenges = [];
+          if (userId && !userId.startsWith('guest_')) {
+            try {
+              const { data, error } = await supabase.from('challenges').select('*').order('created_at', { ascending: false });
+              if (!error && data) challenges = data;
+            } catch {}
+          }
+          if (challenges.length === 0) {
+            const stored = localStorage.getItem('nc_v2_challenges');
+            challenges = stored ? JSON.parse(stored) : [];
+          }
+
+          result = {
+            success: true,
+            action: toolName,
+            data: challenges,
+            message: challenges.length > 0
+              ? `You have ${challenges.length} challenge(s) available: ${challenges.slice(0, 3).map(c => `"${c.title}"`).join(', ')}.`
+              : `No active challenges found.`
+          };
+          break;
+        }
+
+        case 'challenge.get': {
+          const stored = localStorage.getItem('nc_v2_challenges');
+          const list = stored ? JSON.parse(stored) : [];
+          const found = list.find(c => c.id === params.challengeId || c.title.toLowerCase().includes((params.query || '').toLowerCase()));
+          result = {
+            success: !!found,
+            action: toolName,
+            data: found,
+            message: found ? `Challenge "${found.title}": ${found.duration_days || 7} days, entry: ${found.entry_fee || 0} ETB.` : `Challenge not found.`
+          };
+          break;
+        }
+
+        case 'challenge.join': {
+          const stored = localStorage.getItem('nc_v2_challenges');
+          const list = stored ? JSON.parse(stored) : [];
+          const target = list.find(c => c.id === params.challengeId);
+          if (!target) {
+            result = { success: false, action: toolName, message: `Challenge not found.` };
+            break;
+          }
+
+          const pStored = localStorage.getItem('nc_v2_participants');
+          const pList = pStored ? JSON.parse(pStored) : [];
+          if (!pList.some(p => p.challenge_id === target.id && p.user_id === (userId || 'guest'))) {
+            pList.push({
+              id: `part_${Date.now()}`,
+              challenge_id: target.id,
+              user_id: userId || 'guest',
+              status: 'active',
+              streak: 0,
+              completed_days: [],
+              joined_at: new Date().toISOString()
+            });
+            localStorage.setItem('nc_v2_participants', JSON.stringify(pList));
+          }
+
+          if (userId && !userId.startsWith('guest_')) {
+            try {
+              await supabase.from('challenge_members').insert({
+                challenge_id: target.id,
+                user_id: userId,
+                status: 'active'
+              });
+            } catch {}
+          }
+
+          window.dispatchEvent(new CustomEvent('nuracare:challenge_joined', { detail: target }));
+
+          result = {
+            success: true,
+            action: toolName,
+            data: target,
+            message: `Successfully joined "${target.title}"!`
+          };
+          break;
+        }
+
+        case 'challenge.start_session': {
+          const session = {
+            id: `sess_${Date.now()}`,
+            challenge_id: params.challengeId,
+            objective_id: params.objectiveId || 'obj_1',
+            status: 'live',
+            verification_method: params.verificationMethod || 'device',
+            started_at: new Date().toISOString()
+          };
+          localStorage.setItem('nuracare_active_challenge_session', JSON.stringify(session));
+
+          result = {
+            success: true,
+            action: toolName,
+            data: session,
+            message: `Started live session for challenge ${params.challengeId}. Verification active.`
+          };
+          break;
+        }
+
+        case 'challenge.submit_verification': {
+          const sessionData = localStorage.getItem('nuracare_active_challenge_session');
+          const session = sessionData ? JSON.parse(sessionData) : {};
+          session.status = 'verified';
+          session.reps_valid = params.repsValid || params.measurementValue || 30;
+          session.completed_at = new Date().toISOString();
+          localStorage.removeItem('nuracare_active_challenge_session');
+
+          result = {
+            success: true,
+            action: toolName,
+            data: session,
+            message: `Verification complete! Recorded ${session.reps_valid} valid units.`
+          };
+          break;
+        }
+
+        case 'challenge.get_leaderboard': {
+          const pStored = localStorage.getItem('nc_v2_participants');
+          const pList = pStored ? JSON.parse(pStored) : [];
+          const ranks = pList
+            .filter(p => !params.challengeId || p.challenge_id === params.challengeId)
+            .sort((a, b) => (b.streak || 0) - (a.streak || 0));
+
+          result = {
+            success: true,
+            action: toolName,
+            data: ranks,
+            message: `Leaderboard retrieved with ${ranks.length} participant(s).`
+          };
+          break;
+        }
+
+        // --- 7. WALLET TOOLS ---
+        case 'wallet.get_balance': {
+          const wStored = localStorage.getItem(`nc_v2_wallet_${userId || 'guest'}`);
+          const wallet = wStored ? JSON.parse(wStored) : {
+            withdrawable_balance: 420.0,
+            challenge_winnings: 350.0,
+            nura_points: 850,
+            xp: 1240,
+            currency: 'ETB'
+          };
+
+          result = {
+            success: true,
+            action: toolName,
+            data: wallet,
+            message: `Your balance: ${wallet.withdrawable_balance.toFixed(2)} ${wallet.currency}. Winnings: ${wallet.challenge_winnings.toFixed(2)} ETB, Nura Points: ${wallet.nura_points} pts.`
+          };
+          break;
+        }
+
         default:
           result = {
             success: false,

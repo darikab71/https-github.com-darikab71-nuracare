@@ -122,6 +122,86 @@ class NotificationScheduler {
       }
     }
   }
+
+  // ─── Challenge Notifications ──────────────────────────────────────────────
+
+  /**
+   * Fire an immediate one-shot challenge notification
+   * (join, start, streak milestone, settlement complete, etc.)
+   */
+  public async notifyChallengeEvent(opts: {
+    type: 'join' | 'start' | 'streak' | 'expiry_warning' | 'settlement_won' | 'settlement_no_win' | 'dispute';
+    challengeTitle: string;
+    streakDays?: number;
+    payoutAmount?: number;
+    currency?: string;
+  }): Promise<void> {
+    const currency = opts.currency || 'ETB';
+
+    const contentMap: Record<string, { title: string; body: string }> = {
+      join:              { title: '🏆 Challenge Joined!',        body: `You're now part of "${opts.challengeTitle}". Day 1 starts now!` },
+      start:             { title: '🚀 Challenge Started!',       body: `"${opts.challengeTitle}" is now live. Complete today's goal!` },
+      streak:            { title: `🔥 ${opts.streakDays}-Day Streak!`, body: `Amazing! You've hit a ${opts.streakDays}-day streak on "${opts.challengeTitle}". Keep it up!` },
+      expiry_warning:    { title: '⏰ Challenge Ending Soon',    body: `"${opts.challengeTitle}" ends in 24 hours. Submit your final verification!` },
+      settlement_won:    { title: '🎉 You Won!',                 body: `Congrats! You earned ${opts.payoutAmount} ${currency} from "${opts.challengeTitle}". Check your wallet.` },
+      settlement_no_win: { title: '🏁 Challenge Completed',     body: `"${opts.challengeTitle}" has ended. Check the leaderboard for final results.` },
+      dispute:           { title: '⚠️ Dispute Filed',           body: `A dispute has been filed regarding your session in "${opts.challengeTitle}". Our team will review it.` },
+    };
+
+    const content = contentMap[opts.type];
+    if (!content) return;
+
+    if (Platform.OS !== 'web') {
+      try {
+        const Notifications = await import('expo-notifications').catch(() => null);
+        if (Notifications?.scheduleNotificationAsync) {
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: content.title,
+              body: content.body,
+              sound: true,
+              data: { challengeTitle: opts.challengeTitle, type: opts.type },
+            },
+            trigger: null, // immediate
+          }).catch(() => {});
+        }
+      } catch {}
+    }
+  }
+
+  /**
+   * Schedule a daily challenge reminder at a specific time
+   */
+  public async scheduleChallengeDaily(opts: {
+    challengeId: string;
+    challengeTitle: string;
+    time: string; // 'HH:MM'
+  }): Promise<void> {
+    if (Platform.OS === 'web') return;
+
+    try {
+      const Notifications = await import('expo-notifications').catch(() => null);
+      if (!Notifications?.scheduleNotificationAsync) return;
+
+      const [hours, minutes] = opts.time.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) return;
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '💪 Daily Challenge Reminder',
+          body: `Don't forget to complete today's goal for "${opts.challengeTitle}"!`,
+          sound: true,
+          data: { challengeId: opts.challengeId },
+        },
+        trigger: {
+          type: 'calendar',
+          hour: hours,
+          minute: minutes,
+          repeats: true,
+        } as any,
+      }).catch(() => {});
+    } catch {}
+  }
 }
 
 export const notificationScheduler = new NotificationScheduler();

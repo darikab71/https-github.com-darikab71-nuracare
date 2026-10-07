@@ -19,6 +19,10 @@ export const INITIAL_COMMUNITY_CHALLENGES: CommunityChallenge[] = [
     difficulty: 'Easy',
     startDate: 'Ongoing',
     endDate: '7 Days',
+    isMonetary: true,
+    entryFee: 100,
+    currency: 'ETB',
+    prizePool: 120000,
     rules: [
       'Drink 500ml upon waking before caffeine.',
       'Log hydration check-in 3 times daily.',

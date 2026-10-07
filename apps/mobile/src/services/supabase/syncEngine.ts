@@ -13,7 +13,7 @@ export const syncLocalDataToCloud = async () => {
   const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
   if (!user || !user.id || user.id.startsWith('guest_') || !isUUID(user.id)) return; // Guest/offline mode does not sync to cloud
   if (syncStore.isSyncing) return;
-  if (syncStore.pendingCheckIns.length === 0 && syncStore.pendingMessages.length === 0) return;
+  if (syncStore.pendingCheckIns.length === 0 && syncStore.pendingMessages.length === 0 && (syncStore.pendingChallengeSessions || []).length === 0) return;
 
   syncStore.setSyncing(true);
 
@@ -110,7 +110,30 @@ export const syncLocalDataToCloud = async () => {
         console.log(`[SyncEngine] Successfully synced ${pendingMessages.length} messages.`);
         pendingMessages.forEach(id => syncStore.removeFromQueue('message', id));
       } else {
-        console.error('[SyncEngine] Failed to upsert session:', upsertError);
+        console.error('[SyncEngine] Failed to upsert session messages:', upsertError);
+      }
+    }
+
+    // 3. Process Offline Challenge Sessions -> `challenge_sessions`
+    const pendingSessions = [...(syncStore.pendingChallengeSessions || [])];
+    if (pendingSessions.length > 0) {
+      for (const sessId of pendingSessions) {
+        try {
+          const { error: sessError } = await supabase
+            .from('challenge_sessions')
+            .upsert({
+              id: sessId,
+              user_id: user.id,
+              status: 'verified',
+              completed_at: new Date().toISOString()
+            });
+
+          if (!sessError) {
+            syncStore.removeFromQueue('challengeSession', sessId);
+          }
+        } catch (e) {
+          console.warn('[SyncEngine] Deferred challenge session sync:', e);
+        }
       }
     }
 

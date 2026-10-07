@@ -296,7 +296,7 @@ export default function CommunityPage({ profile }) {
   };
 
   const toggleJoinChallenge = (postId) => {
-    setPosts(prev =>
+    setLocalPosts(prev =>
       prev.map(p => {
         if (p.id === postId && p.challengeData) {
           const isJoined = !p.challengeData.joined;

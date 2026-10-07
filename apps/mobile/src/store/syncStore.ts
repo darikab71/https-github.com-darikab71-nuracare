@@ -6,8 +6,9 @@ interface SyncState {
   lastSynced: string | null;
   pendingCheckIns: string[];
   pendingMessages: string[];
-  addToQueue: (type: 'checkIn' | 'message', id: string) => void;
-  removeFromQueue: (type: 'checkIn' | 'message', id: string) => void;
+  pendingChallengeSessions: string[];
+  addToQueue: (type: 'checkIn' | 'message' | 'challengeSession', id: string) => void;
+  removeFromQueue: (type: 'checkIn' | 'message' | 'challengeSession', id: string) => void;
   setSyncing: (status: boolean) => void;
   setLastSynced: (date: string) => void;
   loadSyncState: () => void;
@@ -18,16 +19,17 @@ export const useSyncStore = create<SyncState>((set) => ({
   lastSynced: null,
   pendingCheckIns: [],
   pendingMessages: [],
+  pendingChallengeSessions: [],
   
   addToQueue: (type, id) => set((state) => {
-    const queueName = type === 'checkIn' ? 'pendingCheckIns' : 'pendingMessages';
+    const queueName = type === 'checkIn' ? 'pendingCheckIns' : type === 'message' ? 'pendingMessages' : 'pendingChallengeSessions';
     const newQueue = [...state[queueName], id];
     cacheData(queueName, newQueue);
     return { [queueName]: newQueue } as Partial<SyncState>;
   }),
 
   removeFromQueue: (type, id) => set((state) => {
-    const queueName = type === 'checkIn' ? 'pendingCheckIns' : 'pendingMessages';
+    const queueName = type === 'checkIn' ? 'pendingCheckIns' : type === 'message' ? 'pendingMessages' : 'pendingChallengeSessions';
     const newQueue = state[queueName].filter(itemId => itemId !== id);
     cacheData(queueName, newQueue);
     return { [queueName]: newQueue } as Partial<SyncState>;
@@ -43,7 +45,8 @@ export const useSyncStore = create<SyncState>((set) => ({
   loadSyncState: () => {
     const pendingCheckIns = getCachedData<string[]>('pendingCheckIns') || [];
     const pendingMessages = getCachedData<string[]>('pendingMessages') || [];
+    const pendingChallengeSessions = getCachedData<string[]>('pendingChallengeSessions') || [];
     const lastSynced = getCachedData<string>('lastSynced') || null;
-    set({ pendingCheckIns, pendingMessages, lastSynced });
+    set({ pendingCheckIns, pendingMessages, pendingChallengeSessions, lastSynced });
   }
 }));

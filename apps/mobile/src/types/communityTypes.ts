@@ -1,34 +1,6 @@
 export * from '../shared/types';
-import {
-  ChallengeCategory as SharedCategory,
-  ChallengeMode,
-  ChallengeObjective,
-  ChallengeRule,
-  ChallengeStakeConfig,
-  VerificationType,
-  VerificationStrength,
-  ChallengeParticipant
-} from '../shared/types';
 
 export type CommunityPrimaryTab = 'discovery' | 'challenges' | 'community' | 'inbox';
-
-export type ChallengeCategory =
-  | 'physical'
-  | 'sleep'
-  | 'digital_wellbeing'
-  | 'hydration'
-  | 'habits'
-  | 'social'
-  | 'nura_360'
-  | 'Fitness'
-  | 'Sleep'
-  | 'Hydration'
-  | 'Nutrition'
-  | 'Mindfulness'
-  | 'Stress'
-  | 'Productivity'
-  | 'Digital'
-  | 'Habits';
 
 export type ChallengeDifficulty = 'Easy' | 'Moderate' | 'Challenging' | 'Beginner' | 'Advanced' | 'Custom';
 

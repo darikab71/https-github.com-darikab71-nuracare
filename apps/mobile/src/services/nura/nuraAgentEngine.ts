@@ -146,10 +146,84 @@ export class NuraAgentEngine {
       });
     }
 
-    // Pattern J: Medication list (e.g. "Show my medication schedule")
-    else if (lower.includes('medication')) {
+    // Pattern K: Challenge creation (e.g. "Create a 7-day workout challenge", "Challenge me to 30 push-ups", "Bet 100 ETB on 5km run")
+    else if (lower.includes('challenge') && (lower.includes('create') || lower.includes('make') || lower.includes('start') || lower.includes('set up') || lower.includes('bet') || lower.includes('stake') || lower.includes('for me'))) {
+      const dayMatch = lower.match(/(\d+)\s*-?\s*(day|week|month)/);
+      let days = 7;
+      if (dayMatch) {
+        const n = parseInt(dayMatch[1], 10);
+        days = dayMatch[2].startsWith('w') ? n * 7 : dayMatch[2].startsWith('m') ? n * 30 : n;
+      }
+
+      const moneyMatch = lower.match(/(\d+)\s*etb/i);
+      const isMonetary = !!moneyMatch || lower.includes('bet') || lower.includes('stake');
+      const entryFee = moneyMatch ? parseInt(moneyMatch[1], 10) : isMonetary ? 100 : 0;
+
+      let category = 'physical';
+      let title = `${days}-Day Wellness Challenge`;
+
+      if (lower.includes('push-up') || lower.includes('pushup')) {
+        title = `${days}-Day Push-up Challenge`;
+      } else if (lower.includes('squat')) {
+        title = `${days}-Day Squat Challenge`;
+      } else if (lower.includes('run') || lower.includes('5k')) {
+        title = `${days}-Day Running Challenge`;
+      } else if (lower.includes('water') || lower.includes('hydration')) {
+        title = `${days}-Day Hydration Ladder`;
+        category = 'hydration';
+      } else if (lower.includes('screen') || lower.includes('detox')) {
+        title = `${days}-Day Screen Detox`;
+        category = 'digital_wellbeing';
+      }
+
+      const isFriends = lower.includes('me and') || lower.includes('with');
+
+      if (isMonetary && entryFee > 0) {
+        steps.push({
+          toolName: 'challenge.create',
+          params: {
+            title,
+            category,
+            durationDays: days,
+            mode: isFriends ? 'friends' : 'solo',
+            entryFee,
+            isMonetary: true,
+            currency: 'ETB',
+            dailyGoal: title
+          },
+          status: 'needs_confirmation',
+          confirmationPrompt: `I designed your staked challenge: "${title}" (${days} days) with an entry fee of ${entryFee} ETB. Payout will be distributed to verified finishers. Would you like me to create and fund this challenge?`
+        });
+      } else {
+        steps.push({
+          toolName: 'challenge.create',
+          params: {
+            title,
+            category,
+            durationDays: days,
+            mode: isFriends ? 'friends' : 'solo',
+            entryFee: 0,
+            isMonetary: false,
+            dailyGoal: title
+          },
+          status: 'pending'
+        });
+      }
+    }
+
+    // Pattern L: List user challenges
+    else if (lower.includes('challenge') && (lower.includes('show') || lower.includes('list') || lower.includes('my') || lower.includes('active'))) {
       steps.push({
-        toolName: 'medication.list',
+        toolName: 'challenge.list',
+        params: {},
+        status: 'pending'
+      });
+    }
+
+    // Pattern M: Wallet balance query
+    else if (lower.includes('wallet') || lower.includes('balance') || lower.includes('winnings') || (lower.includes('etb') && (lower.includes('how much') || lower.includes('my')))) {
+      steps.push({
+        toolName: 'wallet.get_balance',
         params: {},
         status: 'pending'
       });

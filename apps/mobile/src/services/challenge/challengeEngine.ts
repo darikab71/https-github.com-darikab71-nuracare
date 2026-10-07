@@ -1,5 +1,6 @@
 import { storage } from '../../storage/mmkv';
 import { supabase } from '../supabase/client';
+import { calculatePoolEconomics as sharedCalculatePoolEconomics } from '@nuracare/shared';
 import {
   CommunityChallenge,
   ChallengeParticipant,
@@ -18,27 +19,10 @@ const WALLET_KEY = 'nuracare_user_wallet';
 
 export class ChallengeEngine {
   /**
-   * Computes mathematical breakdown for a staked or free challenge pool
+   * Computes mathematical breakdown for a staked or free challenge pool using unified shared economics
    */
   calculatePoolEconomics(entryFee: number, participantsCount: number, platformFeePct: number = 10, creatorRewardPct: number = 2): ChallengeStakeConfig {
-    const isMonetary = entryFee > 0;
-    const grossPool = entryFee * participantsCount;
-    const platformFee = isMonetary ? Math.round((grossPool * platformFeePct) / 100) : 0;
-    const creatorReward = isMonetary ? Math.round((grossPool * creatorRewardPct) / 100) : 0;
-    const prizePool = isMonetary ? Math.max(0, grossPool - platformFee - creatorReward) : 0;
-
-    return {
-      isMonetary,
-      entryFee,
-      currency: 'ETB',
-      grossPool,
-      platformFeePct,
-      creatorRewardPct,
-      prizePool,
-      winnerRules: {
-        type: 'split_all_verified_completers'
-      }
-    };
+    return sharedCalculatePoolEconomics(entryFee, participantsCount, platformFeePct, creatorRewardPct);
   }
 
   /**

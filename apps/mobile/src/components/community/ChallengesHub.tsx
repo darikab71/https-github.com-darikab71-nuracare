@@ -5,10 +5,12 @@ import {
   Image,
   StyleSheet,
   ScrollView,
+  KeyboardAvoidingView,
   TouchableOpacity,
   Modal,
   TextInput,
   Alert,
+  Platform,
 } from 'react-native';
 import {
   Trophy,
@@ -182,7 +184,7 @@ export default function ChallengesHub({
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* 1. Header with Create Action */}
+      {/* 1. Header with Create Action & Wallet */}
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <View style={styles.headerBadge}>
@@ -193,7 +195,17 @@ export default function ChallengesHub({
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Small steps. Shared progress.</Text>
         </View>
 
-              {/* 2. Nura AI Banner */}
+        <TouchableOpacity
+          onPress={() => setShowWallet(true)}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#f1f5f9', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20 }}
+          activeOpacity={0.8}
+        >
+          <Wallet size={16} color={theme.accent} />
+          <Text style={{ fontSize: 14, fontWeight: '700', color: theme.textPrimary }}>4,250 ETB</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* 2. Nura AI Banner */}
       <TouchableOpacity
         style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, backgroundColor: `${theme.accent}15`, borderRadius: 16, marginBottom: 20 }}
         onPress={() => setShowCreateWizard(true)}
@@ -209,7 +221,6 @@ export default function ChallengesHub({
         </View>
         <ChevronRight size={20} color={theme.accent} />
       </TouchableOpacity>
-      </View>
 
       {/* 2. Sub-Filter Pills */}
       <ScrollView
@@ -251,7 +262,7 @@ export default function ChallengesHub({
       )}
 
       {/* 4. Challenges List */}
-      <View style={styles.challengesList}>
+      <View style={[styles.challengesList, { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 16 }]}>
         {filteredChallenges.length > 0 ? (
           filteredChallenges.map((ch) => {
             const progressRatio = ch.durationDays > 0 ? ch.currentDay / ch.durationDays : 0;
@@ -260,7 +271,7 @@ export default function ChallengesHub({
             return (
               <TouchableOpacity
                 key={ch.id}
-            style={[styles.challengeCard, { overflow: 'hidden' }]}
+            style={[styles.challengeCard, { overflow: 'hidden', width: '48%', marginBottom: 16 }]}
                 onPress={() => setSelectedChallenge(ch)}
                 activeOpacity={0.9}
               >
@@ -268,7 +279,7 @@ export default function ChallengesHub({
             {/* Picture Hero Header */}
             <View style={{ width: '100%', height: 120, backgroundColor: '#f1f5f9' }}>
                <Image
-                 source={{ uri: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800&auto=format&fit=crop&q=80' }}
+                 source={{ uri: ch.imageUrl || 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800&auto=format&fit=crop&q=80' }}
                  style={{ width: '100%', height: '100%' }}
                  resizeMode="cover"
                />
@@ -279,6 +290,7 @@ export default function ChallengesHub({
                   </View>
                </View>
             </View>
+                <View style={{ padding: 12 }}>
                 {/* Card Top Row */}
                 <View style={styles.cardTopRow}>
                   <View style={[styles.categoryBadge, { backgroundColor: `${ch.coverColor}15` }]}>
@@ -293,7 +305,7 @@ export default function ChallengesHub({
 
                 {/* Challenge Title & Desc */}
                 <Text style={styles.challengeTitle}>{ch.title}</Text>
-                <Text style={styles.challengeDesc} numberOfLines={2}>
+                <Text style={styles.challengeDesc} numberOfLines={1}>
                   {ch.description}
                 </Text>
 
@@ -302,7 +314,7 @@ export default function ChallengesHub({
                   <View style={styles.metaItem}>
                     <Users size={13} color="#64748b" />
                     <Text style={styles.metaItemText}>
-                      {ch.participantsCount.toLocaleString()} joined
+                      {ch.participantsCount} joined
                     </Text>
                   </View>
                   <View style={styles.metaItem}>
@@ -316,6 +328,20 @@ export default function ChallengesHub({
                     </View>
                   )}
                 </View>
+
+                {/* Financial details if monetary */}
+                {ch.isMonetary && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#f1f5f9', marginTop: 4, marginBottom: 8 }}>
+                     <View>
+                        <Text style={{ fontSize: 11, color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Entry Stake</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: theme.textPrimary }}>{ch.entryFee} {ch.currency || 'ETB'}</Text>
+                     </View>
+                     <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={{ fontSize: 11, color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Prize Pool</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '800', color: '#16a34a' }}>{ch.prizePool?.toLocaleString()} {ch.currency || 'ETB'}</Text>
+                     </View>
+                  </View>
+                )}
 
                 {/* Progress bar if joined */}
                 {ch.isJoined && (
@@ -360,10 +386,11 @@ export default function ChallengesHub({
                           ch.isJoined && styles.joinBtnTextActive,
                         ]}
                       >
-                        {ch.isJoined ? 'Joined' : 'Join Challenge'}
+                        {ch.isJoined ? 'Joined' : 'Join'}
                       </Text>
                     </TouchableOpacity>
                   </View>
+                </View>
                 </View>
               </TouchableOpacity>
             );
@@ -1061,7 +1088,7 @@ const styles = StyleSheet.create({
   challengeCard: {
     backgroundColor: '#ffffff',
     borderRadius: 18,
-    padding: 18,
+    padding: 0,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     shadowColor: '#000',
@@ -1099,31 +1126,32 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   challengeTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: '#0f172a',
-    marginBottom: 6,
-    lineHeight: 22,
+    marginBottom: 4,
+    lineHeight: 18,
   },
   challengeDesc: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#475569',
-    lineHeight: 18,
-    marginBottom: 12,
+    lineHeight: 16,
+    marginBottom: 8,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    marginBottom: 12,
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
   },
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
   },
   metaItemText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#64748b',
     fontWeight: '500',
   },
