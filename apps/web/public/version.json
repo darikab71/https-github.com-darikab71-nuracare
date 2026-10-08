@@ -1,9 +1,21 @@
 {
-  "appVersion": "1.0.4",
-  "versionCode": 5,
+  "appVersion": "1.0.5",
+  "versionCode": 6,
   "minSupportedVersion": "1.0.0",
-  "releaseDate": "2026-09-23",
+  "minVersionCode": 1,
+  "forceUpdate": false,
+  "releaseDate": "2026-10-08",
   "websiteUrl": "https://nuracare.pro.et",
   "downloadUrl": "https://expo.dev/artifacts/eas/GCgb_vM43BYMM1R1rOSYQgvpzfh5YqhNMdgXf9uEt0k.apk",
-  "releaseNotes": "Enhanced welcome & login page, bundled offline botanical photography, 3D interactive avatar canvas on all devices, and calming ambient water stream audio."
+  "changelogUrl": "https://nuracare.pro.et/changelog",
+  "releaseNotes": "🏆 Real challenge system — join, create & verify challenges live\n💰 Telebirr & CBE Birr staking (ETB) — real prize pools\n🤖 Nura AI now creates challenges from chat commands\n📊 Live leaderboard & streak tracking connected to Supabase\n🔔 Streak milestone push notifications (3, 7, 14, 30 days)\n🔒 Security hardened — wallet balances server-only\n⚡ 5+ duplicate modules eliminated, faster app startup\n🌙 Ethiopian fasting calendar improvements\n🐛 Multiple critical structural bug fixes",
+  "features": {
+    "challengesEnabled": true,
+    "monetaryStakingEnabled": true,
+    "communityFeedEnabled": true,
+    "nuraAIEnabled": true,
+    "offlineSyncEnabled": true,
+    "telebirrEnabled": true,
+    "cbeEnabled": true
+  }
 }

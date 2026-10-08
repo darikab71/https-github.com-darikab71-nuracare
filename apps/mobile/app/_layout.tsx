@@ -18,6 +18,29 @@ import { analytics } from '../src/services/analytics';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
+// Silent OTA update check — downloads new JS bundle in background if available via EAS Update
+// The new bundle is applied on NEXT app launch (no disruption to current session)
+async function checkOTAUpdate() {
+  if (Platform.OS === 'web') return;
+  try {
+    const Updates = await import('expo-updates').catch(() => null);
+    if (!Updates) return;
+    // Only run in production (not Expo Go dev)
+    if (Updates.isEmbeddedLaunch === false || __DEV__) return;
+    const result = await Updates.checkForUpdateAsync().catch(() => null);
+    if (result?.isAvailable) {
+      // Download silently — do NOT reload immediately (apply on next launch)
+      await Updates.fetchUpdateAsync().catch(() => {});
+      // Optional: reload right away if user is on splash/idle (uncomment to auto-apply)
+      // await Updates.reloadAsync().catch(() => {});
+    }
+  } catch {
+    // Non-blocking — OTA check must never crash the app
+  }
+}
+
+
+
 function InnerLayout() {
   const { user, loading: authLoading } = useAuth();
   const { user: storeUser } = useAuthStore();
@@ -36,6 +59,8 @@ function InnerLayout() {
 
     async function prepare() {
       try {
+        // Run OTA check in parallel with app init — non-blocking
+        checkOTAUpdate();
         useAuthStore.getState().loadUser();
         useRemoteConfigStore.getState().initialize();
         useRemoteConfigStore.getState().syncRemoteConfig();
