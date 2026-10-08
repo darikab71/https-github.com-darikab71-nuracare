@@ -7,15 +7,6 @@
     "scheme": "nuracare",
     "icon": "./assets/images/icon.png",
     "owner": "darikab71",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/c8ef278f-9fa4-426b-b682-73785a5bea8d",
-      "enabled": true,
-      "fallbackToCacheTimeout": 0,
-      "checkAutomatically": "ON_LOAD"
-    },
     "splash": {
       "image": "./assets/images/icon.png",
       "resizeMode": "contain",
@@ -43,7 +34,6 @@
     },
     "plugins": [
       "expo-router",
-      "expo-updates",
       [
         "expo-splash-screen",
         {

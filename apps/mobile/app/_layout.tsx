@@ -109,9 +109,9 @@ function InnerLayout() {
   }
 
   // 2. Forced Update check (server-driven Level 3 update)
-  const currentCode = Constants.expoConfig?.android?.versionCode || 4;
+  const currentCode = Constants.expoConfig?.android?.versionCode || 6;
   const minCode = config?.updateManifest?.minSupportedVersionCode || 1;
-  const isOutdated = currentCode < minCode || (config?.updateManifest?.updateRequired && currentCode < (config.updateManifest.latestVersionCode || 4));
+  const isOutdated = currentCode < minCode || (config?.updateManifest?.updateRequired && currentCode < (config.updateManifest.latestVersionCode || 6));
 
   if (isOutdated && config?.updateManifest) {
     return (

@@ -39,6 +39,7 @@ import {
 } from 'lucide-react-native';
 import { TSOM_TYPES } from '../src/lib/ethiopianCalendar';
 import ThemeSelectorModal from '../src/components/theme/ThemeSelectorModal';
+import { checkForAppUpdates } from '../src/services/versionCheck';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -459,6 +460,26 @@ export default function ProfileScreen() {
                 'No additional medical documents attached. Upload PDFs or lab summaries via the web portal or records vault.'}
             </Text>
           </View>
+        </View>
+
+        {/* App Version & Live Updates (PUBG Mobile style) */}
+        <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.sectionHeaderRow}>
+            <View style={styles.sectionTitleWithIcon}>
+              <Sparkles size={18} color={theme.accent} />
+              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>App Version & Updates</Text>
+            </View>
+            <TouchableOpacity 
+              style={[styles.addSmallBtn, { backgroundColor: theme.accentGlow, borderColor: theme.accentSecondary + '40' }]}
+              onPress={() => checkForAppUpdates(true)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.addSmallBtnText, { color: theme.accent }]}>Check Updates</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
+            NuraCare v1.0.5 (Build 6) • All latest features & challenges active
+          </Text>
         </View>
 
         {/* Sovereign Privacy Vault Info */}

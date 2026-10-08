@@ -23,16 +23,16 @@ const CORS_HEADERS = {
 
 /** Built-in default — used if REMOTE_CONFIG_JSON env var is not set */
 const DEFAULT_CONFIG = {
-  version: 2,
+  version: 3,
   minSupportedAppVersion: '1.0.0',
   environment: 'production',
   updateManifest: {
-    latestVersion: '1.0.3',
-    latestVersionCode: 4,
+    latestVersion: '1.0.5',
+    latestVersionCode: 6,
     minSupportedVersionCode: 1,
     updateRequired: false,
     downloadUrl: 'https://expo.dev/artifacts/eas/GCgb_vM43BYMM1R1rOSYQgvpzfh5YqhNMdgXf9uEt0k.apk',
-    releaseNotes: 'Updated Lifestyle hub, advanced priorities & routines, simplified community discovery.',
+    releaseNotes: 'Real challenge system with Telebirr & CBE Birr staking, live verification, Nura AI challenge integration, streak push notifications, and security-hardened wallet.',
   },
   home: {
     greetingFormat: 'time_adaptive',
